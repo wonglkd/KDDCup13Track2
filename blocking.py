@@ -41,9 +41,10 @@ def bin_ngrams(reader, n=5):
 
 def main():
 	parser = argparse.ArgumentParser()
+	parser.add_argument('authorfile', nargs='?', default='Author.csv')
 	parser.add_argument('type', nargs='?', default='samename')
 	args = parser.parse_args()
-	reader = csv.reader(open('Author.csv'))
+	reader = csv.reader(open(args.authorfile))
 	reader.next()
 
 	bins = globals()["bin_"+args.type](reader)

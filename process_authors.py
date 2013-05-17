@@ -23,14 +23,21 @@ def loadAuthors(authorfile):
 		line[1:] = [unicode(cell, 'utf-8') for cell in line[1:]]
 		line[1], line[2] = unidecode(line[1]), unidecode(line[2])
 		hn = HumanName(line[1])
-  		iFfL = ((hn.first[0] if hn.first else '')  + ' ' + hn.last.strip('.')).strip()
+		if hn.last:
+			if hn.first:
+				iFfL = hn.first[0] + ' ' + hn.last.strip('.')
+			else:
+				iFfL = hn.last.strip('.')
+		else:
+			iFfL = hn.first # use full first name if no last name
+		iFfL = iFfL.strip().lower()
 		authors.append((int(line[0]), {
- 			'name': hn.full_name,
- 			'name_title': hn.title.strip('.'),
- 			'name_first': hn.first.strip('.'),
- 			'name_middle': hn.middle.strip('.'),
- 			'name_last': hn.last.strip('.'),
- 			'name_suffix': hn.suffix.strip('.'),
+ 			'name': hn.full_name.lower(),
+ 			'name_title': hn.title.lower().strip('.'),
+ 			'name_first': hn.first.lower().strip('.'),
+ 			'name_middle': hn.middle.lower().strip('.'),
+ 			'name_last': hn.last.lower().strip('.'),
+ 			'name_suffix': hn.suffix.lower().strip('.'),
 			'iFfL': iFfL,
 			'affiliation': line[2]
 		}))

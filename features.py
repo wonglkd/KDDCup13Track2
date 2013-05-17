@@ -79,7 +79,7 @@ def main():
 		f['exact'] = int(aa['name'] == ab['name'] and len(aa['name']) > 0)
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 		
-		writer.writerow(f)
+ 		writer.writerow(f)
 
 	print "Rows skipped: {0}".format(rows_skipped)
 
