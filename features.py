@@ -74,8 +74,8 @@ def main():
 			else:
 				f['affil_sharedidf'] = 0
 		
-		f['lastidf'] = 0 if (aa['name_last'] != ab['name_last'] or not aa['name_last']) else 1.0 + aa['lastname_idf']
-		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else 1.0 + aa['iFfL_idf']
+		f['lastidf'] = 0 if (aa['name_last'] != ab['name_last'] or not aa['name_last']) else aa['lastname_idf']
+		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
 		f['exact'] = int(aa['name'] == ab['name'] and len(aa['name']) > 0)
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 		
