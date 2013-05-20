@@ -24,5 +24,14 @@ def main():
 	for f, indf in enumerate(indices):
 		print_err("{0}. feature {1}: {2} ({3})".format(f + 1, indf, feat_indices[indf], importances[indf]))
 
+	# Plot the feature importances of the forest
+	pl.figure()
+	pl.title("Feature importances")
+	pl.bar(range(len(indices)), importances[indices],
+		   color="r", yerr=std[indices], align="center")
+	pl.xticks(range(len(indices)), indices)
+	pl.xlim([-1, len(indices)])
+	pl.show()
+
 if __name__ == "__main__":
 	main()
