@@ -73,9 +73,6 @@ def main():
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edges.replace('_edges.txt', '') + '.feat'
-	
-# 	print_err("Loading pickled author pre-features")
-#  	authors = pickle.load(open(args.authorprefeat, 'rb'))
 
 	featgen = FeaturesGenerator(args.authorprefeat)
 
