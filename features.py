@@ -8,20 +8,7 @@ import itertools as itl
 import cPickle as pickle
 from pprint import pprint
 
-def main():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('edges')
-	parser.add_argument('authorprefeat', nargs='?', default='authors_prefeat.pickle')
-	parser.add_argument('outfile', nargs='?')
-	args = parser.parse_args()
-	if args.outfile == None:
-		args.outfile = args.edges.replace('_edges.txt', '') + '.feat'
-	
-	print_err("Loading pickled author pre-features")
- 	authors = pickle.load(open(args.authorprefeat, 'rb'))
-
-	print_err("Generating features for author pairs")
-
+class FeaturesGenerator:
 	fields = [
 		'id1',
 		'id2',
@@ -34,22 +21,18 @@ def main():
 		'affil_sharedidf',
 		'suffix'
 	]
-	writer = csv.DictWriter(open(args.outfile, 'wb'), dialect='excel-tab', fieldnames=fields)
-	writer.writeheader()
 
-	rows_skipped = 0
-
- 	for i, (a, b) in enumerate(csv.reader(open(args.edges))):
- 		a, b = int(a), int(b)
- 		if a not in authors or b not in authors:
- 			rows_skipped += 1
- 			continue
+	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
+		print_err("Loading pickled author pre-features")
+		self.authors = pickle.load(open(authorprefeat, 'rb'))
+	
+	def getFeatures(self, a, b):
 		# feature vector
 		f = {
 			'id1': a,
 			'id2': b
  		} 
- 		aa, ab = authors[a], authors[b]
+ 		aa, ab = self.authors[a], self.authors[b]
  		name_para = (('mid', 'name_middle'), ('first', 'name_first'), ('last', 'name_last'))
  		for id_f, id_o in name_para:
 	 		la, lb = len(aa[id_o]), len(ab[id_o])
@@ -79,12 +62,40 @@ def main():
 		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
 		f['exact'] = int(aa['name'] == ab['name'] and len(aa['name']) > 0)
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
+
+		return f
+
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('edges')
+	parser.add_argument('authorprefeat', nargs='?', default='generated/Author_prefeat.pickle')
+	parser.add_argument('outfile', nargs='?')
+	args = parser.parse_args()
+	if args.outfile == None:
+		args.outfile = args.edges.replace('_edges.txt', '') + '.feat'
+	
+# 	print_err("Loading pickled author pre-features")
+#  	authors = pickle.load(open(args.authorprefeat, 'rb'))
+
+	featgen = FeaturesGenerator(args.authorprefeat)
+
+	print_err("Generating features for author pairs")
+
+	writer = csv.DictWriter(open(args.outfile, 'wb'), dialect='excel-tab', fieldnames=featgen.fields)
+	writer.writeheader()
+
+	rows_skipped = 0
+
+ 	for i, (a, b) in enumerate(csv.reader(open(args.edges))):
+ 		a, b = int(a), int(b)
+ 		if a not in featgen.authors or b not in featgen.authors:
+ 			rows_skipped += 1
+ 			continue
 		
- 		writer.writerow(f)
+ 		writer.writerow(featgen.getFeatures(a, b))
  		if (i+1) % 10000 == 0:
  			print_err(i+1, ' rows done')
- 		
-
+ 
 	print_err("Rows skipped: {0}".format(rows_skipped))
 
 if __name__ == "__main__":
