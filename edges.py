@@ -6,6 +6,7 @@ from itertools import combinations
 def getEdges(blockfile):
 	edges = set()
 	for line in open(blockfile):
+		line = line.split(',')[1]
 		line = sorted([int(v) for v in line.split()])
 		for e in combinations(line, 2):
 			edges.add(e)

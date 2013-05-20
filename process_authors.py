@@ -27,9 +27,11 @@ def loadAuthors(authorfile):
 			if hn.first:
 				iFfL = hn.first[0] + ' ' + hn.last.strip('.')
 			else:
-				iFfL = hn.last.strip('.')
+				iFfL = 'L:' + hn.last.strip('.')
+		elif hn.first:
+			iFfL = 'F:' + hn.first # use full first name if no last name
 		else:
-			iFfL = hn.first # use full first name if no last name
+			iFfL = 'ID:' + line[0]
 		iFfL = iFfL.strip().lower()
 		authors.append((int(line[0]), {
  			'name': hn.full_name.lower(),

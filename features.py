@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Given edges + authorinfo, generate features
+from common import *
 import argparse
 import csv
 import numpy as np
@@ -16,10 +17,10 @@ def main():
 	if args.outfile == None:
 		args.outfile = args.edges.replace('_edges.txt', '') + '.feat'
 	
-	print "Loading pickled author pre-features"
+	print_err("Loading pickled author pre-features")
  	authors = pickle.load(open(args.authorprefeat, 'rb'))
 
-	print "Generating features for author pairs"
+	print_err("Generating features for author pairs")
 
 	fields = [
 		'id1',
@@ -38,7 +39,7 @@ def main():
 
 	rows_skipped = 0
 
- 	for a, b in csv.reader(open(args.edges)):
+ 	for i, (a, b) in enumerate(csv.reader(open(args.edges))):
  		a, b = int(a), int(b)
  		if a not in authors or b not in authors:
  			rows_skipped += 1
@@ -80,8 +81,11 @@ def main():
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 		
  		writer.writerow(f)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1, ' rows done')
+ 		
 
-	print "Rows skipped: {0}".format(rows_skipped)
+	print_err("Rows skipped: {0}".format(rows_skipped))
 
 if __name__ == "__main__":
 	main()
