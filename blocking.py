@@ -5,6 +5,7 @@ import argparse
 from unidecode import unidecode
 from nameparser import HumanName
 from collections import defaultdict
+import cPickle as pickle
 
 def bin_samename(authors):
 	bins = defaultdict(set)
