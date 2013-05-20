@@ -9,36 +9,36 @@ import cPickle as pickle
 
 def bin_samename(authors):
 	bins = defaultdict(set)
- 	for i, a in enumerate(authors.values()):
- 		bins[a['name']].add(line[0])
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		bins[a['name']].add(id)
  		if (i+1) % 10000 == 0:
  			print_err(i+1)
  	return bins
 
-def bin_fFfL(reader):
+def bin_fFfL(authors):
 	bins = defaultdict(set)
- 	for i, a in enumerate(authors.values()):
- 		bins[a['fFfL']].add(line[0])
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		bins[a['fFfL']].add(id)
  		if (i+1) % 10000 == 0:
  			print_err(i+1)
  	return bins
 
-def bin_iFfL(reader):
+def bin_iFfL(authors):
 	bins = defaultdict(set)
- 	for i, a in enumerate(authors.values()):
-		bins[a['iFfL']].add(line[0])
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+		bins[a['iFfL']].add(id)
  		if (i+1) % 10000 == 0:
  			print_err(i+1)
  	return bins
 
-def bin_ngrams(reader, n=5):
+def bin_ngrams(authors, n=5):
 	bins = defaultdict(set)
- 	for i, a in enumerate(authors.values()):
+ 	for i, (id, a) in enumerate(authors.iteritems()):
  		if not a['name'].startswith('ID:'):
  			lname = a['name'].replace('.','')
 	 		ngrams = zip(*[lname[i:] for i in range(n)])
 			for p in ngrams:
-				bins[p].add(line[0])
+				bins[p].add(id)
 		if (i+1) % 10000 == 0:
 			print_err(i+1)
  	return bins
@@ -55,7 +55,7 @@ def main():
 	bins = sorted([(len(bv), blabel, bv) for blabel, bv in bins.iteritems()], reverse=True)
 
 	for _, binlabel, binv in bins:
-		print binlabel + ',' + ' '.join(binv)
+		print binlabel + ',' + ' '.join(map(str, binv))
 		
 if __name__ == "__main__":
 	main()
