@@ -26,21 +26,32 @@ def loadAuthors(authorfile):
 		if hn.last:
 			if hn.first:
 				iFfL = hn.first[0] + ' ' + hn.last.strip('.')
+				fFfL = hn.first + ' ' + hn.last.strip('.')
+				fFfL = fFfL.strip().lower()
 			else:
 				iFfL = 'L:' + hn.last.strip('.')
+				fFfL = iFfL
 		elif hn.first:
 			iFfL = 'F:' + hn.first # use full first name if no last name
+			fFfL = iFfL
 		else:
 			iFfL = 'ID:' + line[0]
+			fFfL = iFfL
 		iFfL = iFfL.strip().lower()
+
+		full_name = hn.full_name.strip().lower()
+		if full_name == '':
+			full_name = 'ID: ' + line[0]
+
 		authors.append((int(line[0]), {
- 			'name': hn.full_name.lower(),
+ 			'name': full_name,
  			'name_title': hn.title.lower().strip('.'),
  			'name_first': hn.first.lower().strip('.'),
  			'name_middle': hn.middle.lower().strip('.'),
  			'name_last': hn.last.lower().strip('.'),
  			'name_suffix': hn.suffix.lower().strip('.'),
 			'iFfL': iFfL,
+			'fFfL': fFfL,
 			'affiliation': line[2]
 		}))
 		affiliations.append(line[2])
