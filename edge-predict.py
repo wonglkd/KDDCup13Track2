@@ -3,6 +3,7 @@ from common import *
 import argparse
 import cPickle as pickle
 import csv
+import numpy as np
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -14,7 +15,7 @@ def main():
 		args.outfile = args.featurefile.replace('.feat','') + '.prob'
 
 	print_err("Loading saved classifier")	
-	clf, feat_indices = pickle.load(open(args.modelfile, 'rb'))
+	clf, feat_indices, affil_median = pickle.load(open(args.modelfile, 'rb'))
 
 	print_err("Loading features")
 	reader = csv.reader(open(args.featurefile, 'rb'), dialect='excel-tab')
@@ -26,6 +27,10 @@ def main():
 		X.append(line[2:])
  		if (i+1) % 10000 == 0:
  			print_err(i+1, ' rows done')
+ 	X = np.array(X)
+# 	affil_ind = feat_indices.index('affil_sharedidf')
+# 	X[np.isnan(X[:, affil_ind]), affil_ind] = affil_median
+ 	X[np.isnan(X)] = 0.
 
 	print_err("Making predictions")
 	predictions = clf.predict_proba(X)[:,1]
@@ -37,7 +42,7 @@ def main():
 	for i, ((id1, id2), prob) in enumerate(zip(ids, predictions)):
 		writer.writerow([id1, id2, '{:g}'.format(prob)])
  		if (i+1) % 10000 == 0:
- 			print_err(i+1, ' rows done')
+ 			print_err(i+1, 'rows done')
 
 if __name__=="__main__":
     main()

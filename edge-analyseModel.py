@@ -10,7 +10,7 @@ def main():
 	parser.add_argument('modelfile', nargs='?', default='generated/model.pickle')
 	args = parser.parse_args()
 	
-	clf, feat_indices = pickle.load(open(args.modelfile, 'rb'))
+	clf, feat_indices, affil_median = pickle.load(open(args.modelfile, 'rb'))
 	
 	print_err("OOB Score (CV):", clf.oob_score_)
 
