@@ -4,14 +4,25 @@ GEN_DIR := generated
 AUTHOR_SET := Author
 # AUTHOR_SET := Author_f20000
 PREFEAT := $(GEN_DIR)/$(AUTHOR_SET)_prefeat.pickle
-BIN_METHODS := iFfL samename
+BIN_METHODS := iFfL samename fullparsedname
 
-all: $(GEN_DIR)/iFfL_bins.txt $(GEN_DIR)/iFfL_edges.txt $(GEN_DIR)/iFfL.feat $(GEN_DIR)/iFfL.sim $(GEN_DIR)/iFfL.clusters $(GEN_DIR)/iFfL-submit.csv $(PREFEAT)
-feat-t: $(GEN_DIR)/iFfL.feat
-cluster-t: $(GEN_DIR)/iFfL.clusters
-sim-t: $(GEN_DIR)/iFfL.sim
-bins: $(addprefix $(GEN_DIR)/,$(BIN_METHODS:=_bins.txt))
+BIN_FILES = $(foreach i,$(BIN_METHODS),$(GEN_DIR)/$i_bins.txt)
+EDGE_FILES := $(GEN_DIR)/iFfL_edges.txt
+FEAT_FILES := $(GEN_DIR)/iFfL.feat
+SIM_FILES := $(GEN_DIR)/iFfL.sim
+CLUSTER_FILES := $(GEN_DIR)/iFfL.clusters
+SUBMIT_FILES := $(GEN_DIR)/iFfL-submit.csv
+SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
+#feat-t: $(GEN_DIR)/iFfL.feat
+#cluster-t: $(GEN_DIR)/iFfL.clusters
+#sim-t: $(GEN_DIR)/iFfL.sim
+#bins: $(addprefix $(GEN_DIR)/,$(BIN_METHODS:=_bins.txt))
 
+all: $(SUBMIT_FILES)
+.SECONDARY: $(BIN_FILES) $(EDGE_FILES) $(FEAT_FILES) $(CLUSTER_FILES) $(SUBMIT_FILES) $(PREFEAT)
+
+bin: $(BIN_FILES)
+bin-submit: $(SUBMIT_BIN_FILES)
 prefeat-t: $(GEN_DIR)/Author_f20000_prefeat.pickle 
 
 $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
@@ -36,6 +47,9 @@ $(GEN_DIR)/model.pickle: edge-train.py
 	time ./$^
 
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
+	time ./$^ $@
+
+$(GEN_DIR)/%-bins_submit.csv: prep_submit.py $(GEN_DIR)/%_bins.txt
 	time ./$^ $@
 
 # awk '{ if ($3 >= 0.6) print $0; }'
