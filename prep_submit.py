@@ -6,6 +6,10 @@ import csv
 from pprint import pprint
 import sys
 
+def skip_front(iterable):
+    for line in iterable:
+		yield line.split(';')[1]
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('clusterfile')
@@ -13,12 +17,17 @@ def main():
 	parser.add_argument('authorfile', nargs='?', default='data/Author.csv')
 	args = parser.parse_args()
 	if args.outfile == None:
-		args.outfile = args.edgelist.replace('.sim','') + '-submit.csv'
+		args.outfile = args.clusterfile.replace('.clusters','') + '-submit.csv'
 
 	print_err("Reading clusters")
 	clusterset = []
 	clusterid = {}
-	reader_clusterfile = csv.reader(open(args.clusterfile))
+	if args.clusterfile.endswith('_bins.txt'):
+		f_clusterfile = skip_front(open(args.clusterfile))
+	else:
+		f_clusterfile = open(args.clusterfile)
+	
+	reader_clusterfile = csv.reader(f_clusterfile)
 	for label, line in enumerate(reader_clusterfile):
 		line = map(int, line)
 		clusterset.append(' '.join(map(str, line)))
