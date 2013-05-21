@@ -31,6 +31,14 @@ def bin_iFfL(authors):
  			print_err(i+1)
  	return bins
 
+def bin_fullparsedname(authors):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		bins[a['fullparsedname']].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+ 	return bins
+
 def bin_ngrams(authors, n=5):
 	bins = defaultdict(set)
  	for i, (id, a) in enumerate(authors.iteritems()):
@@ -55,7 +63,7 @@ def main():
 	bins = sorted([(len(bv), blabel, bv) for blabel, bv in bins.iteritems()], reverse=True)
 
 	for _, binlabel, binv in bins:
-		print binlabel + ',' + ' '.join(map(str, binv))
+		print binlabel + ';' + ','.join(map(str, binv))
 		
 if __name__ == "__main__":
 	main()
