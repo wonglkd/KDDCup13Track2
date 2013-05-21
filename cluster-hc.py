@@ -15,7 +15,7 @@ def getSimilarity(G_sim, cl1, cl2):
 	edge_sum = sum([G_sim[v1][v2]['weight'] for v1, v2 in product(cl1, cl2) if G_sim.has_edge(v1, v2)])
 	return edge_sum / float(len(cl1) * len(cl2))
 
-def hcluster(G_sim, threshold_sim=0.5):
+def hcluster(G_sim, threshold_sim):
 	connected_components = nx.connected_component_subgraphs(G_sim)
 	all_clusters = []
 	for cc in connected_components:
@@ -58,12 +58,14 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
+	parser.add_argument('--interconnectivity', default=0.7)
+	parser.add_argument('--density', default=0.7)
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
-	threshold_interconnectivity = 0.4
-	threshold_density = 0.5
+	threshold_interconnectivity = args.interconnectivity
+	threshold_density = args.density
 
 	print_err("Loading graph")
 	G_sim = nx.read_weighted_edgelist(skip_zero(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
