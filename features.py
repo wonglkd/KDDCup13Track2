@@ -7,6 +7,7 @@ import numpy as np
 import itertools as itl
 import cPickle as pickle
 from pprint import pprint
+import math
 
 class FeaturesGenerator:
 	fields = [
@@ -19,6 +20,7 @@ class FeaturesGenerator:
 		'lastidf',
 		'iFfLidf',
 		'affil_sharedidf',
+# 		'affil_cosineidf',
 		'suffix'
 	]
 
@@ -26,6 +28,11 @@ class FeaturesGenerator:
 		print_err("Loading pickled author pre-features")
 		self.authors = pickle.load(open(authorprefeat, 'rb'))
 	
+	def getCosineSimilarity(self, a, b):
+		print(a)
+		print(b)
+		return np.dot(a, b) / (math.sqrt(np.dot(a, a)) * math.sqrt(np.dot(b, b)))
+
 	def getFeatures(self, a, b):
 		# feature vector
 		f = {
@@ -48,10 +55,12 @@ class FeaturesGenerator:
 				f[id_f] = 1
 
 		if aa['affil_tdidf'] is None or ab['affil_tdidf'] is None:
-			f['affil_sharedidf'] = 0
+			f['affil_sharedidf'] = np.nan
+# 			f['affil_cosineidf'] = np.nan
 		else:
 			affil_terms_a = aa['affil_tdidf'].nonzero()[1]
 			affil_terms_b = ab['affil_tdidf'].nonzero()[1]
+# 			f['affil_cosineidf'] = self.getCosineSimilarity(aa['affil_tdidf'], ab['affil_tdidf'])
 			affil_ind = np.intersect1d(affil_terms_a, affil_terms_b, assume_unique=True)
 			if affil_ind.any():
 				f['affil_sharedidf'] = np.sum(aa['affil_tdidf'][[0] * len(affil_ind), affil_ind])
