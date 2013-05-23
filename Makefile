@@ -24,6 +24,15 @@ all: $(SUBMIT_FILES)
 bin: $(BIN_FILES)
 bin-submit: $(SUBMIT_BIN_FILES)
 prefeat-t: $(GEN_DIR)/Author_f20000_prefeat.pickle 
+model: $(GEN_DIR)/model.pickle
+authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authordata/pa_coauthors_u.csv
+
+%_u.csv: unidecodefile.py %.csv
+	./$^ $@
+
+analyse: ./edge-analyseModel.py $(GEN_DIR)/model.pickle
+	./$<
+	
 
 $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
 	time ./$^ $* > $@
@@ -43,8 +52,8 @@ $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
 $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
 	time ./$^ $@; sort $@ -nrk 3 -t"," -o $@
 	
-$(GEN_DIR)/model.pickle: edge-train.py
-	time ./$^
+$(GEN_DIR)/model.pickle: edge-train.py features.py
+	time ./$<
 
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
 	time ./$^ $@

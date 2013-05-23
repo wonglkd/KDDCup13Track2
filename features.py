@@ -7,6 +7,7 @@ import numpy as np
 import itertools as itl
 import cPickle as pickle
 from pprint import pprint
+import featEdges
 import math
 
 class FeaturesGenerator:
@@ -27,7 +28,9 @@ class FeaturesGenerator:
 	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
 		print_err("Loading pickled author pre-features")
 		self.authors = pickle.load(open(authorprefeat, 'rb'))
-	
+		self.PFG = featEdges.PaperauthorFeaturesGenerator(self.authors)
+		self.fields += self.PFG.fields
+
 	def getCosineSimilarity(self, a, b):
 		print(a)
 		print(b)
@@ -72,6 +75,8 @@ class FeaturesGenerator:
 		f['exact'] = int(aa['name'] == ab['name'] and len(aa['name']) > 0)
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 
+		f.update(self.PFG.getEdgeFeatures(a, b))
+
 		return f
 
 def main():
@@ -92,8 +97,10 @@ def main():
 
 	rows_skipped = 0
 
- 	for i, (a, b) in enumerate(csv.reader(open(args.edges))):
- 		a, b = int(a), int(b)
+ 	for i, row in enumerate(csv.reader(open(args.edges))):
+ 		if len(row) == 3:
+ 			row = row[1:3]
+ 		a, b = int(row[0]), int(row[1])
  		if a not in featgen.authors or b not in featgen.authors:
  			rows_skipped += 1
  			continue
