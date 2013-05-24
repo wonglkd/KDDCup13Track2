@@ -23,7 +23,7 @@ def hcluster(G_sim, threshold_sim):
 		removed = set()
 		adjclusters = [set()] * len(cc)
 		c_sim = nx.to_scipy_sparse_matrix(cc, weight='weight', format='coo')
-		pq = list(zip(-c_sim.data, c_sim.row, c_sim.col))
+		pq = [(sim, r, c) for (sim, r, c) in zip(-c_sim.data, c_sim.row, c_sim.col) if r < c]
 		for _, r, c in pq:
 			adjclusters[r].add(c)
 			adjclusters[c].add(r)
@@ -38,14 +38,32 @@ def hcluster(G_sim, threshold_sim):
  			if similarity < threshold_sim:
  				break
 #  			print similarity, c1, c2
+#  			print_err(clusters[c1])
+#  			print_err(clusters[c2])
+# 			print_err(c1, c2, similarity)
+# 			for i, cl in enumerate(clusters):
+# 				if i not in removed:
+# 					print_err(i, cl)
+# 			print_err("--")
 	 		clusters.append(clusters[c1] + clusters[c2])
  			removed.add(c1)
  			removed.add(c2)
- 			adjclusters.append((adjclusters[c1].union(adjclusters[c2])) - set([c1, c2]))
+ 			toremove = set([c1, c2])
+ 			adjclusters.append((adjclusters[c1] | adjclusters[c2]) - toremove)
  			for nc in adjclusters[-1]:
+ 				if nc in removed:
+ 					continue
+ 				adjclusters[nc] -= toremove
+ 				adjclusters[nc].add(len(clusters)-1)
  				nsim = getSimilarity(G_sim, clusters[-1], clusters[nc])
  				if nsim >= threshold_sim:
  					hq.heappush(pq, (-nsim, len(clusters)-1, nc))
+#  				else:
+#  					print_err("Not merged:")
+# 					print_err(len(clusters)-1, clusters[len(clusters)-1])
+# 					print_err(nc, clusters[nc])
+# 					print_err(len(clusters)-1, nc, nsim)
+# 			print_err("----")
  		all_clusters.extend([cl for i, cl in enumerate(clusters) if i not in removed and len(cl) > 1])
  	return sorted(all_clusters, key=len, reverse=True)
  
@@ -74,18 +92,19 @@ def main():
 	clusters = hcluster(G_sim, threshold_interconnectivity)
 
  	print_err("Writing clusters")
- 	writer = csv.writer(open(args.outfile, 'wb'))
+ 	f_out = open(args.outfile, 'w')
  	for clist in clusters:
  		cl = G_sim.subgraph(clist)
 		cl_nodes = len(cl)
 		cl_edges = cl.number_of_edges()
 		cl_unweighted_density = nx.density(cl)
 		cl_weighted_density = cl.size(weight='weight')
+
 		if cl_nodes != 1:
 			cl_weighted_density /= (.5 * cl_nodes * (cl_nodes - 1))
 		if cl_weighted_density >= threshold_density:
 			print cl_nodes, cl_edges, cl_unweighted_density, cl_weighted_density
-			writer.writerow(sorted(clist))
+			f_out.write('{:g};{:}\n'.format(cl_weighted_density, ','.join(map(str, sorted(clist)))))			
 		else:
 			print_err(cl_nodes, cl_edges, cl_unweighted_density, cl_weighted_density)
 
