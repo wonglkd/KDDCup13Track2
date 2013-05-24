@@ -16,8 +16,8 @@ def main():
 	args = parser.parse_args()
 
 	randseed = 2048
-	n_trees = 75
-	min_samples_split = 3 #2 #10
+	n_trees = 90
+	min_samples_split = 2 #3 #10
 	n_jobs = -1 # -1 = no. of cores on machine
 
 	print_err("Loading features")
