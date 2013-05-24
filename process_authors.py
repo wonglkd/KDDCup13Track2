@@ -21,57 +21,53 @@ def loadAuthors(authorfile):
 	iFfL_cnt = defaultdict(int)
 	affiliations = []
  	print_err("Parsing names and counts")
-	punc = '.; '
+	#[^~:_`@\?\\|\'/\"\.\-0-9a-z;,\n\r \+\-\)\}&%\$\*\{\>=\^]
+	punc = ".;,-'~:_@?\|\\/\"+-)}{(&$*%=>^ "
 	titles_c = nameparser.constants.TITLES - set(['wing'])
 	id2affiliation = {}
 	for i, line in enumerate(reader):
 		line[1:] = [unidecode(unicode(cell, 'utf-8')) for cell in line[1:]]
 		line[2] = line[2].lower()
 		hn = HumanName(line[1], titles_c=titles_c)
-		hn.title = hn.title.lower().strip(punc)
-		hn.first = hn.first.lower().strip(punc)
-		hn.middle = hn.middle.lower().strip(punc)
-		hn.last = hn.last.lower().strip(punc)
-		hn.suffix = hn.suffix.lower().strip(punc)
-		hn.full_name = hn.full_name.strip().replace(';','').lower()
-		full_parsed = hn.first + ' '
-		if hn.middle:
-			full_parsed += hn.middle + ' '
-		full_parsed += hn.last + ' ' + hn.suffix
-		full_parsed = full_parsed.strip()
-		if hn.last:
-			if hn.first:
-				iFfL = hn.first[0] + ' ' + hn.last
-			else:
-				iFfL = 'L:' + hn.last
-		elif hn.first:
-			iFfL = 'F:' + hn.first # use full first name if no last name
-		else:
-			iFfL = 'ID:' + line[0]
-		if hn.last and hn.first:
-			fFfL = hn.first + ' ' + hn.last
-		else:
-			fFfL = iFfL
-
-		if not hn.full_name:
-			hn.full_name = 'ID:' + line[0]
-		if not full_parsed:
-			full_parsed = hn.full_name
-
-		authors.append((int(line[0]), {
- 			'name': hn.full_name,
+		ai = {
+ 			'fullname_joined': hn.full_name,
  			'name_title': hn.title,
  			'name_first': hn.first,
  			'name_middle': hn.middle,
  			'name_last': hn.last,
- 			'name_suffix': hn.suffix,
- 			'fullparsedname': full_parsed,
-			'iFfL': iFfL,
-			'fFfL': fFfL,
-			'affiliation': line[2]
-		}))
- 		lastname_cnt[hn.last] += 1
-  		iFfL_cnt[iFfL] += 1
+ 			'name_suffix': hn.suffix
+		}
+		ai = {k: v.lower().encode('ascii').translate(None, punc) for k, v in ai.iteritems()}
+		ai['name'] = hn.full_name.lower().strip().encode('ascii').translate(None, ';')
+		ai['fullname'] = hn.full_name.lower().encode('ascii').translate(None, punc.replace(' ',''))
+		ai['fullname_parsed'] = ai['name_first'] + ai['name_middle'] + ai['name_last'] + ai['name_suffix']
+		ai['affiliation'] = line[2]
+		if ai['name_last']:
+			if ai['name_first']:
+				ai['iFfL'] = ai['name_first'][0] + ai['name_last']
+			else:
+				ai['iFfL'] = 'L:' + ai['name_last']
+		elif ai['name_first']:
+			ai['iFfL'] = 'F:' + ai['name_first'] # use full first name if no last name
+		else:
+			ai['iFfL'] = 'ID:' + line[0]
+		if ai['name_last'] and ai['name_first']:
+			ai['fFfL'] = ai['name_first'] + ai['name_last']
+			ai['fFiL'] = ai['name_first'] + ai['name_last'][0]
+		else:
+			ai['fFfL'] = ai['iFfL']
+			ai['fFiL'] = ai['iFfL']
+
+		if not ai['fullname_joined']:
+			ai['fullname_joined'] = 'ID:' + line[0]
+		if not ai['fullname']:
+			ai['fullname'] = 'ID:' + line[0]
+		if not ai['fullname_parsed']:
+			ai['fullname_parsed'] = ai['fullname']
+
+		authors.append((int(line[0]), ai))
+ 		lastname_cnt[ai['name_last']] += 1
+  		iFfL_cnt[ai['iFfL']] += 1
   		if line[2]:
 			id2affiliation[int(line[0])] = len(affiliations)
 			affiliations.append(line[2])
@@ -87,7 +83,6 @@ def loadAuthors(authorfile):
 	print_err("Computing TF-IDF of affiliations")
  	tt = TfidfTransformer(norm=None, use_idf=True, smooth_idf=True, sublinear_tf=False)
  	affil_tfidf = tt.fit_transform(affil_count)
-#  	print affil_tfidf.shape
 #  	for i in range(10):
 #  		print i
 #  		print affil_tfidf[:,i]
