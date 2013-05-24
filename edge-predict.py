@@ -4,6 +4,7 @@ import argparse
 import cPickle as pickle
 import csv
 import numpy as np
+import features as feat
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -17,17 +18,7 @@ def main():
 	print_err("Loading saved classifier")	
 	clf, feat_indices, affil_median = pickle.load(open(args.modelfile, 'rb'))
 
-	print_err("Loading features")
-	reader = csv.reader(open(args.featurefile, 'rb'), dialect='excel-tab')
-	header = reader.next()
-	ids, X = [], []
-	for i, line in enumerate(reader):
-		line = map(num, line)
-		ids.append((line[0], line[1]))
-		X.append(line[2:])
- 		if (i+1) % 10000 == 0:
- 			print_err(i+1, ' rows done')
- 	X = np.array(X)
+	ids, X = feat.load_features(args.featurefile)
 # 	affil_ind = feat_indices.index('affil_sharedidf')
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = affil_median
  	X[np.isnan(X)] = 0.
