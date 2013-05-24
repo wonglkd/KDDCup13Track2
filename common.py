@@ -11,11 +11,11 @@ def getDB(id='origdata'):
 	db_filename = DBs[id]
 # 	conn = sqlite3.connect(db_filename)
 	conn = apsw.Connection(db_filename)
-	if id == 'pa':
-		memcon = apsw.Connection(":memory")
-		with memcon.backup("main", conn, "main") as backup:
-			backup.step()
-		return memcon
+# 	if id == 'pa':
+# 		memcon = apsw.Connection(":memory")
+# 		with memcon.backup("main", conn, "main") as backup:
+# 			backup.step()
+# 		return memcon
 	return conn
 
 def selectDB(conn, query, para = None):
