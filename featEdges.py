@@ -7,7 +7,6 @@ import cPickle as pickle
 from pprint import pprint
 from itertools import imap
 from collections import defaultdict
-import numpy as np
 
 class PaperauthorFeaturesGenerator:
 	pa_by_authors = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
@@ -64,9 +63,15 @@ class PaperauthorFeaturesGenerator:
 		'journalsW',
 		'years',
 		'yearscore',
-		'coauthor',
-		'coauthorW'
+# 		'coauthor',
+# 		'coauthorW'
 	]
+	
+	fields_num_index = set([
+		'conferences',
+		'journals',
+		'years'
+	])
 	
 	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt'):
 		self.filter = set(imap(int, open(authorfilterfile, 'rb')))
@@ -80,6 +85,8 @@ class PaperauthorFeaturesGenerator:
  				reader = csv.reader(f)
  				reader.next()
  				for line in reader:
+	 				if field in self.fields_num_index:
+	 					line[1] = int(line[1])
  					self.pa_by_authors[int(line[0])][field][line[1]] += int(line[2])
  		for author, paf in self.pa_by_authors.iteritems():
  			for field, pai in paf.iteritems():
@@ -160,8 +167,8 @@ class PaperauthorFeaturesGenerator:
 		return self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
 	
 	def getYearScore(self, a1, a2):
-		k1 = self.pa_by_authors[a1]['year'].keys()
-		k2 = self.pa_by_authors[a2]['year'].keys()
+		k1 = self.pa_by_authors[a1]['years'].keys()
+		k2 = self.pa_by_authors[a2]['years'].keys()
 		if not k1 or not k2:
 			return 0
 		x1, x2 = min(k1), max(k1)
@@ -181,8 +188,8 @@ class PaperauthorFeaturesGenerator:
 			'journalsW': 0,
 			'years': 0,
 			'yearscore': 0,
-			'coauthor': 0,
-			'coauthorW': 0
+# 			'coauthor': 0,
+# 			'coauthorW': 0
 		})
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
@@ -192,8 +199,8 @@ class PaperauthorFeaturesGenerator:
 				'journalsW': self.getSetSimW('journals', author1, author2),
 				'years': self.getSetSim('years', author1, author2),
 				'yearscore': self.getYearScore(author1, author2),
-				'coauthor': self.getCoauthorsSim(author1, author2),
-				'coauthorW': self.getCoauthorsSimW(author1, author2)
+# 				'coauthor': self.getCoauthorsSim(author1, author2),
+# 				'coauthorW': self.getCoauthorsSimW(author1, author2)
 			})
 		return f
 
