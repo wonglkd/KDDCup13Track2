@@ -22,10 +22,7 @@ def main():
 	print_err("Reading clusters")
 	clusterset = []
 	clusterid = {}
-	if args.clusterfile.endswith('_bins.txt'):
-		f_clusterfile = skip_front(open(args.clusterfile))
-	else:
-		f_clusterfile = open(args.clusterfile)
+	f_clusterfile = skip_front(open(args.clusterfile))
 	
 	reader_clusterfile = csv.reader(f_clusterfile)
 	for label, line in enumerate(reader_clusterfile):
