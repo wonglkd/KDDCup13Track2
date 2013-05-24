@@ -3,14 +3,26 @@ from common import *
 import csv
 import argparse
 from unidecode import unidecode
-from nameparser import HumanName
+from nameparser import constants as npc
 from collections import defaultdict
 import cPickle as pickle
+import re
 
+stopwords_custom = set(['document', 'preparation', 'system', 'consortium', 'committee', 'international', 'artificial', 'network', 'distributed', 'based', 'research', 'language', 'technology', 'project', 'design', 'computer', 'control', 'object', 'internet', 'propulsion', 'corp', 'workshop', 'xml', 'world', 'work', 'thesis', 'test', 'tool', 'structure', 'statistical', 'laboratory', 'ltd', 'objects', 'process', 'scheduling', 'september', 'special', 'student', 'programs', 'capacitated', 'balancing', 'assembly', 'aspect', 'model', 'inc', 'psychological', 'psychology', 'mohammed', 'computing', 'software', 'programming', 'new', 'applications', 'jet', 'propulsion', 'classification', 'recommendation'])
+stopwords = stopwords_custom | npc.TITLES | npc.PREFIXES | npc.SUFFIXES | npc.CONJUNCTIONS
+
+def bin_exactsamename(authors):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		bins[a['fullname']].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+ 	return bins
+ 
 def bin_samename(authors):
 	bins = defaultdict(set)
  	for i, (id, a) in enumerate(authors.iteritems()):
- 		bins[a['name']].add(id)
+ 		bins[a['fullname_joined']].add(id)
  		if (i+1) % 10000 == 0:
  			print_err(i+1)
  	return bins
@@ -21,6 +33,21 @@ def bin_fFfL(authors):
  		bins[a['fFfL']].add(id)
  		if (i+1) % 10000 == 0:
  			print_err(i+1)
+ 	return bins
+
+def bin_fFiL(authors, max_bin_size=20):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		if len(a['fFiL']) > 2:
+			bins[a['fFiL']].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+
+	bk = bins.keys()
+	for b in bk:
+		if len(bins[b]) > max_bin_size:
+			del bins[b]
+
  	return bins
 
 def bin_iFfL(authors):
@@ -34,21 +61,60 @@ def bin_iFfL(authors):
 def bin_fullparsedname(authors):
 	bins = defaultdict(set)
  	for i, (id, a) in enumerate(authors.iteritems()):
- 		bins[a['fullparsedname']].add(id)
+ 		bins[a['fullname_parsed']].add(id)
  		if (i+1) % 10000 == 0:
  			print_err(i+1)
  	return bins
 
-def bin_ngrams(authors, n=5):
+def bin_offbylastone(authors):
 	bins = defaultdict(set)
  	for i, (id, a) in enumerate(authors.iteritems()):
- 		if not a['name'].startswith('ID:'):
- 			lname = a['name'].replace('.','')
-	 		ngrams = zip(*[lname[i:] for i in range(n)])
+ 		if ':' not in a['fullname_joined']:
+			bins[a['fullname_joined']].add(id)
+			if len(a['fullname_joined']) > 1:
+				bins[a['fullname_joined'][:-1]].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+ 	return bins
+
+def bin_token(authors, nw=2, max_bin_size=100):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		if ':' not in a['name']:
+ 			tokens = re.sub("[^\w]", " ",  a['name']).split()
+ 			tokens = [v for v in tokens if len(v) > 2 and v not in stopwords]
+	 		ngrams = zip(*[tokens[j:] for j in range(nw)])
 			for p in ngrams:
-				bins[p].add(id)
+				pg = ' '.join(p)
+				if len(pg) > len(p)*2-1:
+					bins[pg].add(id)
 		if (i+1) % 10000 == 0:
 			print_err(i+1)
+
+	bk = bins.keys()
+	for b in bk:
+		if len(bins[b]) > max_bin_size:
+			del bins[b]
+
+ 	return bins
+
+def bin_ngrams(authors, n=15, max_bin_size=30):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		if ':' not in a['fullname']:
+ 			lname = a['fullname']
+	 		ngrams = zip(*[lname[j:] for j in range(n)])
+			for p in ngrams:
+				if not any(((s in p) for s in stopwords_custom)):
+					bins[''.join(p)].add(id)
+		if (i+1) % 10000 == 0:
+			print_err(i+1)
+
+	bk = bins.keys()
+	for b in bk:
+		if len(bins[b]) > max_bin_size:
+			del bins[b]
+
  	return bins
 
 def main():
@@ -63,7 +129,7 @@ def main():
 	bins = sorted([(len(bv), blabel, bv) for blabel, bv in bins.iteritems()], reverse=True)
 
 	for _, binlabel, binv in bins:
-		print binlabel + ';' + ','.join(map(str, binv))
+		print binlabel + ';' + ','.join(map(str, sorted(binv)))
 		
 if __name__ == "__main__":
 	main()
