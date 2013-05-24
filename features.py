@@ -10,6 +10,7 @@ from pprint import pprint
 from collections import defaultdict
 import featEdges
 import math
+import jellyfish
 
 def load_features(featurefile):
 	print_err("Loading features")
@@ -37,7 +38,8 @@ class FeaturesGenerator:
 		'iFfLidf',
 		'affil_sharedidf',
 # 		'affil_cosineidf',
-		'suffix'
+		'suffix',
+		'jaro_distance'
 	] + featEdges.PaperauthorFeaturesGenerator.fields
 
 	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
@@ -96,7 +98,8 @@ class FeaturesGenerator:
 		
 		f['lastidf'] = 0 if (aa['name_last'] != ab['name_last'] or not aa['name_last']) else aa['lastname_idf']
 		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
-		f['exact'] = int(aa['name'] == ab['name'] and len(aa['name']) > 0)
+		f['exact'] = int(aa['fullname'] == ab['fullname'] and len(aa['fullname']) > 0)
+		f['jaro_distance'] = 0 if (':' in aa['fullname'] or ':' in ab['fullname']) else jellyfish.jaro_distance(aa['fullname'], ab['fullname'])
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 
 		f.update(self.PFG.getEdgeFeatures(a, b))
