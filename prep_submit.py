@@ -22,7 +22,7 @@ def main():
 	print_err("Reading clusters")
 	clusterset = []
 	clusterid = {}
-	f_clusterfile = skip_front(open(args.clusterfile))
+	f_clusterfile = skip_front(skip_comments(open(args.clusterfile)))
 	
 	reader_clusterfile = csv.reader(f_clusterfile)
 	for label, line in enumerate(reader_clusterfile):
@@ -31,13 +31,16 @@ def main():
 		for node in line:
 			clusterid[node] = label
 
-	print_err("Reading authorfile")
-	reader_authors = csv.reader(open(args.authorfile, 'rb'))
-	header = reader_authors.next()
-	authorids = []
-	for line in reader_authors:
-		authorids.append(int(line[0]))
- 	authorids = sorted(set(authorids))
+	if 'goldstd' in args.clusterfile:
+		authorids = sorted(clusterid.keys())
+	else:
+		print_err("Reading authorfile")
+		reader_authors = csv.reader(open(args.authorfile, 'rb'))
+		header = reader_authors.next()
+		authorids = []
+		for line in reader_authors:
+			authorids.append(int(line[0]))
+		authorids = sorted(set(authorids))
  	
 	print_err("Writing submission")
  	writer = csv.writer(open(args.outfile, 'wb'))
