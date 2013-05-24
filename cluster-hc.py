@@ -93,6 +93,9 @@ def main():
 
  	print_err("Writing clusters")
  	f_out = open(args.outfile, 'w')
+ 	
+ 	clusters_o = []
+ 	
  	for clist in clusters:
  		cl = G_sim.subgraph(clist)
 		cl_nodes = len(cl)
@@ -103,10 +106,13 @@ def main():
 		if cl_nodes != 1:
 			cl_weighted_density /= (.5 * cl_nodes * (cl_nodes - 1))
 		if cl_weighted_density >= threshold_density:
-			print cl_nodes, cl_edges, cl_unweighted_density, cl_weighted_density
-			f_out.write('{:g};{:}\n'.format(cl_weighted_density, ','.join(map(str, sorted(clist)))))			
+			clusters_o.append((cl_nodes, cl_weighted_density, cl_edges, cl_unweighted_density, ','.join(map(str, sorted(clist)))))
 		else:
 			print_err(cl_nodes, cl_edges, cl_unweighted_density, cl_weighted_density)
+	
+	for cl_nodes, cl_weighted_density, cl_edges, cl_unweighted_density, clstr in sorted(clusters_o, reverse=True):
+		print cl_nodes, cl_edges, cl_unweighted_density, cl_weighted_density
+		f_out.write('{:},{:g};{:}\n'.format(cl_nodes, cl_weighted_density, clstr))			
 
 if __name__ == "__main__":
 	main()
