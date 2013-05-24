@@ -17,6 +17,35 @@ class PaperauthorFeaturesGenerator:
 		'affiliation': 'SELECT COUNT(*) as cnt, affiliation FROM paperauthor WHERE AuthorId = ? and affiliation <> "" GROUP BY affiliation'
 	}
 	author_query_ = 'SELECT * FROM author WHERE Id = ?'
+	coauthor_query_ = '''SELECT
+			(SELECT COUNT(*) FROM
+			(SELECT Coauthor FROM pa_coauthors co1
+			WHERE co1.AuthorId = ?
+			INTERSECT
+			SELECT Coauthor FROM pa_coauthors co2
+			WHERE co2.AuthorId = ?)) as common
+		,
+			(SELECT COUNT(Coauthor) FROM pa_coauthors co3
+			WHERE co3.AuthorId = ?) as cnt1
+		,
+			(SELECT COUNT(Coauthor) FROM pa_coauthors co4
+			WHERE co4.AuthorId = ?) as cnt2'''
+	coauthor_query_w_ = '''SELECT
+			(SELECT IFNULL(SUM(mc), 0) FROM (SELECT MIN(cnt) as mc FROM
+			pa_coauthors co0 JOIN
+			(SELECT Coauthor FROM pa_coauthors co1
+			WHERE co1.AuthorId = ?
+			INTERSECT
+			SELECT Coauthor FROM pa_coauthors co2
+			WHERE co2.AuthorId = ?) co_ ON co_.Coauthor = co0.Coauthor WHERE AuthorId IN (?,?)
+			GROUP BY co_.Coauthor
+			)) as common
+		,
+			(SELECT SUM(cnt) FROM pa_coauthors co3
+			WHERE co3.AuthorId = ?) as cnt1
+		,
+			(SELECT SUM(cnt) FROM pa_coauthors co4
+			WHERE co4.AuthorId = ?) as cnt2'''
 
 	pa_files_ = {
 		'name': 'authordata/pa_names_u.csv',
@@ -34,12 +63,15 @@ class PaperauthorFeaturesGenerator:
 		'journals',
 		'journalsW',
 		'years',
-		'yearscore'
+		'yearscore',
+		'coauthor',
+		'coauthorW'
 	]
 	
 	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt'):
 		self.filter = set(imap(int, open(authorfilterfile, 'rb')))
- 		self.conn = getDB()
+		self.conn = getDB()
+ 		self.conn_pa = getDB('pa')
 
 		self.author_info = authorprefeat
  		for field, filename in self.pa_files_.iteritems():
@@ -54,24 +86,31 @@ class PaperauthorFeaturesGenerator:
  				total = sum(pai.values())
  				self.pa_by_authors[author][field] = {val: cnt / float(total) for val, cnt in pai.iteritems()}
 	
-	def jaccard(self, a, b):
+	def sim(self, common, len1, len2):
+		if common == 0:
+			return 0.
+		return common / float(min(len1, len2))
+		# Jaccard
+		# return common / float(len1 + len2)
+	
+	def dictSim(self, a, b):
 		if not a or not b:
 			return 0.
 		n = len(set(a.keys()) & set(b.keys()))
-		return n / float(len(a) + len(b) - n)
+		return self.sim(n, len(a), len(b))
 	
-	def jaccardW(self, a, b):
+	def dictSimW(self, a, b):
 		if not a or not b:
 			return 0.
 		common = set(a.keys()) & set(b.keys())
 		total_common = sum([min(a[v], b[v]) for v in common])
-		return total_common / float(sum(a.values()) + sum(b.values()))
+		return self.sim(total_common, sum(a.values()), sum(b.values()))
 
 	def getAuthor(self, aID):
 		if aID in self.author_info:
 			return
 		
-		authorinfo = selectDB(self.conn, self.author_query_, [aID])[0]
+		authorinfo = selectDB(self.conn, self.author_query_, [aID]).next()
 		self.author_info[authorinfo[0]] = {
 			'name': authorinfo[1].replace(';','').strip().lower(),
 			'affiliation': authorinfo[2].lower()
@@ -80,15 +119,23 @@ class PaperauthorFeaturesGenerator:
 		if aID not in self.filter or aID in self.pa_by_authors:
 			return
 
-		curr_a = {}
+ 		curr_a = {}
 
-# 		for field, query in self.pa_queries_author_.iteritems():
-# 			results = selectDB(self.conn, query, [aID])
-# 			total = sum([a for a, _ in results])
-# 			curr_a[field] = {fieldval: cnt / float(total) for cnt, fieldval in results}
-# 
-# 		self.pa_by_authors[aID] = curr_a
+		for field, query in self.pa_queries_author_.iteritems():
+			results = selectDB(self.conn, query, [aID])
+			total = sum([a for a, _ in results])
+			curr_a[field] = {fieldval: cnt / float(total) for cnt, fieldval in results}
+
+		self.pa_by_authors[aID] = curr_a
 		return
+	
+	def getCoauthorsSim(self, a1, a2):
+		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_, [a1, a2, a1, a2]).next()
+		return self.sim(common, len1, len2)
+
+	def getCoauthorsSimW(self, a1, a2):
+		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_w_, [a1, a2, a1, a2, a1, a2]).next()
+		return self.sim(common, len1, len2)
 
 	def getFieldPA(self, field, a1, a2):
 		# missing value
@@ -107,10 +154,10 @@ class PaperauthorFeaturesGenerator:
 		return self.getFieldPA(field, a1, a2) + self.getFieldPA(field, a2, a1)
 
 	def getSetSim(self, field, a1, a2):
-		return self.jaccard(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
+		return self.dictSim(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
 
 	def getSetSimW(self, field, a1, a2):
-		return self.jaccardW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
+		return self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
 	
 	def getYearScore(self, a1, a2):
 		k1 = self.pa_by_authors[a1]['year'].keys()
@@ -119,12 +166,13 @@ class PaperauthorFeaturesGenerator:
 			return 0
 		x1, x2 = min(k1), max(k1)
 		y1, y2 = min(k2), max(k2)
-		return max(x1, y1) - min(x2, y2) + 1
+		return min(x2, y2) - max(x1, y1) + 1
 
 	def getEdgeFeatures(self, author1, author2):
-		self.getAuthor(author1)
-		self.getAuthor(author2)
-		f = {
+# 		self.getAuthor(author1)
+# 		self.getAuthor(author2)
+		f = defaultdict(float)
+		f.update({
 			'pa_name': self.getPABoth('name', author1, author2),
 			'pa_affil': self.getPABoth('affiliation', author1, author2),
 			'conferences': 0,
@@ -132,8 +180,10 @@ class PaperauthorFeaturesGenerator:
 			'journals': 0,
 			'journalsW': 0,
 			'years': 0,
-			'yearscore': 0
-		}
+			'yearscore': 0,
+			'coauthor': 0,
+			'coauthorW': 0
+		})
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
 				'conferences': self.getSetSim('conferences', author1, author2),
@@ -141,7 +191,9 @@ class PaperauthorFeaturesGenerator:
 				'journals': self.getSetSim('journals', author1, author2),
 				'journalsW': self.getSetSimW('journals', author1, author2),
 				'years': self.getSetSim('years', author1, author2),
-				'yearscore': self.getYearScore(author1, author2)
+				'yearscore': self.getYearScore(author1, author2),
+				'coauthor': self.getCoauthorsSim(author1, author2),
+				'coauthorW': self.getCoauthorsSimW(author1, author2)
 			})
 		return f
 
@@ -156,9 +208,9 @@ def main():
 		args.outfile = args.edges.replace('_edges.txt', '') + '.edgefeat'
 
  	print_err("Loading pickled author pre-features")
-#   	authors = pickle.load(open(args.authorprefeat, 'rb'))
-  	authors = {}
-	PFG = PaperauthorFeaturesGenerator(args.authorfilter, authors)
+   	authors = pickle.load(open(args.authorprefeat, 'rb'))
+#   	authors = {}
+	PFG = PaperauthorFeaturesGenerator(authors, args.authorfilter)
 
 	rows_skipped = 0
 	rows = 0
@@ -177,7 +229,7 @@ def main():
 	 		writer.writerow(f)
 	  		rows += 1
 
- 		if (i+1) % 10 == 0:
+ 		if (i+1) % 100 == 0:
  			print_err(i+1, ' rows done;', rows, ' rows extracted')
  	
 	print_err("Rows skipped: {0}".format(rows_skipped))
