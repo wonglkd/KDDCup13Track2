@@ -13,18 +13,18 @@ SIM_FILES := $(GEN_DIR)/iFfL.sim
 CLUSTER_FILES := $(GEN_DIR)/iFfL.clusters
 SUBMIT_FILES := $(GEN_DIR)/iFfL-submit.csv
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
-#feat-t: $(GEN_DIR)/iFfL.feat
+feat: $(FEAT_FILES)
 #cluster-t: $(GEN_DIR)/iFfL.clusters
 #sim-t: $(GEN_DIR)/iFfL.sim
 #bins: $(addprefix $(GEN_DIR)/,$(BIN_METHODS:=_bins.txt))
 
 all: $(SUBMIT_FILES)
-.SECONDARY: $(BIN_FILES) $(EDGE_FILES) $(FEAT_FILES) $(CLUSTER_FILES) $(SUBMIT_FILES) $(PREFEAT)
+.SECONDARY:
 
 bin: $(BIN_FILES)
 bin-submit: $(SUBMIT_BIN_FILES)
 prefeat-t: $(GEN_DIR)/Author_f20000_prefeat.pickle 
-model: $(GEN_DIR)/model.pickle
+train: $(GEN_DIR)/model.pickle
 authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authordata/pa_coauthors_u.csv
 
 %_u.csv: unidecodefile.py %.csv
@@ -32,7 +32,9 @@ authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authorda
 
 analyse: ./edge-analyseModel.py $(GEN_DIR)/model.pickle
 	./$<
-	
+
+$(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT)
+	time ./$^ $@
 
 $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
 	time ./$^ $* > $@
@@ -43,8 +45,8 @@ $(GEN_DIR)/%_edges.txt: edges.py $(GEN_DIR)/%_bins.txt
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
 	time ./$^ $@
 
-$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT)
-	time ./$^ $@
+$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py
+	time ./features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
 	time ./$^ $@; sort $@ -nrk 3 -t"," -o $@
@@ -52,8 +54,8 @@ $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
 $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
 	time ./$^ $@; sort $@ -nrk 3 -t"," -o $@
 	
-$(GEN_DIR)/model.pickle: edge-train.py features.py
-	time ./$<
+$(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
+	time ./$^ $@
 
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
 	time ./$^ $@

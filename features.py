@@ -7,8 +7,23 @@ import numpy as np
 import itertools as itl
 import cPickle as pickle
 from pprint import pprint
+from collections import defaultdict
 import featEdges
 import math
+
+def load_features(featurefile):
+	print_err("Loading features")
+	reader = csv.reader(open(featurefile, 'rb'), dialect='excel-tab')
+	header = reader.next()
+	ids, X = [], []
+	for i, line in enumerate(reader):
+		line = map(num, line)
+		ids.append((line[0], line[1]))
+		X.append(line[2:])
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1, ' rows done')
+ 	X = np.array(X)
+ 	return ids, X
 
 class FeaturesGenerator:
 	fields = [
@@ -23,13 +38,13 @@ class FeaturesGenerator:
 		'affil_sharedidf',
 # 		'affil_cosineidf',
 		'suffix'
-	]
+	] + featEdges.PaperauthorFeaturesGenerator.fields
 
 	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
 		print_err("Loading pickled author pre-features")
 		self.authors = pickle.load(open(authorprefeat, 'rb'))
 		self.PFG = featEdges.PaperauthorFeaturesGenerator(self.authors)
-		self.fields += self.PFG.fields
+# 		self.fields += self.PFG.fields
 
 	def getCosineSimilarity(self, a, b):
 		print(a)
@@ -41,7 +56,7 @@ class FeaturesGenerator:
 		f = {
 			'id1': a,
 			'id2': b
- 		} 
+ 		}
  		aa, ab = self.authors[a], self.authors[b]
  		name_para = (('mid', 'name_middle'), ('first', 'name_first'), ('last', 'name_last'))
  		for id_f, id_o in name_para:
@@ -61,14 +76,23 @@ class FeaturesGenerator:
 			f['affil_sharedidf'] = np.nan
 # 			f['affil_cosineidf'] = np.nan
 		else:
+# 			print aa['affil_tdidf']
+# 			print ab['affil_tdidf']
 			affil_terms_a = aa['affil_tdidf'].nonzero()[1]
 			affil_terms_b = ab['affil_tdidf'].nonzero()[1]
 # 			f['affil_cosineidf'] = self.getCosineSimilarity(aa['affil_tdidf'], ab['affil_tdidf'])
-			affil_ind = np.intersect1d(affil_terms_a, affil_terms_b, assume_unique=True)
-			if affil_ind.any():
-				f['affil_sharedidf'] = np.sum(aa['affil_tdidf'][[0] * len(affil_ind), affil_ind])
+			affil_common = np.intersect1d(affil_terms_a, affil_terms_b, assume_unique=True)
+			diffa = np.setdiff1d(affil_terms_a, affil_common)
+			diffb = np.setdiff1d(affil_terms_b, affil_common)
+			if affil_common.any():
+				f['affil_sharedidf'] = np.sum(aa['affil_tdidf'][[0] * len(affil_common), affil_common])
 			else:
 				f['affil_sharedidf'] = 0
+			suma = np.sum(aa['affil_tdidf'][[0] * len(diffa), diffa]) if diffa.any() else 0
+			sumb = np.sum(ab['affil_tdidf'][[0] * len(diffb), diffb]) if diffb.any() else 0
+# 			print suma, sumb
+			f['affil_sharedidf'] -= math.log(1.0 + min(suma, sumb))
+# 			print "affil", f['affil_sharedidf']
 		
 		f['lastidf'] = 0 if (aa['name_last'] != ab['name_last'] or not aa['name_last']) else aa['lastname_idf']
 		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
@@ -97,16 +121,17 @@ def main():
 
 	rows_skipped = 0
 
- 	for i, row in enumerate(csv.reader(open(args.edges))):
- 		if len(row) == 3:
+ 	for i, row in enumerate(csv.reader(skip_comments(open(args.edges, 'rb')))):
+ 		if len(row) >= 3:
  			row = row[1:3]
  		a, b = int(row[0]), int(row[1])
  		if a not in featgen.authors or b not in featgen.authors:
  			rows_skipped += 1
+ 			print_err("Skipped:", a, b)
  			continue
 		
  		writer.writerow(featgen.getFeatures(a, b))
- 		if (i+1) % 10000 == 0:
+ 		if (i+1) % 5000 == 0:
  			print_err(i+1, ' rows done')
  
 	print_err("Rows skipped: {0}".format(rows_skipped))
