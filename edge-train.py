@@ -15,8 +15,8 @@ def main():
 	parser.add_argument('outfile', nargs='?', default='generated/model.pickle')
 	args = parser.parse_args()
 
-	randseed = 2048
-	n_trees = 90
+	randseed = 100
+	n_trees = 130
 	min_samples_split = 2 #3 #10
 	n_jobs = -1 # -1 = no. of cores on machine
 
