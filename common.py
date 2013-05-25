@@ -40,7 +40,7 @@ def print_err(*args):
 
 def skip_comments(iterable):
     for line in iterable:
-        if not line.startswith('#'):
+        if not line.startswith('#') and line.strip():
             yield line
 
 def num(s):
