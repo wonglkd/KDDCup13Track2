@@ -10,12 +10,12 @@ BIN_FILES = $(foreach i,$(BIN_METHODS),$(GEN_DIR)/$i_bins.txt)
 EDGE_FILES := $(GEN_DIR)/iFfL_edges.txt
 FEAT_FILES := $(GEN_DIR)/iFfL.feat
 #SIM_FILES := $(GEN_DIR)/iFfL.sim
-CLUSTER_FILES := $(GEN_DIR)/iFfL.clusters
+CLUSTER_FILES := $(GEN_DIR)/combined.clusters
 SUBMIT_FILES := $(GEN_DIR)/combined-submit.csv
 # $(GEN_DIR)/iFfL-submit.csv 
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
 feat: $(FEAT_FILES)
-#cluster-t: $(GEN_DIR)/iFfL.clusters
+
 #sim-t: $(GEN_DIR)/iFfL.sim
 edgefeat-t:
 	./featEdges.py generated/edges_test.txt data/authors_with_papers.txt generated/test.edgefeat
@@ -25,7 +25,9 @@ all: $(SUBMIT_FILES)
 
 evaluate: evaluate.py $(GEN_DIR)/goldstd-submit.csv $(SUBMIT_FILES)
 	./$^
+submitgz: $(SUBMIT_FILES:=.gz)
 bins: $(BIN_FILES)
+cluster: $(CLUSTER_FILES)
 bin-submit: $(SUBMIT_BIN_FILES)
 prefeat-t: $(GEN_DIR)/Author_f20000_prefeat.pickle 
 train: $(GEN_DIR)/model.pickle
@@ -66,6 +68,9 @@ $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.fe
 
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
 	time ./$^ $@
+
+%.gz: %
+	gzip -c $* > $@
 
 $(GEN_DIR)/goldstd_edges.txt: edges.py $(DATA_DIR)/goldstd_clusters.csv
 	time ./$^ > $@
