@@ -10,8 +10,8 @@ except ImportError:
 
 def getDB(id='origdata'):
 	DBs = {
-		'origdata': "kddcup13.sqlite3",
-		'pa': 'pa.sqlite3'
+		'origdata': "db/kddcup13.sqlite3",
+		'pa': 'db/pa.sqlite3'
 	}
 	db_filename = DBs[id]
 	if db_interface == 'apsw':
