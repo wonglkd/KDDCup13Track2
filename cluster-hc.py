@@ -18,7 +18,16 @@ def getSimilarity(G_sim, cl1, cl2):
 def hcluster(G_sim, threshold_sim):
 	connected_components = nx.connected_component_subgraphs(G_sim)
 	all_clusters = []
-	for cc in connected_components:
+	print_err('Clustering', len(connected_components), 'components')
+	for component_i, cc in enumerate(connected_components):
+ 		print_err('Starting component', component_i, 'of', len(connected_components), '({:} nodes)'.format(len(cc)))
+ 		if len(cc) == 2:
+ 			cl = list(cc.nodes())
+ 			if cc.size(weight='weight') >= threshold_sim:
+ 				all_clusters.append(cl)
+ 			continue
+ 		elif len(cc) < 2:
+ 			continue
 		clusters = [[v] for v in cc]
 		removed = set()
 		adjclusters = [set()] * len(cc)
@@ -67,26 +76,30 @@ def hcluster(G_sim, threshold_sim):
  		all_clusters.extend([cl for i, cl in enumerate(clusters) if i not in removed and len(cl) > 1])
  	return sorted(all_clusters, key=len, reverse=True)
  
-def skip_zero(iterable):
+def enforce_min(iterable, min_weight):
     for line in iterable:
-        if not line.endswith(',0'):
+    	vl = line.split(',')
+        if float(vl[2]) >= min_weight:
             yield line
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
-	parser.add_argument('--interconnectivity', default=0.7)
-	parser.add_argument('--density', default=0.7)
+	parser.add_argument('--interconnectivity', default=0.80)
+	parser.add_argument('--density', default=0.80)
+	parser.add_argument('--min-edge', default=0.2)
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
+	threshold_min_weight = args.min_edge
 	threshold_interconnectivity = args.interconnectivity
 	threshold_density = args.density
 
 	print_err("Loading graph")
-	G_sim = nx.read_weighted_edgelist(skip_zero(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
+	G_sim = nx.read_weighted_edgelist(enforce_min(open(args.edgelist, 'rb'), threshold_min_weight), nodetype=int, delimiter=',')
+	print_err('Loaded (V={:}, E={:})'.format(len(G_sim), G_sim.size()))
 
 	print_err("Clustering")
 	clusters = hcluster(G_sim, threshold_interconnectivity)
