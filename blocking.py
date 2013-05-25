@@ -35,6 +35,21 @@ def bin_fFfL(authors):
  			print_err(i+1)
  	return bins
 
+def bin_fF3L(authors, max_bin_size=20):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		if ':' not in a['fFiL'] and len(a['name_last']) >= 3 and len(a['fFiL']) > 2:
+			bins[a['fFiL'] + a['name_last'][1:3]].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+
+	bk = bins.keys()
+	for b in bk:
+		if len(bins[b]) > max_bin_size:
+			del bins[b]
+
+ 	return bins
+
 def bin_fFiL(authors, max_bin_size=20):
 	bins = defaultdict(set)
  	for i, (id, a) in enumerate(authors.iteritems()):
