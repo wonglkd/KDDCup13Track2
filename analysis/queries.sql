@@ -115,6 +115,14 @@ JOIN paperauthor ON p.Id = PaperId
 JOIN awithpapers awp ON AuthorId = awp.Id;
 
 
+SELECT pa.name, pa.affiliation, a.*, p.title, p.year FROM
+(author a LEFT JOIN paperauthor pa ON AuthorID = a.ID)
+LEFT JOIN paper p ON p.Id = PaperId
+WHERE a.Id IN (96610)
+LIMIT 50;
+SELECT * FROM paperauthor WHERE AuthorID IN (96610);
+SELECT * FROM author WHERE ID IN (96610);
+
 
 -- SELECT COUNT(*) FROM paper p
 -- WHERE EXISTS (SELECT * FROM paperauthor JOIN awithpapers awp ON awp.Id = AuthorId WHERE paperId = p.Id);
