@@ -43,7 +43,10 @@ def main():
 					scores.append((f1, precision, recall, line[0]))
 		scores = sorted(scores, reverse=True)
 		print_err('File:', filename)
- 		pprint(scores)
+		for line in scores:
+			if line[0] != 1:
+				print_err(' '.join(map('{:g}'.format, line[:3])), line[3])
+#  		pprint(scores)
 		scores = np.array(scores)
 		print_err('F1', 'Precision', 'Recall')
 		print_err(np.mean(scores[:,:3], axis=0))
