@@ -1,7 +1,12 @@
-import sqlite3
-import apsw
 import sys
 import exceptions
+
+try:
+	import apsw
+	db_interface = 'apsw'
+except ImportError:
+	import sqlite3
+	db_interface = 'sqlite'
 
 def getDB(id='origdata'):
 	DBs = {
@@ -9,8 +14,10 @@ def getDB(id='origdata'):
 		'pa': 'pa.sqlite3'
 	}
 	db_filename = DBs[id]
-# 	conn = sqlite3.connect(db_filename)
-	conn = apsw.Connection(db_filename)
+	if db_interface == 'apsw':
+	 	conn = apsw.Connection(db_filename)
+	else:
+	 	conn = sqlite3.connect(db_filename)
 # 	if id == 'pa':
 # 		memcon = apsw.Connection(":memory")
 # 		with memcon.backup("main", conn, "main") as backup:
@@ -20,9 +27,12 @@ def getDB(id='origdata'):
 
 def selectDB(conn, query, para = None):
 	cur = conn.cursor()
-	for row in cur.execute(query, para):
-		yield row
-# 	return cur.fetchall()
+	if db_interface == 'apsw':
+		for row in cur.execute(query, para):
+			yield row
+	else:
+		for row in cur.fetchall():
+			yield row
 
 def print_err(*args):
     sys.stderr.write(' '.join(map(str,args)) + '\n')
