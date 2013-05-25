@@ -57,14 +57,18 @@ class PaperauthorFeaturesGenerator:
 	fields = [
 		'pa_name',
 		'pa_affil',
+		'names',
+		'namesW',
+		'affiliations',
+		'affiliationsW',
 		'conferences',
 		'conferencesW',
 		'journals',
 		'journalsW',
 		'years',
 		'yearscore',
-# 		'coauthor',
-# 		'coauthorW'
+		'coauthor',
+		'coauthorW'
 	]
 	
 	fields_num_index = set([
@@ -182,25 +186,33 @@ class PaperauthorFeaturesGenerator:
 		f.update({
 			'pa_name': self.getPABoth('name', author1, author2),
 			'pa_affil': self.getPABoth('affiliation', author1, author2),
+			'names': 0,
+			'namesW': 0,
+			'affiliations': 0,
+			'affiliationsW': 0,
 			'conferences': 0,
 			'conferencesW': 0,
 			'journals': 0,
 			'journalsW': 0,
 			'years': 0,
 			'yearscore': 0,
-# 			'coauthor': 0,
-# 			'coauthorW': 0
+			'coauthor': 0,
+			'coauthorW': 0
 		})
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
+				'names': self.getSetSim('name', author1, author2),
+				'namesW': self.getSetSimW('name', author1, author2),
+				'affiliations': self.getSetSim('affiliation', author1, author2),
+				'affiliationsW': self.getSetSimW('affiliation', author1, author2),
 				'conferences': self.getSetSim('conferences', author1, author2),
 				'conferencesW': self.getSetSimW('conferences', author1, author2),
 				'journals': self.getSetSim('journals', author1, author2),
 				'journalsW': self.getSetSimW('journals', author1, author2),
 				'years': self.getSetSim('years', author1, author2),
 				'yearscore': self.getYearScore(author1, author2),
-# 				'coauthor': self.getCoauthorsSim(author1, author2),
-# 				'coauthorW': self.getCoauthorsSimW(author1, author2)
+				'coauthor': self.getCoauthorsSim(author1, author2),
+				'coauthorW': self.getCoauthorsSimW(author1, author2)
 			})
 		return f
 
@@ -222,17 +234,18 @@ def main():
 	rows_skipped = 0
 	rows = 0
 
-	writer = csv.DictWriter(open(args.outfile, 'wb'), dialect='excel-tab', fieldnames=['a1','a2']+PFG.fields)
+	writer = csv.DictWriter(open(args.outfile, 'wb'), dialect='excel-tab', fieldnames=['authors']+PFG.fields)
 	writer.writeheader()
 
- 	for i, (a, b) in enumerate(csv.reader(open(args.edges, 'rb'))):
+ 	for i, (a, b) in enumerate(csv.reader(skip_comments(open(args.edges, 'rb')))):
  		a, b = int(a), int(b)
  		if a not in PFG.filter and b not in PFG.filter:
  			rows_skipped += 1
  		else:
+ 			print a, b
  			f = PFG.getEdgeFeatures(a, b)
  			f = {k: '{:g}'.format(v) for k, v in f.iteritems()}
- 			f['a1'], f['a2'] = a, b
+ 			f['authors'] = '{:},{:}'.format(a, b)
 	 		writer.writerow(f)
 	  		rows += 1
 
