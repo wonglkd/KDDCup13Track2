@@ -15,7 +15,7 @@ def main():
 	LEFT JOIN paper p ON p.Id = PaperId'''
 	}
 
-	with open('analysis/analyse.clusters') as f:
+	with open('analysis/analyse.clusters.tmp') as f:
 		with getDB() as conn:
 			for line in skip_comments(f):
 				if ';' in line:
