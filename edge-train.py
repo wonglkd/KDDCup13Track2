@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from common import *
 import argparse
 import features as feat
@@ -17,8 +17,11 @@ def main():
 
 	randseed = 100
 	n_trees = 130
-	min_samples_split = 2 #3 #10
+	min_samples_split = 1 #3 #10
 	n_jobs = -1 # -1 = no. of cores on machine
+
+# 	n_trees = 500
+
 
 	print_err("Loading features")
 	ids, X = feat.load_features(args.featfile)
@@ -47,13 +50,22 @@ def main():
 								 n_jobs=n_jobs,
 								 oob_score=True,
 								 min_samples_split=min_samples_split,
+								 min_samples_leaf=1,
 								 compute_importances=True,
 								 random_state=randseed)
+# 	clf = GradientBoostingClassifier(n_estimators=n_trees,
+# 									 verbose=2,
+# 									 learning_rate=0.1,
+# 									 max_depth=3,
+# 									 min_samples_split=min_samples_split,
+# 									 min_samples_leaf=1,
+# 									 subsample=0.7)
+	
 	print_err("Fitting data")
 	clf.fit(X, Y)
 
+#  	print_err("Train Score:", clf.train_score_)
 	print_err("OOB Score (CV):", clf.oob_score_)
-#  	print_err("Test Score:", clf.score(X, Y))
 
 	print_err("Saving model")
 	pickle.dump((clf, feat_indices, affil_median), open(args.outfile, 'wb'), pickle.HIGHEST_PROTOCOL)

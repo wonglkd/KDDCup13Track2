@@ -15,8 +15,11 @@ def main():
 	print_err("OOB Score (CV):", clf.oob_score_)
 
 	importances = clf.feature_importances_
-	std = np.std([tree.feature_importances_ for tree in clf.estimators_],
-				 axis=0)
+	try:
+		std = np.std([tree.feature_importances_ for tree in clf.estimators_],
+					 axis=0)
+	except AttributeError:
+		print_err("No tree importances")
 	indices = np.argsort(importances)[::-1]
 
 	# Print the feature ranking
