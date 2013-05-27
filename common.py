@@ -31,6 +31,8 @@ def selectDB(conn, query, para = None):
 		for row in cur.execute(query, para):
 			yield row
 	else:
+		if para == None:
+			para = []
 		cur.execute(query, para)
 		for row in cur.fetchall():
 			yield row
