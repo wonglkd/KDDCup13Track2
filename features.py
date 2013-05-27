@@ -14,13 +14,13 @@ import jellyfish
 
 def load_features(featurefile):
 	print_err("Loading features")
-	reader = csv.reader(open(featurefile, 'rb'), dialect='excel-tab')
+	reader = csv.reader(skip_comments(open(featurefile, 'rb')), dialect='excel-tab')
 	header = reader.next()
 	ids, X = [], []
 	for i, line in enumerate(reader):
-		line = map(num, line)
-		ids.append((line[0], line[1]))
-		X.append(line[2:])
+		line[1:] = map(num, line[1:])
+		ids.append(map(int, line[0].split(",")))
+		X.append(line[1:])
  		if (i+1) % 10000 == 0:
  			print_err(i+1, ' rows done')
  	X = np.array(X)
@@ -28,8 +28,6 @@ def load_features(featurefile):
 
 class FeaturesGenerator:
 	fields = [
-		'id1',
-		'id2',
 		'exact',
 		'mid',
 		'first',
@@ -39,7 +37,8 @@ class FeaturesGenerator:
 		'affil_sharedidf',
 # 		'affil_cosineidf',
 		'suffix',
-		'jaro_distance'
+		'jaro_distance',
+		'firstmidswap'
 	] + featEdges.PaperauthorFeaturesGenerator.fields
 
 	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
@@ -55,10 +54,7 @@ class FeaturesGenerator:
 
 	def getFeatures(self, a, b):
 		# feature vector
-		f = {
-			'id1': a,
-			'id2': b
- 		}
+		f = {}
  		aa, ab = self.authors[a], self.authors[b]
  		name_para = (('mid', 'name_middle'), ('first', 'name_first'), ('last', 'name_last'))
  		for id_f, id_o in name_para:
@@ -95,6 +91,17 @@ class FeaturesGenerator:
 # 			print suma, sumb
 			f['affil_sharedidf'] -= math.log(1.0 + min(suma, sumb))
 # 			print "affil", f['affil_sharedidf']
+
+		if aa['name_last'] == ab['name_last'] and (
+			(aa['name_first'] == ab['name_middle'] and not aa['name_middle']) or
+			(ab['name_first'] == aa['name_middle'] and not ab['name_middle'])
+		):
+			if len(aa['name_first']) > 1:
+				f['firstmidswap'] = 2
+			else:
+				f['firstmidswap'] = 1
+		else:
+			f['firstmidswap'] = 0
 		
 		f['lastidf'] = 0 if (aa['name_last'] != ab['name_last'] or not aa['name_last']) else aa['lastname_idf']
 		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
@@ -119,7 +126,7 @@ def main():
 
 	print_err("Generating features for author pairs")
 
-	writer = csv.DictWriter(open(args.outfile, 'wb'), dialect='excel-tab', fieldnames=featgen.fields)
+	writer = csv.DictWriter(open(args.outfile, 'wb'), dialect='excel-tab', fieldnames=['authors']+featgen.fields)
 	writer.writeheader()
 
 	rows_skipped = 0
@@ -133,7 +140,10 @@ def main():
  			print_err("Skipped:", a, b)
  			continue
 		
- 		writer.writerow(featgen.getFeatures(a, b))
+		f = featgen.getFeatures(a, b)
+		f = {k: '{:g}'.format(v) for k, v in f.iteritems()}
+		f['authors'] = '{:},{:}'.format(a, b)
+ 		writer.writerow(f)
  		if (i+1) % 5000 == 0:
  			print_err(i+1, ' rows done')
  
