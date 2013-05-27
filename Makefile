@@ -58,10 +58,10 @@ $(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py
 	time ./features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
-	time ./$^ $@; sort $@ -nrk 3 -t"," -o $@
+	time ./$^ $@; sort $@ -grk 3 -t"," -o $@
 
 $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
-	time ./$^ $@; sort $@ -nrk 3 -t"," -o $@
+	time ./$^ $@; sort $@ -grk 3 -t"," -o $@
 	
 $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	time ./$^ $@
