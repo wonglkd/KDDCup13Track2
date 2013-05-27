@@ -1,4 +1,10 @@
 generated/
+db/
+authordata/
+deprecated/
+
+*.tmp
+*.log
 
 *.py[cod]
 
