@@ -81,6 +81,40 @@ def bin_fullparsedname(authors):
  			print_err(i+1)
  	return bins
 
+def bin_iFoffbyoneL(authors, max_bin_size=30):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		if ':' not in a['fullname'] and a['name_first'] and a['name_last']:
+ 			bins[a['name_first'][0] + a['name_last']].add(id)
+ 			if len(a['name_last']) > 1:
+	 			bins[a['name_first'][0] + a['name_last'][:-1]].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+
+	bk = bins.keys()
+	for b in bk:
+		if len(bins[b]) > max_bin_size:
+			del bins[b]
+
+ 	return bins
+
+def bin_2FoffbyoneL(authors, max_bin_size=30):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		if ':' not in a['fullname'] and len(a['name_first']) >= 2 and a['name_last']:
+ 			bins[a['name_first'][0:2] + a['name_last']].add(id)
+ 			if len(a['name_last']) > 1:
+	 			bins[a['name_first'][0:2] + a['name_last'][:-1]].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+
+	bk = bins.keys()
+	for b in bk:
+		if len(bins[b]) > max_bin_size:
+			del bins[b]
+
+ 	return bins
+
 def bin_offbylastone(authors):
 	bins = defaultdict(set)
  	for i, (id, a) in enumerate(authors.iteritems()):
