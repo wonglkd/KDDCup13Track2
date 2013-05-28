@@ -4,7 +4,7 @@ GEN_DIR := generated
 AUTHOR_SET := Author
 # AUTHOR_SET := Author_f20000
 PREFEAT := $(GEN_DIR)/$(AUTHOR_SET)_prefeat.pickle
-BIN_METHODS := iFfL samename fullparsedname offbylastone token ngrams fF3L iFoffbyoneL
+BIN_METHODS := iFfL samename fullparsedname offbylastone token ngrams fF3L iFoffbyoneL 2FoffbyoneL
 
 BIN_FILES = $(foreach i,$(BIN_METHODS),$(GEN_DIR)/$i_bins.txt)
 EDGE_FILES := $(GEN_DIR)/iFfL_edges.txt
@@ -34,6 +34,9 @@ train: $(GEN_DIR)/model.pickle
 authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authordata/pa_coauthors_u.csv
 
 %_u.csv: unidecodefile.py %.csv
+	./$^ $@
+
+%_idified.csv: idify.py %.csv
 	./$^ $@
 
 analyse: ./edge-analyseModel.py $(GEN_DIR)/model.pickle
