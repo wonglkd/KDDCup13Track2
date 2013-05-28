@@ -4,7 +4,7 @@ GEN_DIR := generated
 AUTHOR_SET := Author
 # AUTHOR_SET := Author_f20000
 PREFEAT := $(GEN_DIR)/$(AUTHOR_SET)_prefeat.pickle
-BIN_METHODS := iFfL samename fullparsedname offbylastone token ngrams fF3L
+BIN_METHODS := iFfL samename fullparsedname offbylastone token ngrams fF3L iFoffbyoneL 2FoffbyoneL
 
 BIN_FILES = $(foreach i,$(BIN_METHODS),$(GEN_DIR)/$i_bins.txt)
 EDGE_FILES := $(GEN_DIR)/iFfL_edges.txt
@@ -36,7 +36,13 @@ authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authorda
 %_u.csv: unidecodefile.py %.csv
 	./$^ $@
 
+%_idified.csv: idify.py %.csv
+	./$^ $@
+
 analyse: ./edge-analyseModel.py $(GEN_DIR)/model.pickle
+	./$<
+	
+textdata/publication_tfidf.pickle: processTitles.py data/Conference.csv data/Journal.csv
 	./$<
 
 $(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py
@@ -54,7 +60,7 @@ $(GEN_DIR)/combined_edges.txt: edges.py $(BIN_FILES)
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
 	time ./$^ $@
 
-$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py
+$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
 	time ./features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat

@@ -27,7 +27,6 @@ def loadAuthors(authorfile):
 	id2affiliation = {}
 	for i, line in enumerate(reader):
 		line[1:] = [unidecode(unicode(cell, 'utf-8')) for cell in line[1:]]
-		line[2] = line[2].lower()
 		hn = HumanName(line[1], titles_c=titles_c)
 		ai = {
  			'fullname_joined': hn.full_name,
@@ -41,7 +40,7 @@ def loadAuthors(authorfile):
 		ai['name'] = hn.full_name.lower().strip().encode('ascii').translate(None, ';')
 		ai['fullname'] = hn.full_name.lower().encode('ascii').translate(None, punc.replace(' ',''))
 		ai['fullname_parsed'] = ai['name_first'] + ai['name_middle'] + ai['name_last'] + ai['name_suffix']
-		ai['affiliation'] = line[2]
+		ai['affiliation'] = line[2].lower()
 		if ai['name_last']:
 			if ai['name_first']:
 				ai['iFfL'] = ai['name_first'][0] + ai['name_last']
@@ -75,7 +74,7 @@ def loadAuthors(authorfile):
 			print i+1, "rows processed"
 
 	print_err("Computing Counts of affiliations")
- 	stopwordlist = ['a', 'an', 'and', 'at', 'by', 'department', 'of', 'supported', 'the', 'this', 'school']
+ 	stopwordlist = ['a', 'an', 'and', 'at', 'by', 'department', 'of', 'supported', 'the', 'this', 'school', 'institute', 'university', 'college', 'institution']
  	stopwordlist = list(ENGLISH_STOP_WORDS | set(stopwordlist))
  	count_vec = CountVectorizer(min_df=1, binary=True, stop_words=stopwordlist)
  	affil_count = count_vec.fit_transform(affiliations)
