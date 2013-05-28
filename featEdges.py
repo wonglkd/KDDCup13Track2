@@ -7,6 +7,7 @@ import cPickle as pickle
 from pprint import pprint
 from itertools import imap
 from collections import defaultdict
+import scipy as sp
 
 class PaperauthorFeaturesGenerator:
 	pa_by_authors = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
@@ -47,11 +48,11 @@ class PaperauthorFeaturesGenerator:
 			WHERE co4.AuthorId = ?) as cnt2'''
 
 	pa_files_ = {
-		'name': 'authordata/pa_names_u.csv',
- 		'affiliation': 'authordata/pa_affiliation_u.csv',
+# 		'name': 'authordata/pa_names_u.csv',
+#  		'affiliation': 'authordata/pa_affiliation_u.csv',
 		'conferences': 'authordata/pa_conferences.csv',
 		'journals': 'authordata/pa_journals.csv',
- 		'years': 'authordata/pa_years.csv'
+#  		'years': 'authordata/pa_years.csv'
 	}
 	
 	fields = [
@@ -66,9 +67,10 @@ class PaperauthorFeaturesGenerator:
 		'journals',
 		'journalsW',
 		'years',
-		'yearscore',
 		'coauthor',
-		'coauthorW'
+		'coauthorW',
+		'yearscore',
+		'pubTextSim'
 	]
 	
 	fields_num_index = set([
@@ -77,8 +79,9 @@ class PaperauthorFeaturesGenerator:
 		'years'
 	])
 	
-	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt'):
+	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt', publicationtfidffile='textdata/publication_tfidf.pickle'):
 		self.filter = set(imap(int, open(authorfilterfile, 'rb')))
+		self.pub_tfidf, self.pub_id2ind = pickle.load(open(publicationtfidffile, 'rb'))
 		self.conn = getDB()
  		self.conn_pa = getDB('pa')
 
@@ -179,6 +182,25 @@ class PaperauthorFeaturesGenerator:
 		y1, y2 = min(k2), max(k2)
 		return min(x2, y2) - max(x1, y1) + 1
 
+	def getTextSimPub(self, a1, a2):
+		pub1 = [self.pa_by_authors[a1]['conferences'].keys(),
+				self.pa_by_authors[a1]['journals'].keys()]
+		pub2 = [self.pa_by_authors[a2]['conferences'].keys(),
+				self.pa_by_authors[a2]['journals'].keys()]
+		for x in xrange(2):
+			pub1[x] = [self.pub_id2ind[x][v] for v in pub1[x] if v in self.pub_id2ind[x]]
+			pub2[x] = [self.pub_id2ind[x][v] for v in pub2[x] if v in self.pub_id2ind[x]]
+		if len(pub1[0]) + len(pub1[1]) == 0 or len(pub2[0]) + len(pub2[1]) == 0:
+			return 0
+		terms1 = sp.sparse.lil_matrix((1, self.pub_tfidf[0].shape[1]), dtype=float)
+		terms2 = terms1.copy()
+		for x in xrange(2): # x: 0-conference, 1-journals
+			if pub1[x]:
+				terms1 += self.pub_tfidf[x][pub1[x]].sum(axis=0)
+			if pub2[x]:
+				terms2 += self.pub_tfidf[x][pub2[x]].sum(axis=0)
+		return shared_terms_sum(terms1, terms2)
+
 	def getEdgeFeatures(self, author1, author2):
 # 		self.getAuthor(author1)
 # 		self.getAuthor(author2)
@@ -197,7 +219,8 @@ class PaperauthorFeaturesGenerator:
 			'years': 0,
 			'yearscore': 0,
 			'coauthor': 0,
-			'coauthorW': 0
+			'coauthorW': 0,
+			'pubTextSim': 0
 		})
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
@@ -212,7 +235,8 @@ class PaperauthorFeaturesGenerator:
 				'years': self.getSetSim('years', author1, author2),
 				'yearscore': self.getYearScore(author1, author2),
 				'coauthor': self.getCoauthorsSim(author1, author2),
-				'coauthorW': self.getCoauthorsSimW(author1, author2)
+				'coauthorW': self.getCoauthorsSimW(author1, author2),
+				'pubTextSim': self.getTextSimPub(author1, author2)
 			})
 		return f
 
@@ -227,8 +251,8 @@ def main():
 		args.outfile = args.edges.replace('_edges.txt', '') + '.edgefeat'
 
  	print_err("Loading pickled author pre-features")
-   	authors = pickle.load(open(args.authorprefeat, 'rb'))
-#   	authors = {}
+#   	authors = pickle.load(open(args.authorprefeat, 'rb'))
+ 	authors = {}
 	PFG = PaperauthorFeaturesGenerator(authors, args.authorfilter)
 
 	rows_skipped = 0

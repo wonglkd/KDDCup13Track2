@@ -1,5 +1,7 @@
 import sys
 import exceptions
+import numpy as np
+import math
 
 try:
 	import apsw
@@ -53,3 +55,17 @@ def num(s):
         	return float(s)
         except exceptions.ValueError:
         	raise Exception("Could not convert string to number:"+ s)
+        	
+def shared_terms_sum(aa, bb):
+	terms_a = aa.nonzero()[1]
+	terms_b = bb.nonzero()[1]
+	terms_common = np.intersect1d(terms_a, terms_b, assume_unique=True)
+	diffa = np.setdiff1d(terms_a, terms_common)
+	diffb = np.setdiff1d(terms_b, terms_common)
+	if terms_common.any():
+		fsum = aa[[0] * len(terms_common), terms_common].sum()
+	else:
+		fsum = 0
+	suma = aa[[0] * len(diffa), diffa].sum() if diffa.any() else 0
+	sumb = bb[[0] * len(diffb), diffb].sum() if diffb.any() else 0
+	return fsum - math.log(1.0 + min(suma, sumb))
