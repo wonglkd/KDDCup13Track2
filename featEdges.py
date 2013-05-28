@@ -8,6 +8,7 @@ from pprint import pprint
 from itertools import imap
 from collections import defaultdict
 import scipy as sp
+from scipy.stats import scoreatpercentile
 
 class PaperauthorFeaturesGenerator:
 	pa_by_authors = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
@@ -48,11 +49,13 @@ class PaperauthorFeaturesGenerator:
 			WHERE co4.AuthorId = ?) as cnt2'''
 
 	pa_files_ = {
-# 		'name': 'authordata/pa_names_u.csv',
-#  		'affiliation': 'authordata/pa_affiliation_u.csv',
+		'name': 'authordata/pa_names_u.csv',
+ 		'affiliation': 'authordata/pa_affiliation_u.csv',
 		'conferences': 'authordata/pa_conferences.csv',
+		'paperids': 'authordata/pa_paperids.csv',
 		'journals': 'authordata/pa_journals.csv',
-#  		'years': 'authordata/pa_years.csv'
+		'years': 'authordata/pa_years.csv',
+		'titles_dup_idified': 'authordata/pa_titles_dup_idified.csv'
 	}
 	
 	fields = [
@@ -69,6 +72,10 @@ class PaperauthorFeaturesGenerator:
 		'years',
 		'coauthor',
 		'coauthorW',
+		'paperIDs',
+		'paperIDsW',
+		'titles_dup',
+		'titles_dupW',
 		'yearscore',
 		'pubTextSim'
 	]
@@ -76,7 +83,9 @@ class PaperauthorFeaturesGenerator:
 	fields_num_index = set([
 		'conferences',
 		'journals',
-		'years'
+		'years',
+		'paperids',
+		'titles_dup_idified'
 	])
 	
 	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt', publicationtfidffile='textdata/publication_tfidf.pickle'):
@@ -95,10 +104,11 @@ class PaperauthorFeaturesGenerator:
 	 				if field in self.fields_num_index:
 	 					line[1] = int(line[1])
  					self.pa_by_authors[int(line[0])][field][line[1]] += int(line[2])
- 		for author, paf in self.pa_by_authors.iteritems():
- 			for field, pai in paf.iteritems():
- 				total = sum(pai.values())
- 				self.pa_by_authors[author][field] = {val: cnt / float(total) for val, cnt in pai.iteritems()}
+		# Normalise
+#  		for author, paf in self.pa_by_authors.iteritems():
+#  			for field, pai in paf.iteritems():
+#  				total = sum(pai.values())
+#  				self.pa_by_authors[author][field] = {val: cnt / float(total) for val, cnt in pai.iteritems()}
 	
 	def sim(self, common, len1, len2):
 		if common == 0:
@@ -173,13 +183,24 @@ class PaperauthorFeaturesGenerator:
 	def getSetSimW(self, field, a1, a2):
 		return self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
 	
+	def pcutl(self, a, p=10):
+		return scoreatpercentile(a, p)
+
+	def pcuth(self, a, p=90):
+		return scoreatpercentile(a, p)
+	
 	def getYearScore(self, a1, a2):
-		k1 = self.pa_by_authors[a1]['years'].keys()
-		k2 = self.pa_by_authors[a2]['years'].keys()
+		k1 = self.pa_by_authors[a1]['years'].items()
+		k2 = self.pa_by_authors[a2]['years'].items()
 		if not k1 or not k2:
 			return 0
-		x1, x2 = min(k1), max(k1)
-		y1, y2 = min(k2), max(k2)
+		kk1, kk2 = [], []
+		for k, v in k1:
+			kk1.extend([k] * int(v))
+		for k, v in k2:
+			kk2.extend([k] * int(v))
+		x1, x2 = self.pcutl(kk1), self.pcuth(kk1)
+		y1, y2 = self.pcutl(kk2), self.pcuth(kk2)
 		return min(x2, y2) - max(x1, y1) + 1
 
 	def getTextSimPub(self, a1, a2):
@@ -220,6 +241,8 @@ class PaperauthorFeaturesGenerator:
 			'yearscore': 0,
 			'coauthor': 0,
 			'coauthorW': 0,
+			'paperIDs': 0,
+			'paperIDsW': 0,
 			'pubTextSim': 0
 		})
 		if author1 in self.filter and author2 in self.filter:
@@ -236,7 +259,11 @@ class PaperauthorFeaturesGenerator:
 				'yearscore': self.getYearScore(author1, author2),
 				'coauthor': self.getCoauthorsSim(author1, author2),
 				'coauthorW': self.getCoauthorsSimW(author1, author2),
-				'pubTextSim': self.getTextSimPub(author1, author2)
+				'pubTextSim': self.getTextSimPub(author1, author2),
+				'paperIDs': self.getSetSim('paperids', author1, author2),
+				'paperIDsW': self.getSetSimW('paperids', author1, author2),
+				'titles_dup': self.getSetSim('titles_dup_idified', author1, author2),
+				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2)
 			})
 		return f
 
@@ -266,7 +293,7 @@ def main():
  		if a not in PFG.filter and b not in PFG.filter:
  			rows_skipped += 1
  		else:
- 			print a, b
+#  			print a, b
  			f = PFG.getEdgeFeatures(a, b)
  			f = {k: '{:g}'.format(v) for k, v in f.iteritems()}
  			f['authors'] = '{:},{:}'.format(a, b)
