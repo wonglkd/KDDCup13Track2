@@ -54,7 +54,11 @@ def num(s):
         try:
         	return float(s)
         except exceptions.ValueError:
-        	raise Exception("Could not convert string to number:"+ s)
+        	if s == "":
+        		print_err("Warning: empty values in file")
+        		return 0.
+        	else:
+				raise Exception("Could not convert string to number:"+ s)
         	
 def shared_terms_sum(aa, bb):
 	terms_a = aa.nonzero()[1]
