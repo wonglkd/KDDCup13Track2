@@ -72,8 +72,6 @@ def main():
 	print_err("Loading pubs by author")
 	pubs_by_author, author_ids = loadPubsByAuthor(args.pafiles)
 
-	pickle.dump((dict(pubs_by_author), tfidfs, id2ind), open(args.output, 'wb'), pickle.HIGHEST_PROTOCOL)
-
 	print_err("Generating rows")
 	TSVG = TextSimVecGenerator(pubs_by_author, tfidfs, id2ind)
 	TextSimVecs = {}
