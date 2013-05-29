@@ -78,8 +78,9 @@ def main():
 	TSVG = TextSimVecGenerator(pubs_by_author, tfidfs, id2ind)
 	TextSimVecs = {}
 	for i, aid in enumerate(author_ids):
- 		TextSimVecs[aid] = TSVG.getTextSimPub(aid)
-		TSVG.getTextSimPub(aid)
+ 		tsv = TSVG.getTextSimPub(aid)
+ 		if tsv is not None:
+	 		TextSimVecs[aid] = tsv
 		if (i+1) % 1000 == 0:
 			print_err(i+1, ' rows done')
 
@@ -99,7 +100,7 @@ class TextSimVecGenerator:
 		if pubs:
 			return sp.sparse.csr_matrix(self.pub_tfidf[pubs].sum(axis=0))
 		else:
-			return sp.sparse.csr_matrix((1, self.pub_tfidf.shape[1]), dtype=float)
+			return None
 
 if __name__ == "__main__":
 	main()
