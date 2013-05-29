@@ -11,7 +11,7 @@ def main():
 	args = parser.parse_args()
 	
 	clf, feat_indices, affil_median = pickle.load(open(args.modelfile, 'rb'))
-	
+		
 	print_err("OOB Score (CV):", clf.oob_score_)
 
 	importances = clf.feature_importances_
@@ -19,7 +19,8 @@ def main():
 		std = np.std([tree.feature_importances_ for tree in clf.estimators_],
 					 axis=0)
 	except AttributeError:
-		print_err("No tree importances")
+		1
+# 		print_err("No tree importances")
 	indices = np.argsort(importances)[::-1]
 
 	# Print the feature ranking
