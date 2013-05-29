@@ -14,6 +14,12 @@ CLUSTER_FILES := $(GEN_DIR)/combined.clusters
 SUBMIT_FILES := $(GEN_DIR)/combined-submit.csv
 # $(GEN_DIR)/iFfL-submit.csv 
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
+TRAIN_PARA := --removefeat conferences journals names coauthor paperIDs affiliations
+# Mac/Linux
+EXEC_PREFIX := time ./
+# Windows
+#EXEC_PREFIX := "C:\Program Files (x86)\Python27\python.exe" 
+
 feat: $(FEAT_FILES)
 
 #sim-t: $(GEN_DIR)/iFfL.sim
@@ -47,55 +53,55 @@ textdata/publication_tfidf.pickle: processTitles.py data/Conference.csv data/Jou
 	./$<
 
 $(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py
-	time ./features.py $(DATA_DIR)/train.csv $(PREFEAT) $@
+	$(EXEC_PREFIX)features.py $(DATA_DIR)/train.csv $(PREFEAT) $@
 
 $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
-	time ./$^ $* > $@
+	$(EXEC_PREFIX)$^ $* > $@
 
 $(GEN_DIR)/%_edges.txt: edges.py $(GEN_DIR)/%_bins.txt
-	time ./$^ > $@
+	$(EXEC_PREFIX)$^ > $@
 	
 $(GEN_DIR)/combined_edges.txt: edges.py $(BIN_FILES)
-	time ./$^ > $@
+	$(EXEC_PREFIX)$^ > $@
 
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
-	time ./$^ $@
+	$(EXEC_PREFIX)$^ $@
 
 # textdata/publication_tfidf.pickle
 $(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py
-	time ./features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
+	$(EXEC_PREFIX)features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
-	time ./$^ $@; sort $@ -grk 3 -t"," -o $@
+	$(EXEC_PREFIX)$^ $@; sort $@ -grk 3 -t"," -o $@
 
 $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
-	time ./$^ $@; sort $@ -grk 3 -t"," -o $@
+	$(EXEC_PREFIX)$^ $@; sort $@ -grk 3 -t"," -o $@
 	
 $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	time ./$^ $@
+	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
 cv: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	time ./$^ --cv
+	$(EXEC_PREFIX)$^ --cv $(TRAIN_PARA)
 
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
-	time ./$^ $@
+	$(EXEC_PREFIX)$^ $@
 
 %.gz: %
 	gzip -c $* > $@
 
 $(GEN_DIR)/goldstd_edges.txt: edges.py $(DATA_DIR)/goldstd_clusters.csv
-	time ./$^ > $@
+	$(EXEC_PREFIX)$^ > $@
 
 $(GEN_DIR)/goldstd-submit.csv: prep_submit.py $(DATA_DIR)/goldstd_clusters.csv
-	time ./$^ $@
+	$(EXEC_PREFIX)$^ $@
 
 $(GEN_DIR)/%-bins_submit.csv: prep_submit.py $(GEN_DIR)/%_bins.txt
-	time ./$^ $@
+	$(EXEC_PREFIX)$^ $@
 
 # awk '{ if ($3 >= 0.6) print $0; }'
 
 $(GEN_DIR)/%.clusters: cluster-hc.py $(GEN_DIR)/%.prob
-	time ./$^ $@ > $(GEN_DIR)/$*.clusters-stats
+	$(EXEC_PREFIX)$^ $@ > $(GEN_DIR)/$*.clusters-stats
 
 $(GEN_DIR)/%.clusters-sim: cluster-cc.py $(GEN_DIR)/%.sim
-	time ./$^ $@
+	$(EXEC_PREFIX)$^ $@
