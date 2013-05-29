@@ -9,7 +9,6 @@ import cPickle as pickle
 import numpy as np
 import scipy as sp
 
-
 def llfun(act, pred):
 	epsilon = 1e-15
 	pred = sp.maximum(epsilon, pred)
@@ -34,15 +33,40 @@ def m_cv(clf, X, Y, kfolds):
 	print_err("CV Error: {:g}, Mean OOB: {:g}".format(score, oob))
 	return score
 
+def loadTrainingLabels(trainfilename, ids):
+ 	Y = []
+ 	reader = csv.reader(skip_comments(open(trainfilename, 'rb')))
+ 	for i, (line, (id1, id2)) in enumerate(zip(reader, ids)):
+ 		line[:3] = map(int, line[:3])
+ 		Y.append(line[0])
+ 		if line[1] != id1 or line[2] != id2:
+ 			print_err("Mismatch!", line[1], line[2], id1, id2)
+ 			raise Exception("Mismatch of train.csv and train.feat")
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1, 'rows done')
+ 	return np.asarray(Y)
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('trainfile', nargs='?', default='data/train.csv')
 	parser.add_argument('featfile', nargs='?', default='generated/train.feat')
 	parser.add_argument('outfile', nargs='?', default='generated/model.pickle')
+	parser.add_argument('--clf', default='rf')
+	parser.add_argument('--removefeat', nargs='+', default=[])
 	parser.add_argument('--cv', action='store_true')
 	parser.add_argument('--folds', default=5)
 	args = parser.parse_args()
 
+	if args.removefeat:
+		feat_to_remove = args.removefeat
+	else:
+		feat_to_remove = [
+# 			'conferences',
+# 			'journals',
+# 			'affiliations',
+# 			'jaro_distance'
+		]
+	
 	params = {}
 	# Random Forest
 	params['rf'] = {
@@ -69,29 +93,25 @@ def main():
 	}
 
 	ids, X = feat.load_features(args.featfile)
+ 	feat_indices = feat.FeaturesGenerator.fields
+ 	feat_ind_remaining = [i for i, faid in enumerate(feat_indices) if faid not in feat_to_remove]
+ 	feat_indices = [v for v in feat_indices if v not in feat_to_remove]
+ 	X = X[:, feat_ind_remaining]
 
 	print_err("Loading training dataset labels")
- 	Y = []
- 	feat_indices = feat.FeaturesGenerator.fields
- 	reader = csv.reader(skip_comments(open(args.trainfile, 'rb')))
- 	for i, (line, (id1, id2)) in enumerate(zip(reader, ids)):
- 		line[:3] = map(int, line[:3])
- 		Y.append(line[0])
- 		if line[1] != id1 or line[2] != id2:
- 			print_err("Mismatch!", line[1], line[2], id1, id2)
- 			raise Exception("Mismatch of train.csv and train.feat")
- 		if (i+1) % 10000 == 0:
- 			print_err(i+1, 'rows done')
- 	Y = np.array(Y)
+	Y = loadTrainingLabels(args.trainfile, ids)
 
+	# Filling in missing values
 	affil_ind = feat_indices.index('affil_sharedidf')
  	affil_median = sp.stats.nanmedian(X[:, affil_ind])
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = affil_median
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = 0.
 	X[np.isnan(X)] = 0.
 
-	clf = RandomForestClassifier(**params['rf'])
-# 	clf = GradientBoostingClassifier(**params['gbm'])
+	if args.clf == 'rf':
+		clf = RandomForestClassifier(**params['rf'])
+	elif args.clf == 'gbm':
+	 	clf = GradientBoostingClassifier(**params['gbm'])
 
 	if args.cv:
 		print_err("Running cross-validation")
