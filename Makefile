@@ -33,6 +33,7 @@ prefeat-t: $(GEN_DIR)/Author_f20000_prefeat.pickle
 train: $(GEN_DIR)/model.pickle
 authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authordata/pa_coauthors_u.csv
 
+
 %_u.csv: unidecodefile.py %.csv
 	./$^ $@
 
@@ -60,7 +61,8 @@ $(GEN_DIR)/combined_edges.txt: edges.py $(BIN_FILES)
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
 	time ./$^ $@
 
-$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
+# textdata/publication_tfidf.pickle
+$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py
 	time ./features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
@@ -71,6 +73,9 @@ $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
 	
 $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	time ./$^ $@
+
+cv: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
+	time ./$^ --cv
 
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
 	time ./$^ $@
