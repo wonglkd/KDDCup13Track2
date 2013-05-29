@@ -30,6 +30,31 @@ JOIN awithpapers awp ON awp.Id=AuthorId
 WHERE p.JournalId > 0
 GROUP BY AuthorId, p.JournalId;
 
+.output pa_paperids.csv
+SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId
+GROUP BY AuthorId, pa.PaperId;
+
+CREATE TABLE paper_u (Id INTEGER PRIMARY KEY,Title TEXT,Year INTEGER,ConferenceId INTEGER,JournalId INTEGER,Keyword TEXT);
+CREATE INDEX paper_u_text_idx ON paper_u (title);
+
+-- .output pa_titles_all.csv
+-- SELECT pa.AuthorId, p1.Title, COUNT(*) FROM paper_u p1 JOIN paperauthor pa ON p1.Id = pa.paperId
+-- JOIN awithpapers awp ON awp.Id=AuthorId
+-- WHERE EXISTS (SELECT * FROM paper_u p2 WHERE p2.Title = p1.Title AND (p2.Id < p1.Id OR p2.Id > p1.Id))
+-- AND p1.Title <> ""
+-- GROUP BY AuthorId, p1.Title
+-- ORDER BY p1.Title;
+
+.output pa_titles_dup.csv
+SELECT pa.AuthorId, p1.Title, COUNT(*) FROM paper_u p1 JOIN paperauthor pa ON p1.Id = pa.paperId
+JOIN awithpapers awp ON awp.Id=AuthorId
+WHERE EXISTS (SELECT * FROM paper_u p2 WHERE p2.Title = p1.Title AND (p2.Id < p1.Id OR p2.Id > p1.Id))
+AND p1.Title <> ""
+GROUP BY AuthorId, p1.Title
+ORDER BY p1.Title;
+
+-- optimisation -- WHERE paperTitle is not unique
+
 .output pa_coauthors.csv
 SELECT pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', ''))) as Coauthor, COUNT(*) as cnt
 FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
@@ -100,7 +125,19 @@ SELECT
 			(SELECT SUM(cnt) FROM pa_coauthors co3
 			WHERE co3.AuthorId = 1107709) as cnt2
 ;
- 1107709
+ 
+.mode csv
+.header ON
+.output paper_duplicatetitles.csv
+SELECT * FROM paper p1
+WHERE p1.Title <> "" AND EXISTS (SELECT * FROM paper p2 WHERE p2.Title = p1.Title AND (p2.Id < p1.Id OR p2.Id > p1.Id))
+ORDER BY p1.title;
+
+
+--SELECT * FROM paper p1 JOIN paper p2 ON (p1.Id < p2.Id and p1.Title = p2.Title) WHERE p1.Title <> "";
+
+SELECT * FROM paper WHERE Title = "" LIMIT 10;
+-----
 
 
 SELECT COUNT(Coauthor) FROM pa_coauthors co3
