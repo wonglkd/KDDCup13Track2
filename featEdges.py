@@ -11,7 +11,9 @@ import scipy as sp
 from scipy.stats import scoreatpercentile
 
 class PaperauthorFeaturesGenerator:
+	# [authorid][field][value]
 	pa_by_authors = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+	pa_by_authors_totals = defaultdict(dict)
 	author_info = {}
 	pa_queries_author_ = {
 		'name': 'SELECT COUNT(*) as cnt, name FROM paperauthor WHERE AuthorId = ? and name <> "" GROUP BY name',
@@ -74,7 +76,7 @@ class PaperauthorFeaturesGenerator:
 		'coauthorW',
 		'paperIDs',
 		'paperIDsW',
-		'titles_dup',
+# 		'titles_dup',
 		'titles_dupW',
 		'yearscore',
 		'pubTextSim'
@@ -90,7 +92,7 @@ class PaperauthorFeaturesGenerator:
 	
 	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt', publicationtfidffile='textdata/publication_tfidf.pickle'):
 		self.filter = set(imap(int, open(authorfilterfile, 'rb')))
-		self.pub_tfidf, self.pub_id2ind = pickle.load(open(publicationtfidffile, 'rb'))
+		self.TextSimVecs = pickle.load(open(publicationtfidffile, 'rb'))
 		self.conn = getDB()
  		self.conn_pa = getDB('pa')
 
@@ -104,31 +106,30 @@ class PaperauthorFeaturesGenerator:
 	 				if field in self.fields_num_index:
 	 					line[1] = int(line[1])
  					self.pa_by_authors[int(line[0])][field][line[1]] += int(line[2])
-		# Normalise
-#  		for author, paf in self.pa_by_authors.iteritems():
-#  			for field, pai in paf.iteritems():
-#  				total = sum(pai.values())
-#  				self.pa_by_authors[author][field] = {val: cnt / float(total) for val, cnt in pai.iteritems()}
+ 					
+ 		if 'titles_dup_idified' in self.pa_files_ and 'paperids' in self.pa_files_:
+ 			for aid in self.pa_by_authors:
+	 			self.pa_by_authors[aid]['titles_dup_idified']
 	
 	def sim(self, common, len1, len2):
 		if common == 0:
 			return 0.
 		return common / float(min(len1, len2))
 		# Jaccard
-		# return common / float(len1 + len2)
+		# return common / float(len1 + len2 - common)
 	
 	def dictSim(self, a, b):
 		if not a or not b:
-			return 0.
+			return 0, len(a), len(b)
 		n = len(set(a.keys()) & set(b.keys()))
-		return self.sim(n, len(a), len(b))
+		return (n, len(a), len(b))
 	
 	def dictSimW(self, a, b):
 		if not a or not b:
-			return 0.
+			return 0, sum(a.values()), sum(b.values())
 		common = set(a.keys()) & set(b.keys())
 		total_common = sum([min(a[v], b[v]) for v in common])
-		return self.sim(total_common, sum(a.values()), sum(b.values()))
+		return (total_common, sum(a.values()), sum(b.values()))
 
 	def getAuthor(self, aID):
 		if aID in self.author_info:
@@ -147,8 +148,7 @@ class PaperauthorFeaturesGenerator:
 
 		for field, query in self.pa_queries_author_.iteritems():
 			results = selectDB(self.conn, query, [aID])
-			total = sum([a for a, _ in results])
-			curr_a[field] = {fieldval: cnt / float(total) for cnt, fieldval in results}
+			curr_a[field] = {fieldval: cnt for cnt, fieldval in results}
 
 		self.pa_by_authors[aID] = curr_a
 		return
@@ -170,7 +170,9 @@ class PaperauthorFeaturesGenerator:
 		if not len(a2val) or a2val.startswith('ID:'):
 			return 0.
 		if a2val in self.pa_by_authors[a1][field]:
-			return self.pa_by_authors[a1][field][a2val]
+			if field not in self.pa_by_authors_totals[a1]:
+				self.pa_by_authors_totals[a1][field] = sum(self.pa_by_authors[a1][field].values())
+			return self.pa_by_authors[a1][field][a2val] / float(self.pa_by_authors_totals[a1][field])
 		else:
 			return 0.
 	
@@ -178,16 +180,16 @@ class PaperauthorFeaturesGenerator:
 		return self.getFieldPA(field, a1, a2) + self.getFieldPA(field, a2, a1)
 
 	def getSetSim(self, field, a1, a2):
-		return self.dictSim(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
+		return self.sim(*self.dictSim(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field]))
 
 	def getSetSimW(self, field, a1, a2):
-		return self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field])
+		return self.sim(*self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field]))
 	
 	def pcutl(self, a, p=10):
-		return scoreatpercentile(a, p)
+		return scoreatpercentile(a, p) # interpolation = 'lower'?
 
 	def pcuth(self, a, p=90):
-		return scoreatpercentile(a, p)
+		return scoreatpercentile(a, p) # interpolation = 'higher'?
 	
 	def getYearScore(self, a1, a2):
 		k1 = self.pa_by_authors[a1]['years'].items()
@@ -204,23 +206,17 @@ class PaperauthorFeaturesGenerator:
 		return min(x2, y2) - max(x1, y1) + 1
 
 	def getTextSimPub(self, a1, a2):
-		pub1 = [self.pa_by_authors[a1]['conferences'].keys(),
-				self.pa_by_authors[a1]['journals'].keys()]
-		pub2 = [self.pa_by_authors[a2]['conferences'].keys(),
-				self.pa_by_authors[a2]['journals'].keys()]
-		for x in xrange(2):
-			pub1[x] = [self.pub_id2ind[x][v] for v in pub1[x] if v in self.pub_id2ind[x]]
-			pub2[x] = [self.pub_id2ind[x][v] for v in pub2[x] if v in self.pub_id2ind[x]]
-		if len(pub1[0]) + len(pub1[1]) == 0 or len(pub2[0]) + len(pub2[1]) == 0:
+		if a1 not in self.TextSimVecs or a2 not in self.TextSimVecs:
 			return 0
-		terms1 = sp.sparse.lil_matrix((1, self.pub_tfidf[0].shape[1]), dtype=float)
-		terms2 = terms1.copy()
-		for x in xrange(2): # x: 0-conference, 1-journals
-			if pub1[x]:
-				terms1 += self.pub_tfidf[x][pub1[x]].sum(axis=0)
-			if pub2[x]:
-				terms2 += self.pub_tfidf[x][pub2[x]].sum(axis=0)
+		
+		terms1 = self.TextSimVecs[a1]
+		terms2 = self.TextSimVecs[a2]
 		return shared_terms_sum(terms1, terms2)
+
+	def getTitlesOverlap(self, a1, a2):
+		common_titles, _, _ = self.dictSimW(self.pa_by_authors[a1]['titles_dup_idified'], self.pa_by_authors[a2]['titles_dup_idified'])
+		common_paperids, _, _ = self.dictSimW(self.pa_by_authors[a1]['paperids'], self.pa_by_authors[a2]['paperids'])
+		return common_titles - common_paperids
 
 	def getEdgeFeatures(self, author1, author2):
 # 		self.getAuthor(author1)
@@ -243,6 +239,8 @@ class PaperauthorFeaturesGenerator:
 			'coauthorW': 0,
 			'paperIDs': 0,
 			'paperIDsW': 0,
+# 			'titles_dup': 0,
+			'titles_dupW': 0,
 			'pubTextSim': 0
 		})
 		if author1 in self.filter and author2 in self.filter:
@@ -259,11 +257,12 @@ class PaperauthorFeaturesGenerator:
 				'yearscore': self.getYearScore(author1, author2),
 				'coauthor': self.getCoauthorsSim(author1, author2),
 				'coauthorW': self.getCoauthorsSimW(author1, author2),
-				'pubTextSim': self.getTextSimPub(author1, author2),
 				'paperIDs': self.getSetSim('paperids', author1, author2),
 				'paperIDsW': self.getSetSimW('paperids', author1, author2),
-				'titles_dup': self.getSetSim('titles_dup_idified', author1, author2),
-				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2)
+				'titles_dupW': self.getTitlesOverlap(author1, author2),
+# 				'titles_dup': self.getSetSim('titles_dup_idified', author1, author2),
+# 				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2),
+				'pubTextSim': self.getTextSimPub(author1, author2)
 			})
 		return f
 
