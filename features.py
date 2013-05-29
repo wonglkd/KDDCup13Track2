@@ -35,7 +35,6 @@ class FeaturesGenerator:
 		'lastidf',
 		'iFfLidf',
 		'affil_sharedidf',
-# 		'affil_cosineidf',
 		'suffix',
 		'jaro_distance',
 		'firstmidswap'
@@ -45,7 +44,6 @@ class FeaturesGenerator:
 		print_err("Loading pickled author pre-features")
 		self.authors = pickle.load(open(authorprefeat, 'rb'))
 		self.PFG = featEdges.PaperauthorFeaturesGenerator(self.authors)
-# 		self.fields += self.PFG.fields
 
 	def getCosineSimilarity(self, a, b):
 		print(a)
@@ -72,25 +70,8 @@ class FeaturesGenerator:
 
 		if aa['affil_tdidf'] is None or ab['affil_tdidf'] is None:
 			f['affil_sharedidf'] = np.nan
-# 			f['affil_cosineidf'] = np.nan
 		else:
-# 			print aa['affil_tdidf']
-# 			print ab['affil_tdidf']
-			affil_terms_a = aa['affil_tdidf'].nonzero()[1]
-			affil_terms_b = ab['affil_tdidf'].nonzero()[1]
-# 			f['affil_cosineidf'] = self.getCosineSimilarity(aa['affil_tdidf'], ab['affil_tdidf'])
-			affil_common = np.intersect1d(affil_terms_a, affil_terms_b, assume_unique=True)
-			diffa = np.setdiff1d(affil_terms_a, affil_common)
-			diffb = np.setdiff1d(affil_terms_b, affil_common)
-			if affil_common.any():
-				f['affil_sharedidf'] = np.sum(aa['affil_tdidf'][[0] * len(affil_common), affil_common])
-			else:
-				f['affil_sharedidf'] = 0
-			suma = np.sum(aa['affil_tdidf'][[0] * len(diffa), diffa]) if diffa.any() else 0
-			sumb = np.sum(ab['affil_tdidf'][[0] * len(diffb), diffb]) if diffb.any() else 0
-# 			print suma, sumb
-			f['affil_sharedidf'] -= math.log(1.0 + min(suma, sumb))
-# 			print "affil", f['affil_sharedidf']
+			f['affil_sharedidf'] = shared_terms_sum(aa['affil_tdidf'], ab['affil_tdidf'])
 
 		if aa['name_last'] == ab['name_last'] and (
 			(aa['name_first'] == ab['name_middle'] and not aa['name_middle']) or
@@ -105,7 +86,7 @@ class FeaturesGenerator:
 		
 		f['lastidf'] = 0 if (aa['name_last'] != ab['name_last'] or not aa['name_last']) else aa['lastname_idf']
 		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
-		f['exact'] = int(aa['fullname'] == ab['fullname'] and len(aa['fullname']) > 0)
+		f['exact'] = int(aa['fullname_joined'] == ab['fullname_joined'] and len(aa['fullname_joined']) > 0)
 		f['jaro_distance'] = 0 if (':' in aa['fullname'] or ':' in ab['fullname']) else jellyfish.jaro_distance(aa['fullname'], ab['fullname'])
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 
