@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn import cross_validation
+from sklearn.metrics import mean_squared_error
 from common import *
 import argparse
 import features as feat
@@ -18,20 +19,29 @@ def llfun(act, pred):
 	return ll
 
 def m_cv(clf, X, Y, kfolds):
-	cv = cross_validation.KFold(len(X), n_folds=kfolds, indices=True)
-	results = []
+	cv = cross_validation.StratifiedKFold(Y, n_folds=kfolds, indices=True)
+	results_ll = []
+	results_rms = []
 	oob_scores = []
 	for i, (traincv, testcv) in enumerate(cv):
 		print_err("Fold {:} of {:}".format(i+1, kfolds))
 		probas = clf.fit(X[traincv], Y[traincv]).predict_proba(X[testcv])
-		lscore = llfun(Y[testcv], [x[1] for x in probas])
-		print_err("Error: {:g}, OOB: {:g}".format(lscore, clf.oob_score_))
-		results.append(lscore)
+ 		lscore_ll = llfun(Y[testcv], [x[1] for x in probas])
+		lscore_rms = mean_squared_error(Y[testcv], [x[1] for x in probas])
+		print_err("LL E: {:g}, RMS E: {:g}, OOB: {:g}".format(lscore_ll, lscore_rms, clf.oob_score_))
+		results_ll.append(lscore_ll)
+		results_rms.append(lscore_rms)
 		oob_scores.append(clf.oob_score_)
-	score = np.array(results).mean()
+	score_ll = np.array(results_ll).mean()
+	score_rms = np.array(results_rms).mean()
 	oob = np.array(oob_scores).mean()
-	print_err("CV Error: {:g}, Mean OOB: {:g}".format(score, oob))
-	return score
+	print_err("CV (LL): {:g}, CV (RMS): {:g}, Mean OOB: {:g}".format(score_ll, score_rms, oob))
+	return score_ll
+
+# def learning_curve(clf, X, Y, npoints=20, xstart=100):
+# 	chunksize = range(xstart, len(X), (len(X) - xstart) / npoints) + [len(X)]
+# 	for cs in chunksize:
+# 		cv = cross_validation.StratifiedShuffleSplit(Y, n_iter=1, train_size=cs)
 
 def loadTrainingLabels(trainfilename, ids):
  	Y = []
@@ -71,7 +81,8 @@ def main():
 	# Random Forest
 	params['rf'] = {
 		'random_state': 100,
- 		'n_estimators': 1000, #130
+ 		'n_estimators': 200, #130
+# 		'n_estimators': 1000, #130
  		'max_features': 'auto', # 6
 		'min_samples_split': 1, #3 #10
 		'n_jobs': -1, # -1 = no. of cores on machine
