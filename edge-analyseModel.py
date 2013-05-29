@@ -33,7 +33,7 @@ def main():
 	pl.title("Feature importances")
 	pl.bar(range(len(indices)), importances[indices],
 		   color="r", yerr=std[indices], align="center")
-	pl.xticks(range(len(indices)), indices)
+	pl.xticks(range(len(indices)), [feat_indices[v] for v in indices], rotation=45, horizontalalignment='right')
 	pl.xlim([-1, len(indices)])
 	pl.show()
 
