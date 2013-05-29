@@ -61,8 +61,7 @@ $(GEN_DIR)/combined_edges.txt: edges.py $(BIN_FILES)
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
 	time ./$^ $@
 
-# textdata/publication_tfidf.pickle
-$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py
+$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
 	time ./features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
