@@ -16,11 +16,12 @@ def getSimilarity(G_sim, cl1, cl2):
 	return edge_sum / float(len(cl1) * len(cl2))
 
 def hcluster(G_sim, threshold_sim):
+	print_err("Finding connected components")
 	connected_components = nx.connected_component_subgraphs(G_sim)
 	all_clusters = []
 	print_err('Clustering', len(connected_components), 'components')
 	for component_i, cc in enumerate(connected_components):
- 		print_err('Starting component', component_i, 'of', len(connected_components), '({:} nodes)'.format(len(cc)))
+ 		print_err('Starting component', component_i+1, 'of', len(connected_components), '({:} nodes)'.format(len(cc)))
  		if len(cc) == 2:
  			cl = list(cc.nodes())
  			if cc.size(weight='weight') >= threshold_sim:
@@ -32,7 +33,7 @@ def hcluster(G_sim, threshold_sim):
 		removed = set()
 		adjclusters = [set()] * len(cc)
 		c_sim = nx.to_scipy_sparse_matrix(cc, weight='weight', format='coo')
-		pq = [(sim, r, c) for (sim, r, c) in zip(-c_sim.data, c_sim.row, c_sim.col) if r < c]
+		pq = [(sim, r, c) for (sim, r, c) in zip(-c_sim.data, c_sim.row, c_sim.col) if r < c and -sim >= threshold_sim]
 		for _, r, c in pq:
 			adjclusters[r].add(c)
 			adjclusters[c].add(r)
@@ -46,7 +47,6 @@ def hcluster(G_sim, threshold_sim):
  				continue
  			if similarity < threshold_sim:
  				break
-#  			print similarity, c1, c2
 #  			print_err(clusters[c1])
 #  			print_err(clusters[c2])
 # 			print_err(c1, c2, similarity)
@@ -88,7 +88,7 @@ def main():
 	parser.add_argument('outfile', nargs='?')
 	parser.add_argument('--interconnectivity', default=0.80)
 	parser.add_argument('--density', default=0.80)
-	parser.add_argument('--min-edge', default=0.2)
+	parser.add_argument('--min-edge', default=0.40) #0.15
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
@@ -98,7 +98,7 @@ def main():
 	threshold_density = args.density
 
 	print_err("Loading graph")
-	G_sim = nx.read_weighted_edgelist(enforce_min(open(args.edgelist, 'rb'), threshold_min_weight), nodetype=int, delimiter=',')
+	G_sim = nx.read_weighted_edgelist(enforce_min(skip_comments(open(args.edgelist, 'rb')), threshold_min_weight), nodetype=int, delimiter=',')
 	print_err('Loaded (V={:}, E={:})'.format(len(G_sim), G_sim.size()))
 
 	print_err("Clustering")
