@@ -8,9 +8,13 @@ import argparse
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('modelfile', nargs='?', default='generated/model.pickle')
+	parser.add_argument('-o', '--output')
 	args = parser.parse_args()
-	
-	clf, feat_indices, affil_median = pickle.load(open(args.modelfile, 'rb'))
+
+	if args.output is None:
+		args.output = args.modelfile.replace('.pickle', '') + '.pdf'
+
+	clf, feat_indices, feat_ind_remaining, affil_median = pickle.load(open(args.modelfile, 'rb'))
 		
 	print_err("OOB Score (CV):", clf.oob_score_)
 
@@ -35,7 +39,11 @@ def main():
 		   color="r", yerr=std[indices], align="center")
 	pl.xticks(range(len(indices)), [feat_indices[v] for v in indices], rotation=45, horizontalalignment='right')
 	pl.xlim([-1, len(indices)])
-	pl.show()
+# 	pl.show()
+	fig = pl.gcf()
+	fig.subplots_adjust(bottom=0.2)
+	pl.savefig(args.output)
+
 
 if __name__ == "__main__":
 	main()
