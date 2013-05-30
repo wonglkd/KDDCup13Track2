@@ -20,9 +20,11 @@ TRAIN_PARA := --removefeat conferences journals names coauthor paperIDs affiliat
 ifeq ($(OS),Windows_NT)
 	# Windows
 	EXEC_PREFIX := "C:\Program Files (x86)\Python27\python.exe" 
+	SORT_BIN := C:\MinGW\msys\1.0\bin\sort
 else
 	# Mac/Linux
 	EXEC_PREFIX := time ./
+	SORT_BIN := sort
 endif
 
 #sim-t: $(GEN_DIR)/iFfL.sim
@@ -83,10 +85,10 @@ $(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py te
 	$(EXEC_PREFIX)features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
-	$(EXEC_PREFIX)$^ $@; sort $@ -grk 3 -t"," -o $@
+	$(EXEC_PREFIX)$^ $@; $(SORT_BIN) $@ -grk 3 -t"," -o $@
 
 $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
-	$(EXEC_PREFIX)$^ $@; sort $@ -grk 3 -t"," -o $@
+	$(EXEC_PREFIX)$^ $@; $(SORT_BIN) $@ -grk 3 -t"," -o $@
 	
 $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
