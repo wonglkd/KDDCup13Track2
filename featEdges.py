@@ -107,10 +107,6 @@ class PaperauthorFeaturesGenerator:
 	 				if field in self.fields_num_index:
 	 					line[1] = int(line[1])
  					self.pa_by_authors[int(line[0])][field][line[1]] += int(line[2])
- 					
- 		if 'titles_dup_idified' in self.pa_files_ and 'paperids' in self.pa_files_:
- 			for aid in self.pa_by_authors:
-	 			self.pa_by_authors[aid]['titles_dup_idified']
 	
 	def sim(self, common, len1, len2):
 		if common == 0:
