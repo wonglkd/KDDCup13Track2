@@ -3,6 +3,9 @@ db/
 authordata/
 deprecated/
 
+# Can be generated
+data/*_u.csv
+
 *.pickle
 *.tmp
 *.log
