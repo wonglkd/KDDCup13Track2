@@ -4,7 +4,7 @@ GEN_DIR := generated
 AUTHOR_SET := Author
 # AUTHOR_SET := Author_f20000
 PREFEAT := $(GEN_DIR)/$(AUTHOR_SET)_prefeat.pickle
-BIN_METHODS := iFfL samename fullparsedname offbylastone token ngrams fF3L iFoffbyoneL 2FoffbyoneL
+BIN_METHODS := iFfL samename fullparsedname offbylastone token ngrams fF3L iFoffbyoneL 2FoffbyoneL metaphone
 
 BIN_FILES = $(foreach i,$(BIN_METHODS),$(GEN_DIR)/$i_bins.txt)
 EDGE_FILES := $(GEN_DIR)/iFfL_edges.txt
@@ -15,19 +15,26 @@ SUBMIT_FILES := $(GEN_DIR)/combined-submit.csv
 # $(GEN_DIR)/iFfL-submit.csv 
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
 TRAIN_PARA := --removefeat conferences journals names coauthor paperIDs affiliations
-# Mac/Linux
-EXEC_PREFIX := time ./
-# Windows
-#EXEC_PREFIX := "C:\Program Files (x86)\Python27\python.exe" 
 
-feat: $(FEAT_FILES)
+# Platform specific stuff
+ifeq ($(OS),Windows_NT)
+	# Windows
+	EXEC_PREFIX := "C:\Program Files (x86)\Python27\python.exe" 
+else
+	# Mac/Linux
+	EXEC_PREFIX := time ./
+endif
 
 #sim-t: $(GEN_DIR)/iFfL.sim
+
+.PHONY:
+.SECONDARY:
+all: $(SUBMIT_FILES)
+feat: $(FEAT_FILES)
+
 edgefeat-t:
 	./featEdges.py generated/edges_test.txt data/authors_with_papers.txt generated/test.edgefeat
 
-all: $(SUBMIT_FILES)
-.SECONDARY:
 
 evaluate: evaluate.py $(GEN_DIR)/goldstd-submit.csv $(GEN_DIR)/best-submit.csv $(SUBMIT_FILES)
 	./$^
@@ -39,6 +46,8 @@ prefeat-t: $(GEN_DIR)/Author_f20000_prefeat.pickle
 train: $(GEN_DIR)/model.pickle
 authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authordata/pa_coauthors_u.csv
 
+generated/affil_wordcounts.txt: process_authors.py data/Author.csv
+	$(EXEC_PREFIX)$^ --affilwordfreq > $@
 
 %_u.csv: unidecodefile.py %.csv
 	./$^ $@
@@ -52,9 +61,6 @@ analyse: ./edge-analyseModel.py $(GEN_DIR)/model.pickle
 textdata/publication_tfidf.pickle: processTitles.py data/Conference.csv data/Journal.csv
 	./$<
 
-$(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py
-	$(EXEC_PREFIX)features.py $(DATA_DIR)/train.csv $(PREFEAT) $@
-
 $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
 	$(EXEC_PREFIX)$^ $* > $@
 
@@ -67,8 +73,13 @@ $(GEN_DIR)/combined_edges.txt: edges.py $(BIN_FILES)
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
 	$(EXEC_PREFIX)$^ $@
 
-# textdata/publication_tfidf.pickle
-$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py
+$(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
+	$(EXEC_PREFIX)features.py $(DATA_DIR)/train.csv $(PREFEAT) $@
+	
+$(GEN_DIR)/train_%.feat: features.py $(DATA_DIR)/train_%.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
+	$(EXEC_PREFIX)features.py $(DATA_DIR)/train_$*.csv $(PREFEAT) $@
+
+$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
 	$(EXEC_PREFIX)features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
@@ -82,6 +93,9 @@ $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.fe
 
 $(GEN_DIR)/model_%.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ $@ --clf $* $(TRAIN_PARA)
+
+$(GEN_DIR)/%_model.pickle: edge-train.py $(DATA_DIR)/train_%.csv $(GEN_DIR)/train_%.feat
+	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
 cv: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ --cv $(TRAIN_PARA)
