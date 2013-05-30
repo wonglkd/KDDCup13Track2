@@ -35,11 +35,11 @@ all: $(SUBMIT_FILES)
 feat: $(FEAT_FILES)
 
 edgefeat-t:
-	./featEdges.py generated/edges_test.txt data/authors_with_papers.txt generated/test.edgefeat
+	$(EXEC_PREFIX)featEdges.py generated/edges_test.txt data/authors_with_papers.txt generated/test.edgefeat
 
 
 evaluate: evaluate.py $(GEN_DIR)/goldstd-submit.csv $(GEN_DIR)/best-submit.csv $(SUBMIT_FILES)
-	./$^
+	$(EXEC_PREFIX)$^
 submitgz: $(SUBMIT_FILES:=.gz)
 bins: $(BIN_FILES)
 cluster: $(CLUSTER_FILES)
@@ -52,16 +52,16 @@ generated/affil_wordcounts.txt: process_authors.py data/Author.csv
 	$(EXEC_PREFIX)$^ --affilwordfreq > $@
 
 %_u.csv: unidecodefile.py %.csv
-	./$^ $@
+	$(EXEC_PREFIX)$^ $@
 
 %_idified.csv: idify.py %.csv
-	./$^ $@
+	$(EXEC_PREFIX)$^ $@
 
-analyse: ./edge-analyseModel.py $(GEN_DIR)/model.pickle
-	./$<
+analyse: edge-analyseModel.py $(GEN_DIR)/model.pickle
+	$(EXEC_PREFIX)$<
 	
 textdata/publication_tfidf.pickle: processTitles.py data/Conference.csv data/Journal.csv
-	./$<
+	$(EXEC_PREFIX)$<
 
 $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
 	$(EXEC_PREFIX)$^ $* > $@
