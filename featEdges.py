@@ -61,6 +61,7 @@ class PaperauthorFeaturesGenerator:
 	}
 	
 	fields = [
+		'has_papers',
 		'pa_name',
 		'pa_affil',
 		'names',
@@ -114,6 +115,7 @@ class PaperauthorFeaturesGenerator:
 	def sim(self, common, len1, len2):
 		if common == 0:
 			return 0.
+		# return common
 		return common / float(min(len1, len2))
 		# Jaccard
 		# return common / float(len1 + len2 - common)
@@ -245,6 +247,7 @@ class PaperauthorFeaturesGenerator:
 		})
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
+				'has_papers': 2,
 				'names': self.getSetSim('name', author1, author2),
 				'namesW': self.getSetSimW('name', author1, author2),
 				'affiliations': self.getSetSim('affiliation', author1, author2),
@@ -264,6 +267,10 @@ class PaperauthorFeaturesGenerator:
 # 				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2),
 				'pubTextSim': self.getTextSimPub(author1, author2)
 			})
+		elif author1 in self.filter or author2 in self.filter:
+ 			f['has_papers'] = 1
+ 		else:
+ 			f['has_papers'] = 0
 		return f
 
 def main():

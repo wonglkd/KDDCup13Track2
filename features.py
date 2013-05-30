@@ -34,10 +34,12 @@ class FeaturesGenerator:
 		'last',
 		'lastidf',
 		'iFfLidf',
+		'has_affil',
 		'affil_sharedidf',
 		'suffix',
 		'jaro_distance',
-		'firstmidswap'
+		'firstmidswap',
+		'metaphone'
 	] + featEdges.PaperauthorFeaturesGenerator.fields
 
 	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
@@ -68,7 +70,14 @@ class FeaturesGenerator:
 			else: #initials don't match
 				f[id_f] = 1
 
-		if aa['affil_tdidf'] is None or ab['affil_tdidf'] is None:
+		if aa['affil_tdidf'] is not None and ab['affil_tdidf'] is not None:
+			f['has_affil'] = 2
+		elif aa['affil_tdidf'] is not None or ab['affil_tdidf'] is not None:
+			f['has_affil'] = 1
+		else:
+			f['has_affil'] = 0
+
+		if f['has_affil'] != 2:
 			f['affil_sharedidf'] = np.nan
 		else:
 			f['affil_sharedidf'] = shared_terms_sum(aa['affil_tdidf'], ab['affil_tdidf'])
@@ -89,6 +98,7 @@ class FeaturesGenerator:
 		f['exact'] = int(aa['fullname_joined'] == ab['fullname_joined'] and len(aa['fullname_joined']) > 0)
 		f['jaro_distance'] = 0 if (':' in aa['fullname'] or ':' in ab['fullname']) else jellyfish.jaro_distance(aa['fullname'], ab['fullname'])
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
+		f['metaphone'] = int(aa['metaphone_fullname'] == ab['metaphone_fullname'])
 
 		f.update(self.PFG.getEdgeFeatures(a, b))
 
