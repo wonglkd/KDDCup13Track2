@@ -29,7 +29,7 @@ edgefeat-t:
 all: $(SUBMIT_FILES)
 .SECONDARY:
 
-evaluate: evaluate.py $(GEN_DIR)/goldstd-submit.csv $(SUBMIT_FILES)
+evaluate: evaluate.py $(GEN_DIR)/goldstd-submit.csv $(GEN_DIR)/best-submit.csv $(SUBMIT_FILES)
 	./$^
 submitgz: $(SUBMIT_FILES:=.gz)
 bins: $(BIN_FILES)
