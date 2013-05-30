@@ -122,12 +122,13 @@ class PaperauthorFeaturesGenerator:
 		n = len(set(a.keys()) & set(b.keys()))
 		return (n, len(a), len(b))
 	
-	def dictSimW(self, a, b):
+	def dictSimW(self, a, b, ta=1, tb=1):
 		if not a or not b:
 			return 0, sum(a.values()), sum(b.values())
 		common = set(a.keys()) & set(b.keys())
-		total_common = sum([min(a[v], b[v]) for v in common])
-		return (total_common, sum(a.values()), sum(b.values()))
+		total_common = sum([min(a[v] / float(ta), b[v] / float(tb)) for v in common])
+		return (total_common, 1.0, 1.0)
+# 		return (total_common, sum(a.values()), sum(b.values()))
 
 	def getAuthor(self, aID):
 		if aID in self.author_info:
@@ -159,6 +160,11 @@ class PaperauthorFeaturesGenerator:
 		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_w_, [a1, a2, a1, a2, a1, a2]).next()
 		return self.sim(common, len1, len2)
 
+	def getTotal(self, field, aid):
+		if field not in self.pa_by_authors_totals[aid]:
+			self.pa_by_authors_totals[aid][field] = sum(self.pa_by_authors[aid][field].values())
+		return float(self.pa_by_authors_totals[aid][field])
+
 	def getFieldPA(self, field, a1, a2):
 		# missing value
 		if a1 not in self.filter:
@@ -168,9 +174,7 @@ class PaperauthorFeaturesGenerator:
 		if not len(a2val) or a2val.startswith('ID:'):
 			return 0.
 		if a2val in self.pa_by_authors[a1][field]:
-			if field not in self.pa_by_authors_totals[a1]:
-				self.pa_by_authors_totals[a1][field] = sum(self.pa_by_authors[a1][field].values())
-			return self.pa_by_authors[a1][field][a2val] / float(self.pa_by_authors_totals[a1][field])
+			return self.pa_by_authors[a1][field][a2val] / self.getTotal(field, a1)
 		else:
 			return 0.
 	
@@ -181,7 +185,7 @@ class PaperauthorFeaturesGenerator:
 		return self.sim(*self.dictSim(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field]))
 
 	def getSetSimW(self, field, a1, a2):
-		return self.sim(*self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field]))
+		return self.sim(*self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field], self.getTotal(field, a1), self.getTotal(field, a2)))
 	
 	def pcutl(self, a, p=10):
 		return scoreatpercentile(a, p) # interpolation = 'lower'?
