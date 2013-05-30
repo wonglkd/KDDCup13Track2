@@ -20,7 +20,7 @@ TRAIN_PARA := --removefeat conferences journals names coauthor paperIDs affiliat
 ifeq ($(OS),Windows_NT)
 	# Windows
 	EXEC_PREFIX := "C:\Program Files (x86)\Python27\python.exe" 
-	SORT_BIN := C:\MinGW\msys\1.0\bin\sort
+	SORT_BIN := "C:\MinGW\msys\1.0\bin\sort"
 else
 	# Mac/Linux
 	EXEC_PREFIX := time ./
