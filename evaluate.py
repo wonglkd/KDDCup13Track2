@@ -42,10 +42,11 @@ def main():
 						f1 = 2. * recall * precision / (recall + precision)
 					scores.append((f1, precision, recall, line[0]))
 		scores = sorted(scores, reverse=True)
+		print 'File:', filename
 		print_err('File:', filename)
 		for line in scores:
 			if line[0] != 1:
-				print_err(' '.join(map('{:g}'.format, line[:3])), line[3])
+				print ' '.join(map('{:g}'.format, line[:3])), line[3]
 #  		pprint(scores)
 		scores = np.array(scores)
 		print_err('F1', 'Precision', 'Recall')
