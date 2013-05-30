@@ -115,6 +115,21 @@ def bin_2FoffbyoneL(authors, max_bin_size=30):
 
  	return bins
 
+def bin_metaphone(authors):
+	bins = defaultdict(set)
+ 	for i, (id, a) in enumerate(authors.iteritems()):
+ 		if a['metaphone_fullname']:
+	 		bins[a['metaphone_fullname']].add(id)
+ 		if (i+1) % 10000 == 0:
+ 			print_err(i+1)
+
+# 	bk = bins.keys()
+# 	for b in bk:
+# 		if len(bins[b]) > max_bin_size:
+# 			del bins[b]
+
+ 	return bins
+
 def bin_offbylastone(authors):
 	bins = defaultdict(set)
  	for i, (id, a) in enumerate(authors.iteritems()):
