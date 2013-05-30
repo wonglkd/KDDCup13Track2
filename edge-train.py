@@ -25,17 +25,25 @@ def m_cv(clf, X, Y, kfolds):
 	oob_scores = []
 	for i, (traincv, testcv) in enumerate(cv):
 		print_err("Fold {:} of {:}".format(i+1, kfolds))
-		probas = clf.fit(X[traincv], Y[traincv]).predict_proba(X[testcv])
- 		lscore_ll = llfun(Y[testcv], [x[1] for x in probas])
-		lscore_rms = mean_squared_error(Y[testcv], [x[1] for x in probas])
-		print_err("LL E: {:g}, RMS E: {:g}, OOB: {:g}".format(lscore_ll, lscore_rms, clf.oob_score_))
+		pred = clf.fit(X[traincv], Y[traincv]).predict(X[testcv])
+#		probas = clf.fit(X[traincv], Y[traincv]).predict_proba(X[testcv])
+#		pred = [x[1] for x in probas]
+ 		lscore_ll = llfun(Y[testcv], pred)
+		lscore_rms = mean_squared_error(Y[testcv], pred)
+		try:
+			print_err("LL E: {:g}, RMS E: {:g}, OOB: {:g}".format(lscore_ll, lscore_rms, clf.oob_score_))
+			oob_scores.append(clf.oob_score_)
+		except ValueError:
+			print_err("LL E: {:g}, RMS E: {:g}".format(lscore_ll, lscore_rms))
 		results_ll.append(lscore_ll)
 		results_rms.append(lscore_rms)
-		oob_scores.append(clf.oob_score_)
 	score_ll = np.array(results_ll).mean()
 	score_rms = np.array(results_rms).mean()
-	oob = np.array(oob_scores).mean()
-	print_err("CV (LL): {:g}, CV (RMS): {:g}, Mean OOB: {:g}".format(score_ll, score_rms, oob))
+	if oob_scores:
+		oob = np.array(oob_scores).mean()
+		print_err("CV (LL): {:g}, CV (RMS): {:g}, Mean OOB: {:g}".format(score_ll, score_rms, oob))
+	else:
+		print_err("CV (LL): {:g}, CV (RMS): {:g}".format(score_ll, score_rms))
 	return score_ll
 
 # def learning_curve(clf, X, Y, npoints=20, xstart=100):
@@ -80,28 +88,32 @@ def main():
 	params = {}
 	# Random Forest
 	params['rf'] = {
-		'random_state': 100,
- 		'n_estimators': 200, #130
-# 		'n_estimators': 1000, #130
  		'max_features': 'auto', # 6
+ 		'n_estimators': 400, #130
+# 		'n_estimators': 1000, #130
 		'min_samples_split': 1, #3 #10
-		'n_jobs': -1, # -1 = no. of cores on machine
-		'verbose': 0,
+		'min_samples_leaf': 2,
+		'random_state': 100,
+		'n_jobs': 8, # -1 = no. of cores on machine
 		'oob_score': True,
-		'min_samples_leaf': 1,
+		'verbose': 0,
 		'compute_importances': True
 	}
 
 	# GBM
 	params['gbm'] = {
-		'n_estimators': 15000,
-		'learning_rate': 0.01,
-		'max_depth': 16,
-		'min_samples_split': 2,
+		'n_estimators': 20000,
+#		'n_estimators': 15000,
+		'learning_rate': 1e-04,
+		'max_depth': 7,
+#		'max_depth': 16,
+		'min_samples_split': 1,
+		'min_samples_leaf': 2,
 		'subsample': 0.5,
-		'verbose': 1,
-		'min_samples_leaf': 1
+		'verbose': 0
 	}
+	
+	print params[args.clf]
 
 	ids, X = feat.load_features(args.featfile)
  	feat_indices = feat.FeaturesGenerator.fields
@@ -136,7 +148,7 @@ def main():
 		print_err("OOB Score (CV-estimate):", clf.oob_score_)
 
 		print_err("Saving trained model")
-		pickle.dump((clf, feat_indices, affil_median), open(args.outfile, 'wb'), pickle.HIGHEST_PROTOCOL)
+		pickle.dump((clf, feat_indices, feat_ind_remaining, affil_median), open(args.outfile, 'wb'), pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
 	main()

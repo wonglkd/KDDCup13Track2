@@ -16,9 +16,10 @@ def main():
 		args.outfile = args.featurefile.replace('.feat','') + '.prob'
 
 	print_err("Loading saved classifier")	
-	clf, feat_indices, affil_median = pickle.load(open(args.modelfile, 'rb'))
+	clf, feat_indices, feat_ind_remaining, affil_median = pickle.load(open(args.modelfile, 'rb'))
 
 	ids, X = feat.load_features(args.featurefile)
+ 	X = X[:, feat_ind_remaining]
 # 	affil_ind = feat_indices.index('affil_sharedidf')
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = affil_median
  	X[np.isnan(X)] = 0.
