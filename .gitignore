@@ -3,6 +3,7 @@ db/
 authordata/
 deprecated/
 
+*.pickle
 *.tmp
 *.log
 
