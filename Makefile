@@ -80,9 +80,15 @@ $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
 $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
+$(GEN_DIR)/model_%.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
+	$(EXEC_PREFIX)$^ $@ --clf $* $(TRAIN_PARA)
+
 cv: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ --cv $(TRAIN_PARA)
 
+cv-gbm: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
+	$(EXEC_PREFIX)$^ --cv --clf gbm $(TRAIN_PARA)
+	
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
 	$(EXEC_PREFIX)$^ $@
 
