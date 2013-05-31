@@ -38,6 +38,10 @@ class FeaturesGenerator:
 		'affil_sharedidf',
 		'suffix',
 		'jaro_distance',
+		'jaro_winkler',
+		'jarow_first',
+		'jarow_mid',
+		'jarow_last',
 		'firstmidswap',
 		'metaphone'
 	] + featEdges.PaperauthorFeaturesGenerator.fields
@@ -97,6 +101,10 @@ class FeaturesGenerator:
 		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
 		f['exact'] = int(aa['fullname_joined'] == ab['fullname_joined'] and len(aa['fullname_joined']) > 0)
 		f['jaro_distance'] = 0 if (':' in aa['fullname'] or ':' in ab['fullname']) else jellyfish.jaro_distance(aa['fullname'], ab['fullname'])
+		f['jaro_winkler'] = 0 if (':' in aa['fullname'] or ':' in ab['fullname']) else jellyfish.jaro_winkler(aa['fullname'], ab['fullname'])
+		f['jarow_first'] = jellyfish.jaro_winkler(aa['name_first'], ab['name_first'])
+		f['jarow_mid'] = jellyfish.jaro_winkler(aa['name_middle'], ab['name_middle'])
+		f['jarow_last'] = jellyfish.jaro_winkler(aa['name_last'], ab['name_last'])
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 		f['metaphone'] = int(aa['metaphone_fullname'] == ab['metaphone_fullname'])
 

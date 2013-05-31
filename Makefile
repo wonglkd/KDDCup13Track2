@@ -14,7 +14,7 @@ CLUSTER_FILES := $(GEN_DIR)/combined.clusters
 SUBMIT_FILES := $(GEN_DIR)/combined-submit.csv
 # $(GEN_DIR)/iFfL-submit.csv 
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
-TRAIN_PARA := --removefeat conferences journals names coauthor paperIDs affiliations
+TRAIN_PARA := --removefeat conferences journals names coauthor paperIDs affiliations jaro_distance suffix last
 
 # Platform specific stuff
 ifeq ($(OS),Windows_NT)
