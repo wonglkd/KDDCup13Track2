@@ -40,13 +40,15 @@ def main():
 						f1 = 0.
 					else:
 						f1 = 2. * recall * precision / (recall + precision)
-					scores.append((f1, precision, recall, line[0]))
+					is_first = bool(line[0] == min(line[1]))
+					scores.append((f1, precision, recall, line[0], is_first))
 		scores = sorted(scores, reverse=True)
 		print 'File:', filename
 		print_err('File:', filename)
+		print 'F1,Precision,Recall;Node ID'
 		for line in scores:
-			if line[0] != 1:
-				print ' '.join(map('{:g}'.format, line[:3])), line[3]
+			if line[0] != 1 and line[4]:
+				print ','.join(map('{:g}'.format, line[:3])) + ';{:}'.format(line[3])
 #  		pprint(scores)
 		scores = np.array(scores)
 		print_err('F1', 'Precision', 'Recall')
