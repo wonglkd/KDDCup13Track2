@@ -42,6 +42,8 @@ class FeaturesGenerator:
 		'jarow_first',
 		'jarow_mid',
 		'jarow_last',
+		'jarow_firstmid',
+		'jarow_midlast',
 		'firstmidswap',
 		'metaphone'
 	] + featEdges.PaperauthorFeaturesGenerator.fields
@@ -105,6 +107,9 @@ class FeaturesGenerator:
 		f['jarow_first'] = jellyfish.jaro_winkler(aa['name_first'], ab['name_first'])
 		f['jarow_mid'] = jellyfish.jaro_winkler(aa['name_middle'], ab['name_middle'])
 		f['jarow_last'] = jellyfish.jaro_winkler(aa['name_last'], ab['name_last'])
+		f['jarow_firstmid'] = jellyfish.jaro_winkler(aa['name_first']+aa['name_middle'], ab['name_first']+ab['name_middle'])
+		f['jarow_midlast'] = jellyfish.jaro_winkler(aa['name_middle']+aa['name_last'], ab['name_middle']+ab['name_last'])
+		
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
 		f['metaphone'] = int(aa['metaphone_fullname'] == ab['metaphone_fullname'])
 
