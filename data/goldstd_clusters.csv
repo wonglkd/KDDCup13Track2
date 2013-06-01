@@ -58,6 +58,9 @@ th w de loos|theodoor w de loos|theo w de loos;1409429,1334493,533533,479998,616
 #antony j williams;1933440,1532524,2292573,1703537,2129842,435092,1036573,1160093,1582495
 #patrick suppes;2209730,1893187,105060,713512,424811,1834403,44420,1736091
 
+
+### Negative examples that turned out in our clusterings ###
+### Have not checked to ensure that they are complete ###
 Itu-t Recommendation X;544791
 Itu-t Recommendation G;1408263
 An Approach Base;179350
@@ -72,6 +75,8 @@ G. Kopetz;1465510
 K. Kopetz;1733250
 B. VAN DER SCHOOT;444724
 Hans Van Der Schoot;1515138
+Kouji Ouchi;2178707
+Koji Ouchi;2263292
 
 # orphans
 ID:97236;97236
