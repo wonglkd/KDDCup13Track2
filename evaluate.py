@@ -32,8 +32,8 @@ def main():
 				line[1] = map(int, line[1].split())
 				if line[0] in goldstd:
 					tp = len(goldstd[line[0]] & set(line[1]))
-					fp = len(goldstd[line[0]]) - tp
-					fn = len(line[1]) - tp
+					fp = len(line[1]) - tp
+					fn = len(goldstd[line[0]]) - tp
 					recall = tp / float(tp + fn)
 					precision = tp / float(tp + fp)
 					if tp == 0:
