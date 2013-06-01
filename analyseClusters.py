@@ -2,22 +2,42 @@
 from common import *
 from pprint import pprint
 import argparse
+try:
+	import networkx as nx
+except ImportError:
+	print_err("Could not import networkx")
 
-def getCluster(line, query, conn):
+def getCluster(line, query, conn, raworder=False, G_prob=None):
 	if ';' in line:
 		line = line.split(';')[1]
 	cluster = line.strip().split(',')
+	output = []
 	for v in cluster:
 		res = selectDB(conn, query + ' WHERE a.Id = '+v+' LIMIT 2')
 		for line in res:
-			print(line)
+			output.append(line)
+	if not raworder:
+		output = sorted(output)
+	print_err(len(output), 'rows')
+	if G_prob is not None and len(cluster) > 1:
+		sg = G_prob.subgraph(map(int, cluster))
+		print('V: {:}, E: {:}'.format(len(sg), sg.number_of_edges()))
+		unweighted_density = nx.density(sg)
+		weighted_density = sg.size(weight='weight')
+		if len(sg) > 1:
+			weighted_density /= (.5 * len(sg) * (len(sg) - 1))
+		print("Density: {:g}, WDen: {:g}, AvgEWeight: {:g}".format(unweighted_density, weighted_density, (sg.size(weight='weight') / float(sg.number_of_edges()))))
+	for line in output:
+		print line[0], line[1:]
 	print('-----------')
-
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('qtype', nargs='?', default='author')
-	parser.add_argument('-c', '--rawinput', action='store_true')
+	parser.add_argument('-i', '--interactive', action='store_true')
+	parser.add_argument('-s', '--raworder', action='store_true')
+	parser.add_argument('-l', '--loadinput', default='analysis/analyse.clusters.tmp')
+	parser.add_argument('-g', '--loadgraph')
 	args = parser.parse_args()
 	
 	queries = {
@@ -27,17 +47,23 @@ def main():
 	LEFT JOIN paper p ON p.Id = PaperId'''
 	}
 
+	if args.loadgraph is not None:
+		print_err("Reading edges", args.loadgraph)
+		G_prob = nx.read_weighted_edgelist(args.loadgraph, delimiter=',', nodetype=int)
+	else:
+		G_prob = None
+
 	with getDB() as conn:
-		if args.rawinput:
+		if args.interactive:
 			while True:
 				line = raw_input("Cluster: ")
 				if not line:
 					break
-				getCluster(line, queries[args.qtype], conn)
+				getCluster(line, queries[args.qtype], conn, args.raworder, G_prob)
 		else:
-			with open('analysis/analyse.clusters.tmp') as f:
+			with open(args.loadinput) as f:
 				for line in skip_comments(f):
-					getCluster(line, queries[args.qtype], conn)
+					getCluster(line, queries[args.qtype], conn, args.raworder, G_prob)
 
 if __name__ == "__main__":
 	main()
