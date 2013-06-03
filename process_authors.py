@@ -120,13 +120,28 @@ def main():
 	parser.add_argument('authorfile')
 	parser.add_argument('outputfile', nargs='?')
 	parser.add_argument('--affilwordfreq', action='store_true')
+	parser.add_argument('--format', default='pickle')
 	args = parser.parse_args()
 	
 	authors = loadAuthors(args.authorfile, args.affilwordfreq)
 	if args.affilwordfreq:
 		return
-	print_err("Pickling...")
-	pickle.dump(authors, open(args.outputfile, 'wb'), pickle.HIGHEST_PROTOCOL)
+		
+	if args.format == 'pickle':
+		print_err("Pickling...")
+		pickle.dump(authors, open(args.outputfile, 'wb'), pickle.HIGHEST_PROTOCOL)
+	elif args.format == 'csv':
+		fields = ['id', 'name_title', 'name_first', 'name_middle', 'name_last', 'name_suffix', 'name', 'iFfL', 'metaphone_fullname', 'affiliation']
+		with open(args.outputfile, 'wb') as f:
+			writer = csv.DictWriter(f, fieldnames=fields)
+			writer.writeheader()
+			for ak, av in authors.iteritems():
+				f = {key: av[key] for key in fields if key != 'id'}
+				f['id'] = ak
+				writer.writerow(f)
+	else:
+		raise Exception("Invalid format")
+
 
 if __name__ == "__main__":
 	main()
