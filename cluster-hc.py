@@ -31,7 +31,7 @@ def hcluster(G_sim, threshold_sim):
  			continue
 		clusters = [[v] for v in cc]
 		removed = set()
-		adjclusters = [set()] * len(cc)
+		adjclusters = [set() for i in xrange(len(cc))]
 		c_sim = nx.to_scipy_sparse_matrix(cc, weight='weight', format='coo')
 		pq = [(sim, r, c) for (sim, r, c) in zip(-c_sim.data, c_sim.row, c_sim.col) if r < c and -sim >= threshold_sim]
 		for _, r, c in pq:
