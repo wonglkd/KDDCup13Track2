@@ -121,6 +121,8 @@ def main():
  	feat_indices = [v for v in feat_indices if v not in feat_to_remove]
  	X = X[:, feat_ind_remaining]
 
+	print feat_indices
+
 	print_err("Loading training dataset labels")
 	Y = loadTrainingLabels(args.trainfile, ids)
 
