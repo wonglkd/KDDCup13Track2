@@ -122,13 +122,19 @@ class PaperauthorFeaturesGenerator:
 		n = len(set(a.keys()) & set(b.keys()))
 		return (n, len(a), len(b))
 	
-	def dictSimW(self, a, b, ta=1, tb=1):
+	def dictSimW(self, a, b):
 		if not a or not b:
 			return 0, sum(a.values()), sum(b.values())
 		common = set(a.keys()) & set(b.keys())
+		total_common = sum([min(a[v], b[v]) for v in common])
+ 		return (total_common, sum(a.values()), sum(b.values()))
+
+	def dictSimF(self, a, b, ta=1, tb=1):
+		if not a or not b:
+			return 0.
+		common = set(a.keys()) & set(b.keys())
 		total_common = sum([min(a[v] / float(ta), b[v] / float(tb)) for v in common])
-		return (total_common, 1.0, 1.0)
-# 		return (total_common, sum(a.values()), sum(b.values()))
+		return total_common
 
 	def getAuthor(self, aID):
 		if aID in self.author_info:
@@ -186,6 +192,9 @@ class PaperauthorFeaturesGenerator:
 
 	def getSetSimW(self, field, a1, a2):
 		return self.sim(*self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field], self.getTotal(field, a1), self.getTotal(field, a2)))
+
+	def getSetSimF(self, field, a1, a2):
+		return self.dictSimF(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field], self.getTotal(field, a1), self.getTotal(field, a2))
 	
 	def pcutl(self, a, p=10):
 		return scoreatpercentile(a, p) # interpolation = 'lower'?
@@ -230,17 +239,17 @@ class PaperauthorFeaturesGenerator:
 			'names': 0,
 			'namesW': 0,
 			'affiliations': 0,
-			'affiliationsW': 0,
+			'affiliationsF': 0,
 			'conferences': 0,
-			'conferencesW': 0,
+			'conferencesF': 0,
 			'journals': 0,
-			'journalsW': 0,
+			'journalsF': 0,
 			'years': 0,
 			'yearscore': 0,
 			'coauthor': 0,
 			'coauthorW': 0,
 			'paperIDs': 0,
-			'paperIDsW': 0,
+			'paperIDsF': 0,
 # 			'titles_dup': 0,
 			'titles_dupW': 0,
 			'pubTextSim': 0
@@ -249,19 +258,19 @@ class PaperauthorFeaturesGenerator:
 			f.update({
 				'has_papers': 2,
 				'names': self.getSetSim('name', author1, author2),
-				'namesW': self.getSetSimW('name', author1, author2),
+				'namesF': self.getSetSimF('name', author1, author2),
 				'affiliations': self.getSetSim('affiliation', author1, author2),
-				'affiliationsW': self.getSetSimW('affiliation', author1, author2),
+				'affiliationsF': self.getSetSimF('affiliation', author1, author2),
 				'conferences': self.getSetSim('conferences', author1, author2),
-				'conferencesW': self.getSetSimW('conferences', author1, author2),
+				'conferencesF': self.getSetSimF('conferences', author1, author2),
 				'journals': self.getSetSim('journals', author1, author2),
-				'journalsW': self.getSetSimW('journals', author1, author2),
+				'journalsF': self.getSetSimF('journals', author1, author2),
 				'years': self.getSetSim('years', author1, author2),
 				'yearscore': self.getYearScore(author1, author2),
 				'coauthor': self.getCoauthorsSim(author1, author2),
 				'coauthorW': self.getCoauthorsSimW(author1, author2),
 				'paperIDs': self.getSetSim('paperids', author1, author2),
-				'paperIDsW': self.getSetSimW('paperids', author1, author2),
+				'paperIDsF': self.getSetSimF('paperids', author1, author2),
 				'titles_dupW': self.getTitlesOverlap(author1, author2),
 # 				'titles_dup': self.getSetSim('titles_dup_idified', author1, author2),
 # 				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2),
