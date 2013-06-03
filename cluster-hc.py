@@ -38,7 +38,6 @@ def hcluster(G_sim, threshold_sim):
 			adjclusters[r].add(c)
 			adjclusters[c].add(r)
  		hq.heapify(pq)
-# 		c_sim = c_sim.tolil()
 		
  		while pq:
  			similarity, c1, c2 = hq.heappop(pq)
@@ -88,7 +87,7 @@ def main():
 	parser.add_argument('outfile', nargs='?')
 	parser.add_argument('--interconnectivity', default=0.80)
 	parser.add_argument('--density', default=0.80)
-	parser.add_argument('--min-edge', default=0.40) #0.15
+	parser.add_argument('--min-edge', default=0.20) #0.15
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
