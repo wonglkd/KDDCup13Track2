@@ -14,7 +14,12 @@ def main():
 	if args.output is None:
 		args.output = args.modelfile.replace('.pickle', '') + '.pdf'
 
-	clf, feat_indices, feat_ind_remaining, affil_median = pickle.load(open(args.modelfile, 'rb'))
+	unloaded = pickle.load(open(args.modelfile, 'rb'))
+	if len(unloaded) == 4:
+		clf, feat_indices, feat_ind_remaining, affil_median = unloaded
+	else:
+		clf, feat_indices, affil_median = unloaded
+		feat_ind_remaining = range(len(feat_indices))
 		
 	print_err("OOB Score (CV):", clf.oob_score_)
 
