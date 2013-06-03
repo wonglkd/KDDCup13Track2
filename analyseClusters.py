@@ -2,18 +2,17 @@
 from common import *
 from pprint import pprint
 import argparse
-try:
-	import networkx as nx
-except ImportError:
-	print_err("Could not import networkx")
 
-def getCluster(line, query, conn, raworder=False, G_prob=None):
+def getCluster(line, query, conn, raworder=False, G_prob=None, qlimit=2):
 	if ';' in line:
 		line = line.split(';')[1]
-	cluster = line.strip().split(',')
+	if ',' in line:
+		cluster = line.strip().split(',')
+	else:
+		cluster = line.strip().split()
 	output = []
 	for v in cluster:
-		res = selectDB(conn, query + ' WHERE a.Id = '+v+' LIMIT 2')
+		res = selectDB(conn, query + ' WHERE a.Id = '+v+' LIMIT '+str(qlimit))
 		for line in res:
 			output.append(line)
 	if not raworder:
@@ -37,17 +36,23 @@ def main():
 	parser.add_argument('-i', '--interactive', action='store_true')
 	parser.add_argument('-s', '--raworder', action='store_true')
 	parser.add_argument('-l', '--loadinput', default='analysis/analyse.clusters.tmp')
+	parser.add_argument('-q', '--querylimit', default=2)
 	parser.add_argument('-g', '--loadgraph')
 	args = parser.parse_args()
 	
 	queries = {
 		'author': '''SELECT * FROM author a''',
-		'all': '''SELECT a.*, pa.name, pa.affiliation, p.title, p.year, p.journalId, p.conferenceId FROM
+		'all': '''SELECT a.*, pa.name, pa.affiliation, p.Id, p.title, p.year, p.journalId, p.conferenceId FROM
 	(author a LEFT JOIN paperauthor pa ON AuthorID = a.Id)
 	LEFT JOIN paper p ON p.Id = PaperId'''
 	}
 
 	if args.loadgraph is not None:
+		try:
+			global nx
+			import networkx as nx
+		except ImportError:
+			print_err("Could not import networkx")
 		print_err("Reading edges", args.loadgraph)
 		G_prob = nx.read_weighted_edgelist(args.loadgraph, delimiter=',', nodetype=int)
 	else:
@@ -59,11 +64,21 @@ def main():
 				line = raw_input("Cluster: ")
 				if not line:
 					break
-				getCluster(line, queries[args.qtype], conn, args.raworder, G_prob)
+				if line.strip() in queries:
+					args.qtype = line.strip()
+					print_err("Switched to", line.strip())
+					continue
+				if line.startswith('limit'):
+					line = line.split()
+					line[1]
+					args.querylimit = int(line[1])
+					print_err("Limit changed to", line[1])
+					continue
+				getCluster(line, queries[args.qtype], conn, args.raworder, G_prob, args.querylimit)
 		else:
 			with open(args.loadinput) as f:
 				for line in skip_comments(f):
-					getCluster(line, queries[args.qtype], conn, args.raworder, G_prob)
+					getCluster(line, queries[args.qtype], conn, args.raworder, G_prob, args.querylimit)
 
 if __name__ == "__main__":
 	main()
