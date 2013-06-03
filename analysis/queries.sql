@@ -34,6 +34,65 @@ GROUP BY AuthorId, p.JournalId;
 SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId
 GROUP BY AuthorId, pa.PaperId;
 
+CREATE TABLE pa_duppairs (PaperId INTEGER, AuthorId INTEGER, Count INTEGER, PRIMARY KEY (PaperId, AuthorId));
+CREATE INDEX pa_duppairs_paperidx ON pa_duppairs (PaperId);
+CREATE INDEX pa_duppairs_authoridx ON pa_duppairs (AuthorId);
+
+SELECT COUNT(cnt) FROM
+(SELECT LOWER(a.name), COUNT(*) as cnt FROM Author a JOIN 
+(SELECT DISTINCT Id as AId FROM pa_duppairs JOIN Author ON AuthorId = Id)
+ON AId = Id GROUP BY LOWER(name) HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC);
+
+SELECT * FROM paperauthor pa JOIN (
+SELECT * FROM pa_duppairs WHERE AuthorID IN (SELECT Id FROM Author WHERE Name = 'Chung-Kang Peng') ORDER BY AuthorId
+) aa
+ON aa.PaperId = pa.PaperId ORDER BY pa.AuthorId;
+
+CREATE TABLE authorprocessed (id INT PRIMARY KEY, name_title TEXT, name_first TEXT, name_middle TEXT, name_last TEXT, name_suffix TEXT, name TEXT, iFfL TEXT, metaphone_fullname TEXT, affiliation TEXT);
+SELECT COUNT(*) FROM (SELECT name_last, COUNT(*) as cnt FROM authorprocessed GROUP BY name_last HAVING COUNT(*) >= 2 ORDER BY cnt ASC);
+
+SELECT COUNT(*) FROM
+(SELECT name_last, COUNT(*) as cnt
+FROM authorprocessed JOIN namelist ON name_last = surname
+GROUP BY name_last);
+
+SELECT COUNT(*) FROM
+(SELECT name_last, COUNT(*) as cnta
+FROM authorprocessed
+WHERE NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
+GROUP BY name_last HAVING COUNT(*) > 1 ORDER BY cnta);
+
+SELECT COUNT(*) FROM (SELECT name_last, COUNT(*) as cnta
+FROM authorprocessed
+WHERE EXISTS (SELECT NULL FROM engdict WHERE word = name_last)
+AND NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
+GROUP BY name_last ORDER BY cnta);
+
+SELECT COUNT(*) FROM
+(SELECT name_last, COUNT(*) as cnta
+FROM authorprocessed
+WHERE NOT EXISTS (SELECT NULL FROM engdict WHERE word = name_last)
+AND NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
+GROUP BY name_last HAVING COUNT(*) > 1 LIMIT 1000);
+
+CREATE TABLE engdict (word TEXT PRIMARY KEY);
+
+CREATE TABLE namelist (surname TEXT PRIMARY KEY, cnt INTEGER);
+
+SELECT DISTINCT AuthorId FROM pa_duppairs WHERE AuthorID IN (SELECT Id FROM Author WHERE Name = 'Chung-Kang Peng') ORDER BY AuthorId
+
+Authors
+349745
+979292
+1077240
+1457448
+1789568
+
+
+1077240
+1457448
+210761
+
 CREATE TABLE paper_u (Id INTEGER PRIMARY KEY,Title TEXT,Year INTEGER,ConferenceId INTEGER,JournalId INTEGER,Keyword TEXT);
 CREATE INDEX paper_u_text_idx ON paper_u (title);
 
