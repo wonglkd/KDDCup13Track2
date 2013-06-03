@@ -120,6 +120,10 @@ FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
 JOIN awithpapers a ON a.Id = pa1.AuthorId
 GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')));
 
+-- CREATE INDEX pa_coauthors_idx  ON Coauthor (AuthorId, Coauthor);
+CREATE TABLE pa_coauthors_ (AuthorId INT, Coauthor TEXT, cnt INT);
+.import pa_coauthors.csv pa_coauthors_
+
 CREATE TABLE pa_coauthors (AuthorId INT, Coauthor TEXT, cnt INT, PRIMARY KEY (AuthorId, Coauthor));
 
 INSERT INTO pa_coauthors (AuthorId, Coauthor, cnt)
@@ -129,9 +133,6 @@ CREATE INDEX pa_coauthors_authorid_idx  ON pa_coauthors (AuthorId);
 
 DROP TABLE pa_coauthors_;
 
--- CREATE INDEX pa_coauthors_idx  ON Coauthor (AuthorId, Coauthor);
-CREATE TABLE pa_coauthors_ (AuthorId INT, Coauthor TEXT, cnt INT);
-.import pa_coauthors.csv pa_coauthors_
 
 SELECT
 			(SELECT COUNT(*) FROM
