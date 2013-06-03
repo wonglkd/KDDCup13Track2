@@ -48,6 +48,9 @@ prefeat-t: $(GEN_DIR)/Author_f20000_prefeat.pickle
 train: $(GEN_DIR)/model.pickle
 authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authordata/pa_coauthors_u.csv
 
+textdata/Author_processed.csv: process_authors.py data/Author.csv
+	$(EXEC_PREFIX)$^ $@ --format csv
+
 generated/affil_wordcounts.txt: process_authors.py data/Author.csv
 	$(EXEC_PREFIX)$^ --affilwordfreq > $@
 
