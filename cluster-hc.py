@@ -33,7 +33,7 @@ def hcluster(G_sim, threshold_sim):
 		removed = set()
 		adjclusters = [set() for i in xrange(len(cc))]
 		c_sim = nx.to_scipy_sparse_matrix(cc, weight='weight', format='coo')
-		pq = [(sim, r, c) for (sim, r, c) in zip(-c_sim.data, c_sim.row, c_sim.col) if r < c and -sim >= threshold_sim]
+		pq = [(sim, r, c) for (sim, r, c) in zip(-c_sim.data, c_sim.row, c_sim.col) if r < c]
 		for _, r, c in pq:
 			adjclusters[r].add(c)
 			adjclusters[c].add(r)
