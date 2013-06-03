@@ -127,8 +127,9 @@ def main():
 	Y = loadTrainingLabels(args.trainfile, ids)
 
 	# Filling in missing values
-	affil_ind = feat_indices.index('affil_sharedidf')
- 	affil_median = sp.stats.nanmedian(X[:, affil_ind])
+# 	affil_ind = feat_indices.index('affil_sharedidf')
+#  	affil_median = sp.stats.nanmedian(X[:, affil_ind])
+	affil_median = 0
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = affil_median
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = 0.
 	X[np.isnan(X)] = 0.
