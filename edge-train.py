@@ -3,6 +3,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn import cross_validation
 from sklearn.metrics import mean_squared_error
 from common import *
+import multiprocessing
 import argparse
 import features as feat
 import csv
@@ -88,13 +89,13 @@ def main():
 	params = {}
 	# Random Forest
 	params['rf'] = {
- 		'max_features': 'auto', # 6
+ 		'max_features': 'auto', #4, # 9 6
  		'n_estimators': 400, #130
 # 		'n_estimators': 1000, #130
 		'min_samples_split': 1, #3 #10
 		'min_samples_leaf': 2,
 		'random_state': 100,
-		'n_jobs': 8, # -1 = no. of cores on machine
+		'n_jobs': min(multiprocessing.cpu_count(), 8), # -1 = no. of cores on machine
 		'oob_score': True,
 		'verbose': 0,
 		'compute_importances': True
