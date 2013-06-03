@@ -1,10 +1,12 @@
-generated/
-db/
-authordata/
-deprecated/
+generated/*
+db/*
+authordata/*
+deprecated/*
+namesdata/sources
 
 # Can be generated
 data/*_u.csv
+!**/Makefile
 
 *.pickle
 *.tmp
