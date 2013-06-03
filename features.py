@@ -111,7 +111,7 @@ class FeaturesGenerator:
 		f['jarow_midlast'] = jellyfish.jaro_winkler(aa['name_middle']+aa['name_last'], ab['name_middle']+ab['name_last'])
 		
 		f['suffix'] = int(aa['name_suffix'] == ab['name_suffix'] and len(aa['name_suffix']) > 0)
-		f['metaphone'] = int(aa['metaphone_fullname'] == ab['metaphone_fullname'])
+		f['metaphone'] = int(aa['metaphone_fullname'] == ab['metaphone_fullname'] and len(aa['metaphone_fullname']) > 0)
 
 		f.update(self.PFG.getEdgeFeatures(a, b))
 
