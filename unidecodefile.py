@@ -2,18 +2,31 @@
 from unidecode import unidecode
 import fileinput
 import csv
-import sys
+import argparse
 
-if len(sys.argv) < 3:
-	sys.exit(0)	
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('infile', nargs='?', default='-')
+	parser.add_argument('outfile', nargs='?', default='-')
+	parser.add_argument('-c', '--cols', nargs='*', default=[1])
+	parser.add_argument('-a', '--all-cols', action='store_true')
+	args = parser.parse_args()
 
-f_write = open(sys.argv[2], 'wb') if sys.argv[2] != '-' else sys.stdout
-f_in = open(sys.argv[1], 'rb') if sys.argv[1] != '-' else sys.stdin
+	f_in = open(args.infile, 'rb') if args.infile != '-' else sys.stdin
+	f_write = open(args.outfout, 'wb') if args.outfile != '-' else sys.stdout
 
-writer = csv.writer(f_write)
-for i, line in enumerate(csv.reader(f_in)):
-	line[1] = unidecode(unicode(line[1], 'utf-8')).strip().lower()
-# 	line = [unidecode(unicode(cell, 'utf-8')).strip() for cell in line]
-	writer.writerow(line)
-	if (i+1) % 10000 == 0:
-		print i+1, "lines done"
+	args.cols = map(int, args.cols)
+
+	writer = csv.writer(f_write)
+	for i, line in enumerate(csv.reader(f_in)):
+		if args.all_cols:
+			line = [unidecode(unicode(cell, 'utf-8')).strip().lower() for cell in line]
+		else:
+			for c in args.cols:
+				line[c] = unidecode(unicode(line[c], 'utf-8')).strip().lower()
+		writer.writerow(line)
+		if (i+1) % 10000 == 0:
+			print i+1, "lines done"
+
+if __name__ == "__main__":
+	main()
