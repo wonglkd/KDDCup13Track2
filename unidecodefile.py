@@ -30,7 +30,7 @@ def main():
 			line[c] = unidecode(unicode(line[c], 'utf-8')).strip().lower()
 		if args.strip_punc:
 			for c in args.cols:
-				line[c] = line[c].translate(None, punc.replace(' ',''))
+				line[c] = ' '.join(line[c].translate(None, punc.replace(' ','')).split())
 		writer.writerow(line)
 		if (i+1) % 10000 == 0:
 			print i+1, "lines done"
