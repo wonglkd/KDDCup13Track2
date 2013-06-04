@@ -28,11 +28,11 @@ class PaperauthorFeaturesGenerator:
 			SELECT Coauthor FROM pa_coauthors co2
 			WHERE co2.AuthorId = ?)) as common
 		,
-			(SELECT COUNT(Coauthor) FROM pa_coauthors co3
-			WHERE co3.AuthorId = ?) as cnt1
+			(SELECT cnt FROM pa_coauthors_total
+			WHERE AuthorId = ?) as cnt1
 		,
-			(SELECT COUNT(Coauthor) FROM pa_coauthors co4
-			WHERE co4.AuthorId = ?) as cnt2'''
+			(SELECT cnt FROM pa_coauthors_total
+			WHERE AuthorId = ?) as cnt2'''
 	coauthor_query_w_ = '''SELECT
 			(SELECT IFNULL(SUM(mc), 0) FROM (SELECT MIN(cnt) as mc FROM
 			pa_coauthors co0 JOIN
@@ -44,11 +44,23 @@ class PaperauthorFeaturesGenerator:
 			GROUP BY co_.Coauthor
 			)) as common
 		,
-			(SELECT SUM(cnt) FROM pa_coauthors co3
-			WHERE co3.AuthorId = ?) as cnt1
+			(SELECT total FROM pa_coauthors_total
+			WHERE AuthorId = ?) as cnt1
 		,
-			(SELECT SUM(cnt) FROM pa_coauthors co4
-			WHERE co4.AuthorId = ?) as cnt2'''
+			(SELECT total FROM pa_coauthors_total
+			WHERE AuthorId = ?) as cnt2'''
+	coauthor_query_f_ = '''SELECT IFNULL(SUM(CoauthorF),0) FROM
+		(SELECT co0.Coauthor, co0.AuthorId, co0.cnt, pact.total, co0.cnt*1.0 / pact.total As CoauthorF
+		FROM
+			(pa_coauthors co0 JOIN
+			(SELECT Coauthor FROM pa_coauthors co1
+			WHERE co1.AuthorId = ?
+			INTERSECT
+			SELECT Coauthor FROM pa_coauthors co2
+			WHERE co2.AuthorId = ?) co_ ON co_.Coauthor = co0.Coauthor)
+			JOIN pa_coauthors_total pact ON pact.AuthorId = co0.AuthorId
+			WHERE co0.AuthorId IN (?,?)
+			GROUP BY co0.Coauthor, co0.AuthorId)'''
 
 	pa_files_ = {
 		'name': 'authordata/pa_names_u.csv',
@@ -65,18 +77,19 @@ class PaperauthorFeaturesGenerator:
 		'pa_name',
 		'pa_affil',
 		'names',
-		'namesW',
+		'namesF',
 		'affiliations',
-		'affiliationsW',
+		'affiliationsF',
 		'conferences',
-		'conferencesW',
+		'conferencesF',
 		'journals',
-		'journalsW',
+		'journalsF',
 		'years',
 		'coauthor',
 		'coauthorW',
+		'coauthorF',
 		'paperIDs',
-		'paperIDsW',
+		'paperIDsF',
 # 		'titles_dup',
 		'titles_dupW',
 		'yearscore',
@@ -166,6 +179,9 @@ class PaperauthorFeaturesGenerator:
 		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_w_, [a1, a2, a1, a2, a1, a2]).next()
 		return self.sim(common, len1, len2)
 
+	def getCoauthorsSimF(self, a1, a2):
+		return selectDB(self.conn_pa, self.coauthor_query_f_,  [a1, a2, a1, a2]).next()[0]
+
 	def getTotal(self, field, aid):
 		if field not in self.pa_by_authors_totals[aid]:
 			self.pa_by_authors_totals[aid][field] = sum(self.pa_by_authors[aid][field].values())
@@ -237,7 +253,7 @@ class PaperauthorFeaturesGenerator:
 			'pa_name': self.getPABoth('name', author1, author2),
 			'pa_affil': self.getPABoth('affiliation', author1, author2),
 			'names': 0,
-			'namesW': 0,
+			'namesF': 0,
 			'affiliations': 0,
 			'affiliationsF': 0,
 			'conferences': 0,
@@ -248,6 +264,7 @@ class PaperauthorFeaturesGenerator:
 			'yearscore': 0,
 			'coauthor': 0,
 			'coauthorW': 0,
+			'coauthorF': 0,
 			'paperIDs': 0,
 			'paperIDsF': 0,
 # 			'titles_dup': 0,
@@ -269,6 +286,7 @@ class PaperauthorFeaturesGenerator:
 				'yearscore': self.getYearScore(author1, author2),
 				'coauthor': self.getCoauthorsSim(author1, author2),
 				'coauthorW': self.getCoauthorsSimW(author1, author2),
+				'coauthorF': self.getCoauthorsSimF(author1, author2),
 				'paperIDs': self.getSetSim('paperids', author1, author2),
 				'paperIDsF': self.getSetSimF('paperids', author1, author2),
 				'titles_dupW': self.getTitlesOverlap(author1, author2),

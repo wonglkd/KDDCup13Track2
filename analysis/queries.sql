@@ -120,9 +120,9 @@ FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
 JOIN awithpapers a ON a.Id = pa1.AuthorId
 GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')));
 
--- CREATE INDEX pa_coauthors_idx  ON Coauthor (AuthorId, Coauthor);
+----
 CREATE TABLE pa_coauthors_ (AuthorId INT, Coauthor TEXT, cnt INT);
-.import pa_coauthors.csv pa_coauthors_
+.import pa_coauthors_u_noheader.csv pa_coauthors_
 
 CREATE TABLE pa_coauthors (AuthorId INT, Coauthor TEXT, cnt INT, PRIMARY KEY (AuthorId, Coauthor));
 
@@ -133,6 +133,9 @@ CREATE INDEX pa_coauthors_authorid_idx  ON pa_coauthors (AuthorId);
 
 DROP TABLE pa_coauthors_;
 
+CREATE TABLE pa_coauthors_total (AuthorId INT PRIMARY KEY, cnt INT, total INT);
+INSERT INTO pa_coauthors_total (AuthorId, cnt, total)
+SELECT AuthorId, COUNT(*), SUM(cnt) FROM pa_coauthors GROUP BY AuthorId;
 
 SELECT
 			(SELECT COUNT(*) FROM
@@ -142,11 +145,11 @@ SELECT
 			SELECT Coauthor FROM pa_coauthors co2
 			WHERE co2.AuthorId = 364837)) as common
 		,
-			(SELECT COUNT(Coauthor) FROM pa_coauthors co3
-			WHERE co3.AuthorId = 1688847) as cnt1
+			(SELECT cnt FROM pa_coauthors_total
+			WHERE AuthorId = 1688847) as cnt1
 		,
-			(SELECT COUNT(Coauthor) FROM pa_coauthors co3
-			WHERE co3.AuthorId = 364837) as cnt2
+			(SELECT cnt FROM pa_coauthors_total
+			WHERE AuthorId = 364837) as cnt2
 ;
 
 SELECT
@@ -160,11 +163,11 @@ SELECT
 			GROUP BY co_.Coauthor
 			)) as common
 		,
-			(SELECT SUM(cnt) FROM pa_coauthors co3
-			WHERE co3.AuthorId = 1688847) as cnt1
+			(SELECT total FROM pa_coauthors_total
+			WHERE AuthorId = 1688847) as cnt1
 		,
-			(SELECT SUM(cnt) FROM pa_coauthors co3
-			WHERE co3.AuthorId = 364837) as cnt2
+			(SELECT total FROM pa_coauthors_total
+			WHERE AuthorId = 364837) as cnt2
 ;
 
 
@@ -179,13 +182,29 @@ SELECT
 			GROUP BY co_.Coauthor
 			)) as common
 		,
-			(SELECT SUM(cnt) FROM pa_coauthors co3
-			WHERE co3.AuthorId = 426) as cnt1
+			(SELECT total FROM pa_coauthors_total
+			WHERE AuthorId = 426) as cnt1
 		,
-			(SELECT SUM(cnt) FROM pa_coauthors co3
-			WHERE co3.AuthorId = 1107709) as cnt2
+			(SELECT total FROM pa_coauthors_total
+			WHERE AuthorId = 1107709) as cnt2
 ;
- 
+
+-- coauthorF
+
+SELECT IFNULL(SUM(CoauthorF),0) FROM
+(SELECT co0.Coauthor, co0.AuthorId, co0.cnt, pact.total, co0.cnt*1.0 / pact.total As CoauthorF
+FROM
+			(pa_coauthors co0 JOIN
+			(SELECT Coauthor FROM pa_coauthors co1
+			WHERE co1.AuthorId = 1688847
+			INTERSECT
+			SELECT Coauthor FROM pa_coauthors co2
+			WHERE co2.AuthorId = 364837) co_ ON co_.Coauthor = co0.Coauthor)
+			JOIN pa_coauthors_total pact ON pact.AuthorId = co0.AuthorId
+			WHERE co0.AuthorId IN (364837,1688847)
+			GROUP BY co0.Coauthor, co0.AuthorId)
+;
+
 .mode csv
 .header ON
 .output paper_duplicatetitles.csv
