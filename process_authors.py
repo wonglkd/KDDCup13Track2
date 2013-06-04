@@ -14,6 +14,8 @@ from unidecode import unidecode
 from pprint import pprint
 import jellyfish
 
+punc = ".;,-'~:_@?\|\\/\"+-)}{(&$*%=>^ "
+
 def loadAuthors(authorfile, printaffilwordfreq=False):
 	reader = csv.reader(open(authorfile, 'rb'))
 	reader.next()
@@ -23,7 +25,6 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	affiliations = []
  	print_err("Parsing names and counts")
 	#[^~:_`@\?\\|\'/\"\.\-0-9a-z;,\n\r \+\-\)\}&%\$\*\{\>=\^]
-	punc = ".;,-'~:_@?\|\\/\"+-)}{(&$*%=>^ "
 	titles_c = nameparser.constants.TITLES - set(['wing'])
 	id2affiliation = {}
 	for i, line in enumerate(reader):
