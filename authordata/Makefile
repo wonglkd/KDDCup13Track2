@@ -38,3 +38,6 @@ pa_titles.csv: $(DB_FILE)
 
 %_u.csv: $(ROOT_DIR)/unidecodefile.py %.csv
 	$^ $@
+
+%_u_strippunc.csv: $(ROOT_DIR)/unidecodefile.py %.csv
+	$^ $@ -p
