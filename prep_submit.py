@@ -8,7 +8,10 @@ import sys
 
 def skip_front(iterable):
     for line in iterable:
-		yield line.split(';')[1]
+    	if ';' in line:
+			yield line.split(';')[1]
+		else:
+			yield line
 
 def main():
 	parser = argparse.ArgumentParser()
