@@ -125,8 +125,8 @@ $(GEN_DIR)/%-bins_submit.csv: prep_submit.py $(GEN_DIR)/%_bins.txt
 
 # awk '{ if ($3 >= 0.6) print $0; }'
 
-$(GEN_DIR)/%.clusters: cluster-hc.py $(GEN_DIR)/%.prob
+$(GEN_DIR)/%.clusters: cluster_hc.py $(GEN_DIR)/%.prob
 	$(EXEC_PREFIX)$^ $@ > $(GEN_DIR)/$*.clusters-stats
 
-$(GEN_DIR)/%.clusters-sim: cluster-cc.py $(GEN_DIR)/%.sim
+$(GEN_DIR)/%.clusters-sim: cluster_cc.py $(GEN_DIR)/%.sim
 	$(EXEC_PREFIX)$^ $@
