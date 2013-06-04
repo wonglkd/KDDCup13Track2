@@ -34,6 +34,12 @@ GROUP BY AuthorId, p.JournalId;
 SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId
 GROUP BY AuthorId, pa.PaperId;
 
+.output pa_paperids_inpaper_titlenoblank.csv
+SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId JOIN paper p ON PaperId = p.Id
+WHERE title <> ""
+GROUP BY AuthorId, pa.PaperId;
+
+
 CREATE TABLE pa_duppairs (PaperId INTEGER, AuthorId INTEGER, Count INTEGER, PRIMARY KEY (PaperId, AuthorId));
 CREATE INDEX pa_duppairs_paperidx ON pa_duppairs (PaperId);
 CREATE INDEX pa_duppairs_authoridx ON pa_duppairs (AuthorId);
@@ -107,8 +113,15 @@ CREATE INDEX paper_u_text_idx ON paper_u (title);
 .output pa_titles_dup.csv
 SELECT pa.AuthorId, p1.Title, COUNT(*) FROM paper_u p1 JOIN paperauthor pa ON p1.Id = pa.paperId
 JOIN awithpapers awp ON awp.Id=AuthorId
-WHERE EXISTS (SELECT * FROM paper_u p2 WHERE p2.Title = p1.Title AND (p2.Id < p1.Id OR p2.Id > p1.Id))
-AND p1.Title <> ""
+WHERE EXISTS (SELECT * FROM paper_u p2 WHERE p2.Title = p1.Title AND (p2.Id < p1.Id OR p2.Id > p1.Id)) AND
+p1.Title <> ""
+GROUP BY AuthorId, p1.Title
+ORDER BY p1.Title;
+
+.output pa_titles.csv
+SELECT pa.AuthorId, p1.Title, COUNT(*) FROM paper_u p1 JOIN paperauthor pa ON p1.Id = pa.paperId
+JOIN awithpapers awp ON awp.Id=AuthorId
+WHERE p1.Title <> ""
 GROUP BY AuthorId, p1.Title
 ORDER BY p1.Title;
 
