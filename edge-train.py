@@ -52,18 +52,20 @@ def m_cv(clf, X, Y, kfolds):
 # 	for cs in chunksize:
 # 		cv = cross_validation.StratifiedShuffleSplit(Y, n_iter=1, train_size=cs)
 
-def loadTrainingLabels(trainfilename, ids):
+def loadTrainingLabels(trainfilename, idset):
  	Y = []
+ 	ids = []
  	reader = csv.reader(skip_comments(open(trainfilename, 'rb')))
- 	for i, (line, (id1, id2)) in enumerate(zip(reader, ids)):
+ 	for i, line in enumerate(reader):
  		line[:3] = map(int, line[:3])
  		Y.append(line[0])
- 		if line[1] != id1 or line[2] != id2:
- 			print_err("Mismatch!", line[1], line[2], id1, id2)
- 			raise Exception("Mismatch of train.csv and train.feat")
+ 		if (line[1], line[2]) not in idset:
+ 			print_err("Not found!", line[1], line[2])
+ 			raise Exception("Training instance not present in feature file")
+ 		ids.append((line[1], line[2]))
  		if (i+1) % 10000 == 0:
  			print_err(i+1, 'rows done')
- 	return np.asarray(Y)
+ 	return np.asarray(Y), ids
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -116,7 +118,8 @@ def main():
 	
 	print params[args.clf]
 
-	ids, X = feat.load_features(args.featfile)
+	X_ids, X = feat.load_features(args.featfile)
+	idmap = {id: i for i, id in enumerate(X_ids)}
  	feat_indices = feat.FeaturesGenerator.fields
  	feat_ind_remaining = [i for i, faid in enumerate(feat_indices) if faid not in feat_to_remove]
  	feat_indices = [v for v in feat_indices if v not in feat_to_remove]
@@ -125,7 +128,9 @@ def main():
 	print feat_indices
 
 	print_err("Loading training dataset labels")
-	Y = loadTrainingLabels(args.trainfile, ids)
+	Y, Y_ids = loadTrainingLabels(args.trainfile, set(X_ids))
+	training_indices = [idmap[id] for id in Y_ids]
+	X = X[training_indices]
 
 	# Filling in missing values
 # 	affil_ind = feat_indices.index('affil_sharedidf')
