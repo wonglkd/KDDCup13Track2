@@ -120,7 +120,7 @@ $(GEN_DIR)/%_hc.clusters: cluster_hc.py $(GEN_DIR)/%.prob
 	$(EXEC_PREFIX)$^ $@ > $(GEN_DIR)/$*.hc.clusters-stats
 
 $(GEN_DIR)/%_kruskal.clusters: cluster_kruskal.py $(GEN_DIR)/%.prob
-	$(EXEC_PREFIX)$^ $@ > $(GEN_DIR)/$*.kruskal.clusters-stats
+	$(EXEC_PREFIX)$^ $@ -A > $(GEN_DIR)/$*.kruskal.clusters-stats
 
 $(GEN_DIR)/%.clusters-sim: cluster_cc.py $(GEN_DIR)/%.sim
 	$(EXEC_PREFIX)$^ $@
