@@ -7,8 +7,8 @@ from pprint import pprint
 import sys
 
 def skip_front(iterable):
-    for line in iterable:
-    	if ';' in line:
+	for line in iterable:
+		if ';' in line:
 			yield line.split(';')[1]
 		else:
 			yield line
