@@ -13,7 +13,7 @@ def main():
 	args = parser.parse_args()
 
 	f_in = open(args.infile, 'rb') if args.infile != '-' else sys.stdin
-	f_write = open(args.outfout, 'wb') if args.outfile != '-' else sys.stdout
+	f_write = open(args.outfile, 'wb') if args.outfile != '-' else sys.stdout
 
 	args.cols = map(int, args.cols)
 
