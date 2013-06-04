@@ -64,7 +64,7 @@ class PaperauthorFeaturesGenerator:
 
 	pa_files_ = {
 # 		'name': 'authordata/pa_names_u.csv',
-		'name': 'authordata/pa_names_u_strippunc.csv',
+		'fullname': 'authordata/pa_names_u_strippunc.csv',
  		'affiliation': 'authordata/pa_affiliation_u.csv',
 		'conferences': 'authordata/pa_conferences.csv',
 		'paperids': 'authordata/pa_paperids.csv',
@@ -77,10 +77,10 @@ class PaperauthorFeaturesGenerator:
 	
 	fields = [
 		'has_papers',
-		'pa_name',
+		'pa_fullname',
 		'pa_affil',
-		'names',
-		'namesF',
+		'fullnames',
+		'fullnamesF',
 		'affiliations',
 		'affiliationsF',
 		'conferences',
@@ -269,10 +269,10 @@ class PaperauthorFeaturesGenerator:
 # 		self.getAuthor(author2)
 		f = defaultdict(float)
 		f.update({
-			'pa_name': self.getPABoth('name', author1, author2),
+			'pa_fullname': self.getPABoth('fullname', author1, author2),
 			'pa_affil': self.getPABoth('affiliation', author1, author2),
-			'names': 0,
-			'namesF': 0,
+			'fullnames': 0,
+			'fullnamesF': 0,
 			'affiliations': 0,
 			'affiliationsF': 0,
 			'conferences': 0,
@@ -295,8 +295,8 @@ class PaperauthorFeaturesGenerator:
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
 				'has_papers': 2,
-				'names': self.getSetSim('name', author1, author2),
-				'namesF': self.getSetSimF('name', author1, author2),
+				'fullnames': self.getSetSim('fullname', author1, author2),
+				'fullnamesF': self.getSetSimF('fullname', author1, author2),
 				'affiliations': self.getSetSim('affiliation', author1, author2),
 				'affiliationsF': self.getSetSimF('affiliation', author1, author2),
 				'conferences': self.getSetSim('conferences', author1, author2),
