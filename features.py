@@ -45,7 +45,9 @@ class FeaturesGenerator:
 		'jarow_firstmid',
 		'jarow_midlast',
 		'firstmidswap',
-		'metaphone'
+		'metaphone',
+		'subsetprefix',
+		'offbylastone'
 	] + featEdges.PaperauthorFeaturesGenerator.fields
 
 	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
@@ -98,6 +100,21 @@ class FeaturesGenerator:
 				f['firstmidswap'] = 1
 		else:
 			f['firstmidswap'] = 0
+
+		# 1 = off by two, 2 = off by one
+		f['offbylastone'] = 0
+		
+		la, lb = len(aa['fullname']), len(ab['fullname'])
+		if aa['fullname'].startswith(ab['fullname']):
+			f['subsetprefix'] = lb
+			if la - lb <= 2:
+				f['offbylastone'] = 3 - (la - lb)
+		elif ab['fullname'].startswith(aa['fullname']):
+			f['subsetprefix'] = la
+			if lb - la <= 2:
+				f['offbylastone'] = 3 - (lb - la)
+		else:
+			f['subsetprefix'] = 0
 		
 		f['lastidf'] = 0 if (aa['name_last'] != ab['name_last'] or not aa['name_last']) else aa['lastname_idf']
 		f['iFfLidf'] = 0 if (aa['iFfL'] != ab['iFfL'] or not aa['iFfL']) else aa['iFfL_idf']
