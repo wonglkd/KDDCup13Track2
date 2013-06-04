@@ -19,7 +19,7 @@ def load_features(featurefile):
 	ids, X = [], []
 	for i, line in enumerate(reader):
 		line[1:] = map(num, line[1:])
-		ids.append(map(int, line[0].split(",")))
+		ids.append(tuple(map(int, line[0].split(","))))
 		X.append(line[1:])
  		if (i+1) % 10000 == 0:
  			print_err(i+1, ' rows done')
