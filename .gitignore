@@ -1,15 +1,24 @@
-generated/*
-db/*
 authordata/*
 deprecated/*
 namesdata/sources
 
+# Too big
+db/*
+data/Paper.csv
+data/PaperAuthor.csv
+
 # Can be generated
+generated/*
+namesdata/Author_processed.csv
 data/*_u.csv
+
+# Unignore all makefiles
 !**/Makefile
 
 *.pickle
 *.tmp
+*.tmp.csv
+*.notrack.csv
 *.log
 
 *.py[cod]
