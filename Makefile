@@ -1,8 +1,9 @@
+include Makefile.inc
+
 DATA_DIR := data
 GEN_DIR := generated
 
 AUTHOR_SET := Author
-# AUTHOR_SET := Author_f20000
 PREFEAT := $(GEN_DIR)/$(AUTHOR_SET)_prefeat.pickle
 BIN_METHODS := iFfL samename fullparsedname offbylastone token ngrams fF3L iFoffbyoneL 2FoffbyoneL metaphone
 
@@ -16,19 +17,6 @@ EVALUATE_SETS := 20130531-oldtrainingdata 20130531-afternoon 20130531-1325 20130
 EVALUATE_FILES := $(GEN_DIR)/best-submit.csv $(GEN_DIR)/20130530/combined_716eef6-submit.csv $(foreach i,$(EVALUATE_SETS),$(GEN_DIR)/$i/combined-submit.csv)
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
 TRAIN_PARA := --removefeat conferences journals fullnames coauthor paperIDs affiliations jaro_distance suffix last jaro_winkler
-
-# Platform specific stuff
-ifeq ($(OS),Windows_NT)
-	# Windows
-	EXEC_PREFIX := "C:\Program Files (x86)\Python27\python.exe" 
-	SORT_BIN := "C:\MinGW\msys\1.0\bin\sort"
-else
-	# Mac/Linux
-	EXEC_PREFIX := time ./
-	SORT_BIN := sort
-endif
-
-#sim-t: $(GEN_DIR)/iFfL.sim
 
 .PHONY:
 .SECONDARY:
