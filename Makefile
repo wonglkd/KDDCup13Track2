@@ -55,7 +55,7 @@ generated/affil_wordcounts.txt: process_authors.py data/Author.csv
 	$(EXEC_PREFIX)$^ --affilwordfreq > $@
 
 %_u.csv: unidecodefile.py %.csv
-	$(EXEC_PREFIX)$^ $@
+	$(EXEC_PREFIX)$^ $@ --all-cols
 
 %_idified.csv: idify.py %.csv
 	$(EXEC_PREFIX)$^ $@
