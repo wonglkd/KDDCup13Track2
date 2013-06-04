@@ -80,9 +80,9 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
-	parser.add_argument('--interconnectivity', default=0.80)
-	parser.add_argument('--density', default=0.80)
-	parser.add_argument('--min-edge', default=0.20) #0.15
+	parser.add_argument('-t', '--interconnectivity', default=0.80)
+	parser.add_argument('-d', '--density', default=0.80)
+	parser.add_argument('-m', '--min-edge', default=0.10)
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
@@ -100,7 +100,7 @@ def main():
 
  	print_err("Writing clusters")
  	
-	G_nsim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb'), nodetype=int, delimiter=','))
+	G_nsim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
  	outputClusters(clusters, open(args.outfile, 'wb'), G_nsim, threshold_density)
 
 if __name__ == "__main__":
