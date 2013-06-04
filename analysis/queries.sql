@@ -62,28 +62,40 @@ SELECT COUNT(*) FROM
 FROM authorprocessed JOIN namelist ON name_last = surname
 GROUP BY name_last);
 
+-- no. of names not in whitelist
 SELECT COUNT(*) FROM
 (SELECT name_last, COUNT(*) as cnta
 FROM authorprocessed
 WHERE NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
 GROUP BY name_last HAVING COUNT(*) > 1 ORDER BY cnta);
 
+-- no. of names in blacklist and not in whitelist
 SELECT COUNT(*) FROM (SELECT name_last, COUNT(*) as cnta
 FROM authorprocessed
 WHERE EXISTS (SELECT NULL FROM engdict WHERE word = name_last)
 AND NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
 GROUP BY name_last ORDER BY cnta);
 
+-- no. of names that are not in whitelist and not in blacklist, and occurring more than once
 SELECT COUNT(*) FROM
 (SELECT name_last, COUNT(*) as cnta
 FROM authorprocessed
 WHERE NOT EXISTS (SELECT NULL FROM engdict WHERE word = name_last)
-AND NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
-GROUP BY name_last HAVING COUNT(*) > 1 LIMIT 1000);
+AND NOT EXISTS (SELECT NULL FROM lastname WHERE name_last = lastname.name)
+GROUP BY name_last HAVING COUNT(*) > 1);
+
+-- no
 
 CREATE TABLE engdict (word TEXT PRIMARY KEY);
 
 CREATE TABLE namelist (surname TEXT PRIMARY KEY, cnt INTEGER);
+
+CREATE TABLE lastname_2000 (surname TEXT PRIMARY KEY, cnt INTEGER);
+CREATE TABLE lastname_1990 (surname TEXT PRIMARY KEY, per FLOAT);
+CREATE TABLE engdict (word TEXT PRIMARY KEY);
+CREATE TABLE lastname (name TEXT PRIMARY KEY);
+INSERT INTO lastname
+SELECT surname FROM (SELECT surname FROM lastname_1990 UNION SELECT surname FROM lastname_2000);
 
 SELECT DISTINCT AuthorId FROM pa_duppairs WHERE AuthorID IN (SELECT Id FROM Author WHERE Name = 'Chung-Kang Peng') ORDER BY AuthorId
 
