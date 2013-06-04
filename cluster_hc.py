@@ -82,7 +82,7 @@ def main():
 	parser.add_argument('outfile', nargs='?')
 	parser.add_argument('-t', '--interconnectivity', default=0.80)
 	parser.add_argument('-d', '--density', default=0.80)
-	parser.add_argument('-m', '--min-edge', default=0.10)
+	parser.add_argument('-m', '--min-edge', default=0.05)
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
