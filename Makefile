@@ -15,7 +15,7 @@ SUBMIT_FILES := $(GEN_DIR)/combined-submit.csv
 EVALUATE_SETS := 20130531-oldtrainingdata 20130531-afternoon 20130531-1325 20130531-1025 20130531-0800 20130530 20130601-restore 20130601-restore2
 EVALUATE_FILES := $(GEN_DIR)/best-submit.csv $(GEN_DIR)/20130530/combined_716eef6-submit.csv $(foreach i,$(EVALUATE_SETS),$(GEN_DIR)/$i/combined-submit.csv)
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
-TRAIN_PARA := --removefeat conferences journals names coauthor paperIDs affiliations jaro_distance suffix last jaro_winkler
+TRAIN_PARA := --removefeat conferences journals fullnames coauthor paperIDs affiliations jaro_distance suffix last jaro_winkler
 
 # Platform specific stuff
 ifeq ($(OS),Windows_NT)
