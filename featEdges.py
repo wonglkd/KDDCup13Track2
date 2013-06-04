@@ -63,13 +63,16 @@ class PaperauthorFeaturesGenerator:
 			GROUP BY co0.Coauthor, co0.AuthorId)'''
 
 	pa_files_ = {
-		'name': 'authordata/pa_names_u.csv',
+# 		'name': 'authordata/pa_names_u.csv',
+		'name': 'authordata/pa_names_u_strippunc.csv',
  		'affiliation': 'authordata/pa_affiliation_u.csv',
 		'conferences': 'authordata/pa_conferences.csv',
 		'paperids': 'authordata/pa_paperids.csv',
+		'paperids_inpaper_titlenoblank': 'authordata/pa_paperids_inpaper_titlenoblank.csv',
 		'journals': 'authordata/pa_journals.csv',
 		'years': 'authordata/pa_years.csv',
-		'titles_dup_idified': 'authordata/pa_titles_dup_idified.csv'
+		'titles_idified': 'authordata/pa_titles_idified.csv'
+# 		'titles_dup_idified': 'authordata/pa_titles_dup_idified.csv'
 	}
 	
 	fields = [
@@ -90,6 +93,8 @@ class PaperauthorFeaturesGenerator:
 		'coauthorF',
 		'paperIDs',
 		'paperIDsF',
+# 		'paperIDs_p_title',
+# 		'paperIDs_p_titleF'
 # 		'titles_dup',
 		'titles_dupW',
 		'yearscore',
@@ -101,6 +106,7 @@ class PaperauthorFeaturesGenerator:
 		'journals',
 		'years',
 		'paperids',
+		'paperids_inpaper_titlenoblank',
 		'titles_dup_idified'
 	])
 	
@@ -241,8 +247,21 @@ class PaperauthorFeaturesGenerator:
 		return shared_terms_sum(terms1, terms2)
 
 	def getTitlesOverlap(self, a1, a2):
-		common_titles, _, _ = self.dictSimW(self.pa_by_authors[a1]['titles_dup_idified'], self.pa_by_authors[a2]['titles_dup_idified'])
-		common_paperids, _, _ = self.dictSimW(self.pa_by_authors[a1]['paperids'], self.pa_by_authors[a2]['paperids'])
+# 		titles1, titles2 = self.pa_by_authors[a1]['titles_dup_idified'], self.pa_by_authors[a2]['titles_dup_idified']
+# 		if not titles1 or not titles2:
+# 			return 0
+# 		common_titles = set(title1.keys()) & set(title2.keys())
+# 		if not common_titles:
+# 			return 0
+# 		paperids1, paperids2 = self.pa_by_authors[a1]['paperids'], self.pa_by_authors[a2]['paperids']
+# 		common_paperids = set(paperids1.keys()) & set(paperids2.keys())
+# 		common_titles -= common_paperids
+# 
+# 		common = set(a.keys()) & set(b.keys())
+# 		total_common = sum([min(a[v], b[v]) for v in common])
+
+		common_titles, _, _ = self.dictSimW(self.pa_by_authors[a1]['titles_idified'], self.pa_by_authors[a2]['titles_idified'])
+		common_paperids, _, _ = self.dictSimW(self.pa_by_authors[a1]['paperids_inpaper_titlenoblank'], self.pa_by_authors[a2]['paperids_inpaper_titlenoblank'])
 		return common_titles - common_paperids
 
 	def getEdgeFeatures(self, author1, author2):
@@ -267,6 +286,8 @@ class PaperauthorFeaturesGenerator:
 			'coauthorF': 0,
 			'paperIDs': 0,
 			'paperIDsF': 0,
+# 			'paperIDs_p_title': 0,
+# 			'paperIDs_p_titleF': 0,
 # 			'titles_dup': 0,
 			'titles_dupW': 0,
 			'pubTextSim': 0
@@ -289,6 +310,8 @@ class PaperauthorFeaturesGenerator:
 				'coauthorF': self.getCoauthorsSimF(author1, author2),
 				'paperIDs': self.getSetSim('paperids', author1, author2),
 				'paperIDsF': self.getSetSimF('paperids', author1, author2),
+# 				'paperIDs_p_title': self.getSetSim('paperids_inpaper_titlenoblank', author1, author2),
+# 				'paperIDs_p_titleF': self.getSetSimF('paperids_inpaper_titlenoblank', author1, author2),
 				'titles_dupW': self.getTitlesOverlap(author1, author2),
 # 				'titles_dup': self.getSetSim('titles_dup_idified', author1, author2),
 # 				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2),
@@ -334,7 +357,7 @@ def main():
 	  		rows += 1
 
  		if (i+1) % 100 == 0:
- 			print_err(i+1, ' rows done;', rows, ' rows extracted')
+ 			print_err(i+1, 'rows done;', rows, 'rows extracted')
  	
 	print_err("Rows skipped: {0}".format(rows_skipped))
 
