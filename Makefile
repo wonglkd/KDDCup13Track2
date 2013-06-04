@@ -10,8 +10,8 @@ BIN_FILES = $(foreach i,$(BIN_METHODS),$(GEN_DIR)/$i_bins.txt)
 EDGE_FILES := $(GEN_DIR)/iFfL_edges.txt
 FEAT_FILES := $(GEN_DIR)/iFfL.feat
 #SIM_FILES := $(GEN_DIR)/iFfL.sim
-CLUSTER_FILES := $(GEN_DIR)/combined.clusters
-SUBMIT_FILES := $(GEN_DIR)/combined-submit.csv
+CLUSTER_FILES := $(GEN_DIR)/combined_kruskal.clusters
+SUBMIT_FILES := $(GEN_DIR)/combined_kruskal-submit.csv
 EVALUATE_SETS := 20130531-oldtrainingdata 20130531-afternoon 20130531-1325 20130531-1025 20130531-0800 20130530 20130601-restore 20130601-restore2
 EVALUATE_FILES := $(GEN_DIR)/best-submit.csv $(GEN_DIR)/20130530/combined_716eef6-submit.csv $(foreach i,$(EVALUATE_SETS),$(GEN_DIR)/$i/combined-submit.csv)
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
@@ -128,8 +128,11 @@ $(GEN_DIR)/%-bins_submit.csv: prep_submit.py $(GEN_DIR)/%_bins.txt
 
 # awk '{ if ($3 >= 0.6) print $0; }'
 
-$(GEN_DIR)/%.clusters: cluster_hc.py $(GEN_DIR)/%.prob
-	$(EXEC_PREFIX)$^ $@ > $(GEN_DIR)/$*.clusters-stats
+$(GEN_DIR)/%_hc.clusters: cluster_hc.py $(GEN_DIR)/%.prob
+	$(EXEC_PREFIX)$^ $@ > $(GEN_DIR)/$*.hc.clusters-stats
+
+$(GEN_DIR)/%_kruskal.clusters: cluster_kruskal.py $(GEN_DIR)/%.prob
+	$(EXEC_PREFIX)$^ $@ > $(GEN_DIR)/$*.kruskal.clusters-stats
 
 $(GEN_DIR)/%.clusters-sim: cluster_cc.py $(GEN_DIR)/%.sim
 	$(EXEC_PREFIX)$^ $@
