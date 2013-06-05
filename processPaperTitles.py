@@ -11,20 +11,29 @@ import scipy as sp
 import re
 
 def getTitleKeywords(filename):
-	titles = []
-	ids = []
-	print_err("Reading file", filename)
-	with open(filename, 'rb') as f:
-		reader = csv.reader(f)
-		header = reader.next()
-		for i, line in enumerate(reader):
+	for i, line in readcsv_iter(filename):
+		if (line[1] + line[5]).strip():
 			# Strip HTML tags
 			yield re.sub('<[^<]+?>', ' ', line[1] + ' ' + line[5])
-#			titles.append(re.sub('<[^<]+?>', ' ', line[1] + ' ' + line[5]))
-#			ids.append(int(line[0]))
-			if (i+1) % 10000 == 0:
-				print_err(i+1, 'lines read')
-#	return titles, ids
+
+def getIdsFromPapers(filename):
+	idmap = {}
+	i = 0
+	for _, line in readcsv_iter(filename):
+		if (line[1] + line[5]).strip():
+			idmap[int(line[0])] = i
+			i += 1
+	return idmap
+	
+def loadPaperIDsByAuthor(filename):
+	paperids_by_author = defaultdict(list)
+	author_ids = set()
+	for i, line in readcsv_iter(filename):
+		# id, paperid, cnt
+		line[0:3] = map(int, line[0:3])
+		paperids_by_author[line[0]].append(line[1])
+		author_ids.add(line[0])
+	return paperids_by_author, author_ids
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -33,51 +42,37 @@ def main():
 	parser.add_argument('-o', '--output', default='textdata/papertitles_tfidf.pickle')
 	args = parser.parse_args()
 
-	print_err("Reading Titles")	
-	#titles, ids = getTitleKeywords(args.paperfile)
-	
 	print_err("Computing TF-IDF")
 	more_stop_words = ['discussion', 'paper', 'method', 'keyword', 'methods', 'case study', 'keywords', 'study', 'research', 'submission', 'evaluation', 'approach', 'framework', 'analysis']
 	more_stop_words += ['conference', 'journal', 'international', 'national', 'on', 'workshop', 'symposium', 'int', 'conf']
 	more_stop_words += ['keywords', 'based', 'using', 'analysis', 'words', 'key', 'word', 'design', 'test', 'title', 'titles', 'high', 'low', 'new', 'novel', 'effects', 'performance', 'applications', 'application']
 	more_stop_words += ['und', 'gan', 'ein'] # and
 	more_stop_words += ['baseado', 'na'] # based on
-	more_stop_words += ['mm'] # 'based on'
-	tfidfs, words_freq = pT.computeTFIDFs(getTitleKeywords(args.paperfile), more_stop_words, words_freq=True, min_df=2)
-
-	pprint(words_freq)
-
-	return
+	more_stop_words += ['mm'] 
+	tfidfs = pT.computeTFIDFs(getTitleKeywords(args.paperfile), more_stop_words, min_df=2)
 	
-	print_err("Producing id-to-index map")
-	id2ind = split_ids(len(args.titlefiles), boundaries, ids)
-	
-	print_err("Loading pubs by author")
-	pubs_by_author, author_ids = loadPubsByAuthor(args.pafiles)
+	print_err("Reading id-to-index map")
+	id2ind = getIdsFromPapers(args.paperfile)
 
+	print_err("Loading paperids by author")
+	paperids_by_author, author_ids = loadPaperIDsByAuthor(args.paperids)
+	
 	print_err("Generating rows")
-	TSVG = TextSimVecGenerator(pubs_by_author, tfidfs, id2ind)
+	PTSVG = PaperTextSimVecGenerator(paperids_by_author, tfidfs, id2ind)
 	TextSimVecs = {}
 	for i, aid in enumerate(author_ids):
- 		tsv = TSVG.getTextSimPub(aid)
+ 		tsv = PTSVG.getTextSimPub(aid)
  		if tsv is not None:
 	 		TextSimVecs[aid] = tsv
-		if (i+1) % 1000 == 0:
+		if (i+1) % 2500 == 0:
 			print_err(i+1, ' rows done')
 
- 	pickle.dump(TextSimVecs, open(args.output, 'wb'), pickle.HIGHEST_PROTOCOL)
+ 	pickle.dump(TextSimVecs, open(args.output, 'wb'), protocol=-1)
 
-class TextSimVecGenerator:
-	def __init__(self, pubs_by_author, pub_tfidf, pub_id2ind):
-		self.pubs_by_author = pubs_by_author
-		self.pub_tfidf = pub_tfidf
-		self.pub_id2ind = pub_id2ind
-
+class PaperTextSimVecGenerator(pT.TextSimVecGenerator):
 	def getTextSimPub(self, aID):
 		pub = self.pubs_by_author[aID]
-		pubs = []
-		for x in xrange(2):
-			pubs.extend([self.pub_id2ind[x][v] for v in pub[x] if v in self.pub_id2ind[x]])
+		pubs = [self.pub_id2ind[v] for v in pub if v in self.pub_id2ind]
 		if pubs:
 			return sp.sparse.csr_matrix(self.pub_tfidf[pubs].sum(axis=0))
 		else:
