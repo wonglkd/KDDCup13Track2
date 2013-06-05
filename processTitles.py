@@ -25,15 +25,15 @@ def getTitles(filenames, title_column=2, id_column=0):
 		boundaries.append(len(titles))
 	return titles, ids, boundaries
 
-def computeTFIDFs(titles, additional_stop_words=[], words_freq=False, min_df=1):
+def computeTFIDFs(titles, additional_stop_words=[], words_freq=False, min_df=1, max_df=1.0):
 	stop_words = ENGLISH_STOP_WORDS | set(additional_stop_words)
 	token_pattern = u'(?u)\\b[0-9]*[a-zA-Z]+[a-zA-Z0-9]+\\b'
-#	token_pattern = u'(?u)\\b\\w\\w+\\b'
-	vec = TfidfVectorizer(analyzer='word', lowercase=True, token_pattern=token_pattern, stop_words=stop_words, min_df=min_df, max_df=1.0, norm=None, use_idf=True, smooth_idf=True, binary=True)
+	vec = TfidfVectorizer(analyzer='word', lowercase=True, token_pattern=token_pattern, stop_words=stop_words, min_df=min_df, max_df=max_df, norm=None, use_idf=True, smooth_idf=True, binary=True)
 	tfidfs = vec.fit_transform(titles)
 
 	# print words sorted by frequency
 	if words_freq:
+		print_err("Preparing Word Frequency")
 		wfreq = Counter(tfidfs.nonzero()[1])
 		kk = [(wfreq[i], word.encode('ascii')) for i, word in enumerate(vec.get_feature_names())]
 		# kk = zip(tfidfs.sum(axis=0).tolist()[0], vec.get_feature_names())
