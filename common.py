@@ -84,4 +84,4 @@ def shared_terms_sum(aa, bb):
 		fsum = 0
 	suma = aa[[0] * len(diffa), diffa].sum() if diffa.any() else 0
 	sumb = bb[[0] * len(diffb), diffb].sum() if diffb.any() else 0
-	return fsum - math.log(1.0 + min(suma, sumb))
+	return fsum - math.log10(1.0 + min(suma, sumb))
