@@ -63,7 +63,7 @@ $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
 $(GEN_DIR)/%_edges.txt: edges.py $(GEN_DIR)/%_bins.txt
 	$(EXEC_PREFIX)$^ > $@
 	
-$(GEN_DIR)/combined_edges.txt: edges.py $(BIN_FILES)
+$(GEN_DIR)/edges.txt: edges.py $(BIN_FILES)
 	$(EXEC_PREFIX)$^ > $@
 
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
