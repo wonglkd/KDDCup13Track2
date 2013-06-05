@@ -1,3 +1,4 @@
+import csv
 import sys
 import exceptions
 import numpy as np
@@ -46,6 +47,17 @@ def skip_comments(iterable):
     for line in iterable:
         if not line.startswith('#') and line.strip():
             yield line
+
+def readcsv_iter(filename, discard_header=True, verbose=True):
+	print_err("Reading file", filename)
+	with open(filename, 'rb') as f:
+		reader = csv.reader(f)
+		if discard_header:
+			header = reader.next()
+		for i, line in enumerate(reader):
+			yield i, line
+			if (i+1) % 10000 == 0 and verbose:
+				print_err(i+1, 'lines read')	
 
 def num(s):
     try:
