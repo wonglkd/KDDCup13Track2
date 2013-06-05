@@ -12,7 +12,7 @@ EDGE_FILES := $(GEN_DIR)/iFfL_edges.txt
 FEAT_FILES := $(GEN_DIR)/iFfL.feat
 #SIM_FILES := $(GEN_DIR)/iFfL.sim
 CLUSTER_FILES := $(GEN_DIR)/combined_kruskal.clusters
-SUBMIT_FILES := $(GEN_DIR)/combined_kruskal-submit.csv
+SUBMIT_FILES := $(GEN_DIR)/combined_kruskal-submit.csv $(GEN_DIR)/combined_hc-submit.csv
 EVALUATE_SETS := 20130531-oldtrainingdata 20130531-afternoon 20130531-1325 20130531-1025 20130531-0800 20130530 20130601-restore 20130601-restore2
 EVALUATE_FILES := $(GEN_DIR)/best-submit.csv $(GEN_DIR)/20130530/combined_716eef6-submit.csv $(foreach i,$(EVALUATE_SETS),$(GEN_DIR)/$i/combined-submit.csv)
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
@@ -72,13 +72,13 @@ $(GEN_DIR)/edges.txt: edges.py $(BIN_FILES)
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
 	$(EXEC32_PREFIX)$^ $@
 
-$(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
+$(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle textdata/papertitles_tfidf.pickle
 	$(EXEC32_PREFIX)features.py $(DATA_DIR)/train.csv $(PREFEAT) $@
 	
-$(GEN_DIR)/train_%.feat: features.py $(DATA_DIR)/train_%.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
+$(GEN_DIR)/train_%.feat: features.py $(DATA_DIR)/train_%.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle textdata/papertitles_tfidf.pickle
 	$(EXEC32_PREFIX)features.py $(DATA_DIR)/train_$*.csv $(PREFEAT) $@
 
-$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
+$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle textdata/papertitles_tfidf.pickle
 	$(EXEC32_PREFIX)features.py $(GEN_DIR)/edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
