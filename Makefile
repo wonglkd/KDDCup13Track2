@@ -75,8 +75,8 @@ $(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py
 $(GEN_DIR)/train_%.feat: features.py $(DATA_DIR)/train_%.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
 	$(EXEC_PREFIX)features.py $(DATA_DIR)/train_$*.csv $(PREFEAT) $@
 
-$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/%_edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
-	$(EXEC_PREFIX)features.py $(GEN_DIR)/$*_edges.txt $(PREFEAT) $@
+$(GEN_DIR)/%.feat: features.py $(GEN_DIR)/edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle
+	$(EXEC_PREFIX)features.py $(GEN_DIR)/edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
 	$(EXEC_PREFIX)$^ $@; $(SORT_BIN) $@ -grk 3 -t"," -o $@
