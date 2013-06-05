@@ -11,6 +11,7 @@ data/PaperAuthor.csv
 generated/*
 namesdata/Author_processed.csv
 data/*_u.csv
+textdata/*_u.txt
 *_noheader.csv
 
 # Unignore all makefiles
