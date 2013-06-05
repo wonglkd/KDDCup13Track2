@@ -147,7 +147,8 @@ GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')));
 
 ----
 CREATE TABLE pa_coauthors_ (AuthorId INT, Coauthor TEXT, cnt INT);
-.import pa_coauthors_u_noheader.csv pa_coauthors_
+.mode csv
+.import pa_coauthors_u_strippunc_noheader.csv pa_coauthors_
 
 CREATE TABLE pa_coauthors (AuthorId INT, Coauthor TEXT, cnt INT, PRIMARY KEY (AuthorId, Coauthor));
 
@@ -161,6 +162,9 @@ DROP TABLE pa_coauthors_;
 CREATE TABLE pa_coauthors_total (AuthorId INT PRIMARY KEY, cnt INT, total INT);
 INSERT INTO pa_coauthors_total (AuthorId, cnt, total)
 SELECT AuthorId, COUNT(*), SUM(cnt) FROM pa_coauthors GROUP BY AuthorId;
+
+ANALYZE;
+VACUUM;
 
 SELECT
 			(SELECT COUNT(*) FROM
