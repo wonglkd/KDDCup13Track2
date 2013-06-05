@@ -65,7 +65,7 @@ def main():
  		if tsv is not None:
 	 		TextSimVecs[aid] = tsv
 		if (i+1) % 2500 == 0:
-			print_err(i+1, ' rows done')
+			print_err(i+1, 'rows done')
 
  	pickle.dump(TextSimVecs, open(args.output, 'wb'), protocol=-1)
 
