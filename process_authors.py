@@ -14,18 +14,6 @@ from unidecode import unidecode
 from pprint import pprint
 import jellyfish
 
-punc_nospacedash = ".;,'~:_@?\|\\/\"+)}{(&$*%=>^"
-punc_nospace = punc_nospacedash + '-'
-punc = punc_nospace + ' '
-
-def strip_punc(str, strip_spaces = True, space_dashes=True):
-	if space_dashes:
-		return ' '.join(str.translate(None, punc_nospacedash).replace('-', ' ').split())
-	elif strip_spaces:
-		return str.translate(None, punc)
-	else:
-		return str.translate(None, punc_nospace)
-
 def loadAuthors(authorfile, printaffilwordfreq=False):
 	reader = csv.reader(open(authorfile, 'rb'))
 	reader.next()

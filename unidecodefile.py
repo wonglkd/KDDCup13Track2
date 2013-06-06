@@ -3,7 +3,7 @@ from unidecode import unidecode
 import fileinput
 import csv
 import argparse
-from process_authors import strip_punc
+from common import strip_punc
 
 def main():
 	parser = argparse.ArgumentParser()

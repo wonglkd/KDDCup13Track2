@@ -91,3 +91,15 @@ def shared_terms_sum(aa, bb):
 	suma = aa[[0] * len(diffa), diffa].sum() if diffa.any() else 0
 	sumb = bb[[0] * len(diffb), diffb].sum() if diffb.any() else 0
 	return fsum - math.log10(1.0 + min(suma, sumb))
+
+punc_nospacedash = ".;,'~:_@?\|\\/\"+)}{(&$*%=>^"
+punc_nospace = punc_nospacedash + '-'
+punc = punc_nospace + ' '
+
+def strip_punc(str, strip_spaces = True, space_dashes=True):
+	if space_dashes:
+		return ' '.join(str.translate(None, punc_nospacedash).replace('-', ' ').split())
+	elif strip_spaces:
+		return str.translate(None, punc)
+	else:
+		return str.translate(None, punc_nospace)
