@@ -56,7 +56,7 @@ pa_titles.csv: $(DB_FILE)
 	$(SQLITE_EXEC) "SELECT pa.AuthorId, p1.Title, COUNT(*) FROM paper_u p1 JOIN paperauthor pa ON p1.Id = pa.paperId JOIN awithpapers awp ON awp.Id=AuthorId WHERE p1.Title <> '' GROUP BY AuthorId, p1.Title ORDER BY p1.Title" > $@
 
 %_u.csv: $(ROOT_DIR)/unidecodefile.py %.csv
-	$(EXEC32_PREFIX)$^ $@
+	$(EXEC_PREFIX)$^ $@
 
 %_u_strippunc.csv: $(ROOT_DIR)/unidecodefile.py %.csv
-	$(EXEC32_PREFIX)$^ $@ -p
+	$(EXEC_PREFIX)$^ $@ -p
