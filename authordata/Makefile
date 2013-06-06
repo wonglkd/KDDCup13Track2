@@ -5,7 +5,7 @@ DB_FILE := $(ROOT_DIR)/db/kddcup13.sqlite3
 SQLITE_OPTS := -csv -header
 SQLITE_EXEC := $(SQLITE_BIN) $(SQLITE_OPTS) $(DB_FILE)
 
-OBJECTS := names_u_strippunc names_dup_u_strippunc affiliation_u conferences journals paperids paperids_dup years coauthors_u coauthors_dup_u coauthors_ids coauthors_ids_dup paperids_inpaper_titlenoblank paperids_inpaper_titlenoblank_dup titles_idified
+OBJECTS := names_u_strippunc names_dup_u_strippunc affiliation_u conferences journals paperids paperids_dup years coauthors_u_strippunc coauthors_dup_u_strippunc coauthors_ids coauthors_ids_dup paperids_inpaper_titlenoblank paperids_inpaper_titlenoblank_dup titles_idified
 FILENAMES := $(foreach i,$(OBJECTS),pa_$(i).csv)
 
 all: $(FILENAMES)
