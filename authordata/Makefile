@@ -2,9 +2,8 @@ ROOT_DIR := ..
 include $(ROOT_DIR)/Makefile.inc
 
 DB_FILE := $(ROOT_DIR)/db/kddcup13.sqlite3
-SQLITE_PATH := sqlite3
-SQLITE_CMDS := -csv -header
-SQLITE_EXEC := $(SQLITE_PATH) $(SQLITE_CMDS) $(DB_FILE)
+SQLITE_OPTS := -csv -header
+SQLITE_EXEC := $(SQLITE_BIN) $(SQLITE_OPTS) $(DB_FILE)
 
 OBJECTS := names_u_strippunc affiliation_u conferences journals paperids years coauthors_u paperids_inpaper_titlenoblank titles_idified
 FILENAMES := $(foreach i,$(OBJECTS),pa_$(i).csv)
