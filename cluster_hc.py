@@ -22,7 +22,7 @@ def hcluster(G_sim, threshold_sim):
 	all_clusters = []
 	print_err('Clustering', len(connected_components), 'components')
 	for component_i, cc in enumerate(connected_components):
- 		print_err('Starting component', component_i+1, 'of', len(connected_components), '({:} nodes)'.format(len(cc)))
+ 		print_err('Starting component', component_i+1, 'of', len(connected_components), '(V={:}, E={:})'.format(len(cc), cc.size()))
  		if len(cc) == 2:
  			cl = list(cc.nodes())
  			if cc.size(weight='weight') >= threshold_sim:
