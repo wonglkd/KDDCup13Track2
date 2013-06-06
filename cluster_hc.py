@@ -12,11 +12,24 @@ import heapq as hq
 from cluster_common import *
 # from collections import defaultdict
 
-def getSimilarity(G_sim, cl1, cl2):
+def getSimilarity_Average(G_sim, cl1, cl2):
 	edge_sum = sum([G_sim[v1][v2]['weight'] for v1, v2 in product(cl1, cl2) if G_sim.has_edge(v1, v2)])
 	return edge_sum / float(len(cl1) * len(cl2))
 
-def hcluster(G_sim, threshold_sim):
+def getSimilarity_AvgPresent(G_sim, cl1, cl2):
+	edgeweights = [G_sim[v1][v2]['weight'] for v1, v2 in product(cl1, cl2) if G_sim.has_edge(v1, v2)]
+	return sum(edgeweights) / float(len(edgeweights))
+
+def getSimilarity_Min(G_sim, cl1, cl2):
+	return min([G_sim[v1][v2]['weight'] for v1, v2 in product(cl1, cl2) if G_sim.has_edge(v1, v2)])
+
+def hcluster(G_sim, threshold_sim, sim_func):
+	sim_funcs = {
+		'average': getSimilarity_Average,
+		'avgpresent': getSimilarity_AvgPresent,
+		'min': getSimilarity_Min
+	}
+	chosen_simfunc = sim_funcs[sim_func]
 	print_err("Finding connected components")
 	connected_components = nx.connected_component_subgraphs(G_sim)
 	all_clusters = []
@@ -64,7 +77,7 @@ def hcluster(G_sim, threshold_sim):
  					continue
  				adjclusters[nc] -= toremove
  				adjclusters[nc].add(len(clusters)-1)
- 				nsim = getSimilarity(G_sim, clusters[-1], clusters[nc])
+ 				nsim = chosen_simfunc(G_sim, clusters[-1], clusters[nc])
  				if nsim >= threshold_sim:
  					hq.heappush(pq, (-nsim, len(clusters)-1, nc))
 #  				else:
@@ -83,6 +96,7 @@ def main():
 	parser.add_argument('-t', '--interconnectivity', default=0.80)
 	parser.add_argument('-d', '--density', default=0.80)
 	parser.add_argument('-m', '--min-edge', default=0.05)
+	parser.add_argument('-l', '--linkage', default='average')
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
@@ -96,7 +110,7 @@ def main():
 	print_err('Loaded (V={:}, E={:})'.format(len(G_sim), G_sim.size()))
 
 	print_err("Clustering")
-	clusters = hcluster(G_sim, threshold_interconnectivity)
+	clusters = hcluster(G_sim, threshold_interconnectivity, args.linkage)
 
  	print_err("Writing clusters")
  	
