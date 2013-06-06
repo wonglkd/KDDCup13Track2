@@ -60,6 +60,9 @@ textdata/publication_tfidf.pickle: processTitles.py data/Conference.csv data/Jou
 textdata/papertitles_tfidf.pickle: processPaperTitles.py processTitles.py data/Paper_u.csv authordata/pa_paperids.csv
 	$(EXEC_PREFIX)$< data/Paper_u.csv authordata/pa_paperids.csv -o $@
 	
+textdata/papertitles_dup_tfidf.pickle: processPaperTitles.py processTitles.py data/Paper_u.csv authordata/pa_paperids_dup.csv
+	$(EXEC_PREFIX)$< data/Paper_u.csv authordata/pa_paperids_dup.csv -o $@
+	
 $(GEN_DIR)/%_bins.txt: blocking.py $(PREFEAT)
 	$(EXEC_PREFIX)$^ $* > $@
 
