@@ -18,6 +18,7 @@ def main():
 	parser.add_argument('clusterfile')
 	parser.add_argument('outfile', nargs='?')
 	parser.add_argument('authorfile', nargs='?', default='data/Author.csv')
+	parser.add_argument('-n', '--no-write', action='store_true')
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.clusterfile.replace('.clusters','') + '-submit.csv'
@@ -44,6 +45,12 @@ def main():
 		for line in reader_authors:
 			authorids.append(int(line[0]))
 		authorids = sorted(set(authorids))
+ 	
+ 	print_err("No of clusters:", len(clusterset))
+ 	print_err("No of authors in clusters:", len(clusterid))
+ 	
+ 	if args.no_write:
+ 		return
  	
 	print_err("Writing submission")
  	writer = csv.writer(open(args.outfile, 'wb'))
