@@ -168,8 +168,36 @@ ORDER BY p1.Title;
 SELECT pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', ''))) as Coauthor, COUNT(*) as cnt
 FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
 JOIN awithpapers a ON a.Id = pa1.AuthorId
+WHERE LOWER(TRIM(REPLACE(pa2.name, ';', ''))) <> ''
 GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')));
 
+-- SELECT pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', ''))) as Coauthor, COUNT(*) as cnt
+-- FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
+-- JOIN awithpapers a ON a.Id = pa1.AuthorId
+-- JOIN pa_duppairs dup1 ON dup1.paperId = pa1.paperId and dup1.AuthorId = pa1.AuthorId
+-- JOIN pa_duppairs dup2 ON dup2.paperId = pa2.paperId and dup2.AuthorId = pa2.AuthorId
+-- WHERE LOWER(TRIM(REPLACE(pa2.name, ';', ''))) <> ''
+-- GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')));
+
+.output pa_coauthors_dup.csv
+SELECT dup1.AuthorId, LOWER(TRIM(REPLACE(pa.name, ';', ''))) as Coauthor, COUNT(*) as cnt
+FROM pa_duppairs dup1 JOIN pa_duppairs dup2 ON dup1.PaperId = dup2.PaperId
+JOIN awithpapers a ON a.Id = dup1.AuthorId
+JOIN paperauthor pa ON dup2.paperId = pa.paperId and dup2.AuthorId = pa.AuthorId
+WHERE LOWER(TRIM(REPLACE(pa.name, ';', ''))) <> ''
+GROUP BY dup1.AuthorId, LOWER(TRIM(REPLACE(pa.name, ';', '')));
+
+.output pa_coauthors_ids.csv
+SELECT pa1.AuthorId, pa2.AuthorId as Coauthor, COUNT(*) as cnt
+FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
+JOIN awithpapers a ON a.Id = pa1.AuthorId
+GROUP BY pa1.AuthorId, pa2.AuthorId;
+
+.output pa_coauthors_ids_dup.csv
+SELECT pa1.AuthorId, pa2.AuthorId as Coauthor, COUNT(*) as cnt
+FROM pa_duppairs pa1 JOIN pa_duppairs pa2 ON pa1.PaperId = pa2.PaperId
+JOIN awithpapers a ON a.Id = pa1.AuthorId
+GROUP BY pa1.AuthorId, pa2.AuthorId;
 ----
 CREATE TABLE pa_coauthors_ (AuthorId INT, Coauthor TEXT, cnt INT);
 .mode csv
