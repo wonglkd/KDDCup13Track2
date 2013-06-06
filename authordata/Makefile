@@ -60,3 +60,8 @@ pa_titles.csv: $(DB_FILE)
 
 %_u_strippunc.csv: $(ROOT_DIR)/unidecodefile.py %.csv
 	$(EXEC_PREFIX)$^ $@ -p
+
+%_cnts.csv: %.csv
+	$(SORT_BIN) $< -o $< ; \
+		uniq -c $< | awk 'BEGIN {OFS=","} {print $$2, $$1}' > $@
+	
