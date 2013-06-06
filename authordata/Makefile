@@ -5,13 +5,16 @@ DB_FILE := $(ROOT_DIR)/db/kddcup13.sqlite3
 SQLITE_OPTS := -csv -header
 SQLITE_EXEC := $(SQLITE_BIN) $(SQLITE_OPTS) $(DB_FILE)
 
-OBJECTS := names_u_strippunc affiliation_u conferences journals paperids years coauthors_u paperids_inpaper_titlenoblank titles_idified
+OBJECTS := names_u_strippunc names_dup_u_strippunc affiliation_u conferences journals paperids paperids_dup years coauthors_u paperids_inpaper_titlenoblank paperids_inpaper_titlenoblank_dup titles_idified
 FILENAMES := $(foreach i,$(OBJECTS),pa_$(i).csv)
 
 all: $(FILENAMES)
 
 pa_names.csv: $(DB_FILE)
 	$(SQLITE_EXEC) "SELECT AuthorId, LOWER(TRIM(REPLACE(name, ';', ''))), COUNT(*) FROM paperauthor JOIN awithpapers ON Id=AuthorId WHERE name <> '' GROUP BY AuthorId, LOWER(TRIM(REPLACE(name, ';', '')))" > $@
+
+pa_names_dup.csv: $(DB_FILE)
+	$(SQLITE_EXEC) "SELECT dup.AuthorId, LOWER(TRIM(REPLACE(name, ';', ''))), COUNT(*) FROM pa_duppairs dup, awithpapers awp, paperauthor pa WHERE awp.Id=dup.AuthorId and dup.AuthorId = pa.AuthorId and dup.PaperId = pa.PaperId and name <> '' GROUP BY dup.AuthorId, LOWER(TRIM(REPLACE(name, ';', '')))" > $@
 
 pa_affiliation.csv: $(DB_FILE)
 	$(SQLITE_EXEC) "SELECT AuthorId, LOWER(affiliation), COUNT(*) FROM paperauthor JOIN awithpapers ON Id=AuthorId WHERE affiliation <> '' GROUP BY AuthorId, LOWER(affiliation)" > $@
@@ -28,8 +31,14 @@ pa_journals.csv: $(DB_FILE)
 pa_paperids.csv: $(DB_FILE)
 	$(SQLITE_EXEC) "SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId GROUP BY AuthorId, pa.PaperId" > $@
 
+pa_paperids_dup.csv: $(DB_FILE)
+	$(SQLITE_EXEC) "SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=pa.AuthorId JOIN pa_duppairs dup ON dup.paperId = pa.paperId and dup.AuthorId = pa.AuthorId GROUP BY pa.AuthorId, pa.PaperId" > $@
+
 pa_paperids_inpaper_titlenoblank.csv: $(DB_FILE)
 	$(SQLITE_EXEC) "SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId JOIN paper p ON PaperId = p.Id WHERE title <> '' GROUP BY AuthorId, pa.PaperId" > $@
+
+pa_paperids_inpaper_titlenoblank_dup.csv: $(DB_FILE)
+	$(SQLITE_EXEC) "SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=pa.AuthorId JOIN paper p ON pa.PaperId = p.Id JOIN pa_duppairs dup ON dup.paperId = pa.paperId and dup.AuthorId = pa.AuthorId WHERE title <> '' GROUP BY pa.AuthorId, pa.PaperId"
 
 pa_coauthors.csv: $(DB_FILE)
 	$(SQLITE_EXEC) "SELECT pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', ''))) as Coauthor, COUNT(*) as cnt FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId JOIN awithpapers a ON a.Id = pa1.AuthorId GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')))" > $@

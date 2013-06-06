@@ -7,6 +7,12 @@ SELECT AuthorId, LOWER(TRIM(REPLACE(name, ';', ''))), COUNT(*) FROM paperauthor 
 WHERE name <> ''
 GROUP BY AuthorId, LOWER(TRIM(REPLACE(name, ';', '')));
 
+.output pa_names_dup.csv
+SELECT dup.AuthorId, LOWER(TRIM(REPLACE(name, ';', ''))), COUNT(*) FROM pa_duppairs dup, awithpapers awp, paperauthor pa
+WHERE awp.Id=dup.AuthorId and dup.AuthorId = pa.AuthorId and dup.PaperId = pa.PaperId
+and name <> ''
+GROUP BY dup.AuthorId, LOWER(TRIM(REPLACE(name, ';', '')));
+
 .output pa_affiliation.csv
 SELECT AuthorId, LOWER(affiliation), COUNT(*) FROM paperauthor JOIN awithpapers ON Id=AuthorId
 WHERE affiliation <> ''
@@ -34,10 +40,22 @@ GROUP BY AuthorId, p.JournalId;
 SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId
 GROUP BY AuthorId, pa.PaperId;
 
+.output pa_paperids_dup.csv
+SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=pa.AuthorId
+JOIN pa_duppairs dup ON dup.paperId = pa.paperId and dup.AuthorId = pa.AuthorId
+GROUP BY pa.AuthorId, pa.PaperId;
+
 .output pa_paperids_inpaper_titlenoblank.csv
 SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId JOIN paper p ON PaperId = p.Id
-WHERE title <> ""
+WHERE title <> ''
 GROUP BY AuthorId, pa.PaperId;
+
+.output pa_paperids_inpaper_titlenoblank_dup.csv
+SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=pa.AuthorId JOIN paper p ON pa.PaperId = p.Id
+JOIN pa_duppairs dup ON dup.paperId = pa.paperId and dup.AuthorId = pa.AuthorId
+WHERE title <> ''
+GROUP BY pa.AuthorId, pa.PaperId;
+
 
 
 CREATE TABLE pa_duppairs (PaperId INTEGER, AuthorId INTEGER, Count INTEGER, PRIMARY KEY (PaperId, AuthorId));
@@ -48,6 +66,13 @@ SELECT COUNT(cnt) FROM
 (SELECT LOWER(a.name), COUNT(*) as cnt FROM Author a JOIN 
 (SELECT DISTINCT Id as AId FROM pa_duppairs JOIN Author ON AuthorId = Id)
 ON AId = Id GROUP BY LOWER(name) HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC);
+
+SELECT * FROM paperauthor WHERE AuthorId = 2292964
+EXCEPT
+SELECT pa.* FROM paperauthor pa JOIN pa_duppairs dup ON pa.PaperId = dup.PaperId AND pa.AuthorId = dup.AuthorId 
+WHERE pa.AuthorId = 2292964;
+
+
 
 SELECT * FROM paperauthor pa JOIN (
 SELECT * FROM pa_duppairs WHERE AuthorID IN (SELECT Id FROM Author WHERE Name = 'Chung-Kang Peng') ORDER BY AuthorId
