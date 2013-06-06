@@ -101,9 +101,9 @@ def main():
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
-	threshold_min_weight = args.min_edge
-	threshold_interconnectivity = args.interconnectivity
-	threshold_density = args.density
+	threshold_min_weight = float(args.min_edge)
+	threshold_interconnectivity = float(args.interconnectivity)
+	threshold_density = float(args.density)
 
 	print_err("Loading graph")
 	G_sim = nx.read_weighted_edgelist(enforce_min(skip_comments(open(args.edgelist, 'rb')), threshold_min_weight), nodetype=int, delimiter=',')
