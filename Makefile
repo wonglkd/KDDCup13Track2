@@ -13,8 +13,9 @@ FEAT_FILES := $(GEN_DIR)/iFfL.feat
 #SIM_FILES := $(GEN_DIR)/iFfL.sim
 CLUSTER_FILES := $(GEN_DIR)/combined_kruskal.clusters
 SUBMIT_FILES := $(GEN_DIR)/combined_kruskal-submit.csv $(GEN_DIR)/combined_hc-submit.csv
-EVALUATE_SETS := 20130531-oldtrainingdata 20130531-afternoon 20130531-1325 20130531-1025 20130531-0800 20130530 20130601-restore 20130601-restore2
-EVALUATE_FILES := $(GEN_DIR)/best-submit.csv $(GEN_DIR)/20130530/combined_716eef6-submit.csv $(foreach i,$(EVALUATE_SETS),$(GEN_DIR)/$i/combined-submit.csv)
+# EVALUATE_SETS := 20130531-oldtrainingdata/combined 20130531-afternoon/combined 20130531-1325/combined 20130531-1025/combined 20130531-0800/combined 20130530/combined 20130601-restore/combined 20130601-restore2/combined
+EVALUATE_SETS := 20130603-2400_best/combined_716eef6 best best-2nd-0.8 20130605-2400/combined_716eef6_kruskal 20130605-2400/combined_716eef6_hc 20130605-2400/combined_kruskal 20130605-2400/combined_hc 20130606-0200/combined_716eef6_kruskal 20130605-1300/combined_716eef6_kruskal
+EVALUATE_FILES := $(foreach i,$(EVALUATE_SETS),$(GEN_DIR)/$i-submit.csv)
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
 TRAIN_PARA := --removefeat conferences journals fullnames coauthor paperIDs affiliations jaro_distance suffix last jaro_winkler
 
@@ -26,7 +27,9 @@ feat: $(FEAT_FILES)
 edgefeat-t:
 	$(EXEC_PREFIX)featEdges.py generated/edges_test.txt data/authors_with_papers.txt generated/test.edgefeat
 
-evaluate: evaluate.py
+evaluate: evaluate.py generated/goldstd-submit.csv
+	$(EXEC_PREFIX)$^ $(EVALUATE_FILES) --verbose
+evals: evaluate.py generated/goldstd-submit.csv
 	$(EXEC_PREFIX)$^ $(EVALUATE_FILES)
 submitgz: $(SUBMIT_FILES:=.gz)
 bins: $(BIN_FILES)
