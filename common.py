@@ -48,6 +48,12 @@ def skip_comments(iterable):
         if not line.startswith('#') and line.strip():
             yield line
 
+def verbose_iter(iter):
+	for i, line in enumerate(iter):
+		yield i, line
+		if (i+1) % 10000 == 0:
+			print_err(i+1, 'lines done')
+
 def readcsv_iter(filename, discard_header=True, verbose=True):
 	print_err("Reading file", filename)
 	with open(filename, 'rb') as f:
