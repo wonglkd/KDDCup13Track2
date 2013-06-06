@@ -1,4 +1,5 @@
 import networkx as nx
+from common import *
 
 def enforce_min(iterable, min_weight):
     for line in iterable:
