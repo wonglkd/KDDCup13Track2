@@ -203,25 +203,6 @@ JOIN awithpapers a ON a.Id = pa1.AuthorId
 WHERE pa1.AuthorId <> pa2.AuthorId
 GROUP BY pa1.AuthorId, pa2.AuthorId;
 ----
-CREATE TABLE pa_coauthors_ (AuthorId INT, Coauthor TEXT, cnt INT);
-.mode csv
-.import pa_coauthors_u_strippunc_noheader.csv pa_coauthors_
-
-CREATE TABLE pa_coauthors (AuthorId INT, Coauthor TEXT, cnt INT, PRIMARY KEY (AuthorId, Coauthor));
-
-INSERT INTO pa_coauthors (AuthorId, Coauthor, cnt)
-SELECT AuthorId, Coauthor, SUM(cnt) as cnt FROM pa_coauthors_ GROUP BY AuthorId, Coauthor;
-
-CREATE INDEX pa_coauthors_authorid_idx  ON pa_coauthors (AuthorId);
-
-DROP TABLE pa_coauthors_;
-
-CREATE TABLE pa_coauthors_total (AuthorId INT PRIMARY KEY, cnt INT, total INT);
-INSERT INTO pa_coauthors_total (AuthorId, cnt, total)
-SELECT AuthorId, COUNT(*), SUM(cnt) FROM pa_coauthors GROUP BY AuthorId;
-
-ANALYZE;
-VACUUM;
 
 SELECT
 			(SELECT COUNT(*) FROM

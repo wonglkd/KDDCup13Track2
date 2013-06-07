@@ -64,4 +64,6 @@ pa_titles.csv: $(DB_FILE)
 %_cnts.csv: %.csv
 	$(SORT_BIN) $< -o $< ; \
 		uniq -c $< | awk 'BEGIN {OFS=","} {print $$2, $$1}' > $@
-	
+
+../db/pa.sqlite3: pa_schema.sql pa_coauthors_u_strippunc_idified_cnts.csv pa_coauthors_ids_cnts.csv
+	$(SQLITE_BIN) -csv $@ < $<
