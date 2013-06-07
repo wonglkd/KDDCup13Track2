@@ -10,6 +10,10 @@ from pprint import pprint
 from collections import defaultdict
 import featEdges
 import math
+try:
+	import jellyfish
+except ImportError:
+	print_err("Could not import jellyfish")
 
 def load_features(featurefile):
 	print_err("Loading features")
@@ -50,7 +54,6 @@ class FeaturesGenerator:
 	] + featEdges.PaperauthorFeaturesGenerator.fields
 
 	def __init__(self, authorprefeat='generated/Author_prefeat.pickle'):
-		import jellyfish
 		print_err("Loading pickled author pre-features")
 		self.authors = pickle.load(open(authorprefeat, 'rb'))
 		self.PFG = featEdges.PaperauthorFeaturesGenerator(self.authors)
