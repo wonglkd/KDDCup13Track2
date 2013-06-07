@@ -1,21 +1,28 @@
 #!/usr/bin/env python
 import csv
+import argparse
 import sys
+from common import verbose_iter
 
-if len(sys.argv) < 3:
-	sys.exit(0)	
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('infile', nargs='?', default='-')
+	parser.add_argument('outfile', nargs='?', default='-')
+	parser.add_argument('-c', '--col', default=1, type=int)
+	
+	f_write = open(args.outfile, 'wb') if args.outfile != '-' else sys.stdout
+	f_in = open(args.infile, 'rb') if args.infile != '-' else sys.stdin
+	
+	seen = {}
+	
+	writer = csv.writer(f_write)
+	reader = csv.reader(f_in)
+	writer.writerow(reader.next()) # skip header
+	for i, line in verbose_iter(reader):
+		if line[args.col] not in seen:
+			seen[line[args.col]] = len(seen)
+		line[args.col] = seen[line[args.col]]
+		writer.writerow(line)
 
-f_write = open(sys.argv[2], 'wb') if sys.argv[2] != '-' else sys.stdout
-f_in = open(sys.argv[1], 'rb') if sys.argv[1] != '-' else sys.stdin
-
-seen = {}
-
-writer = csv.writer(f_write)
-for i, line in enumerate(csv.reader(f_in)):
-	if i != 0:
-		if line[1] not in seen:
-			seen[line[1]] = len(seen)
-		line[1] = seen[line[1]]
-	writer.writerow(line)
-	if (i+1) % 10000 == 0:
-		print i+1, "lines done"
+if __name__ == "__main__":
+	main()
