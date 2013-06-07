@@ -9,6 +9,7 @@ def main():
 	parser.add_argument('infile', nargs='?', default='-')
 	parser.add_argument('outfile', nargs='?', default='-')
 	parser.add_argument('-c', '--col', default=1, type=int)
+	args = parser.parse_args()
 	
 	f_write = open(args.outfile, 'wb') if args.outfile != '-' else sys.stdout
 	f_in = open(args.infile, 'rb') if args.infile != '-' else sys.stdin
