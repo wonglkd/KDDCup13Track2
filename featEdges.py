@@ -63,29 +63,35 @@ class PaperauthorFeaturesGenerator:
 			GROUP BY co0.Coauthor, co0.AuthorId)'''
 
 	pa_files_ = {
-# 		'name': 'authordata/pa_names_u.csv',
 		'fullname': 'authordata/pa_names_u_strippunc.csv',
+		'fullname_dup': 'authordata/pa_names_dup_u_strippunc.csv',
  		'affiliation': 'authordata/pa_affiliation_u.csv',
 		'conferences': 'authordata/pa_conferences.csv',
+		'coauthors_dup': 'authordata/pa_coauthors_dup_u_strippunc.csv',
+		'coauthors_ids_dup': 'authordata/pa_coauthors_ids_dup.csv',
 		'paperids': 'authordata/pa_paperids.csv',
+		'paperids_dup': 'authordata/pa_paperids_dup.csv',
 		'paperids_inpaper_titlenoblank': 'authordata/pa_paperids_inpaper_titlenoblank.csv',
 		'journals': 'authordata/pa_journals.csv',
 		'years': 'authordata/pa_years.csv',
 		'titles_idified': 'authordata/pa_titles_idified.csv'
-# 		'titles_dup_idified': 'authordata/pa_titles_dup_idified.csv'
 	}
 	
 	pickles_ = {
 		'PubTextSimVecs': 'textdata/publication_tfidf.pickle',
-		'PaperTitleSimVecs': 'textdata/papertitles_tfidf.pickle'
+		'PaperTitleSimVecs': 'textdata/papertitles_tfidf.pickle',
+		'PaperTitleSimVecs_dup': 'textdata/papertitles_dup_tfidf.pickle'
 	}
 	
 	fields = [
 		'has_papers',
 		'pa_fullname',
+		'pa_fullname_dup',
 		'pa_affil',
 		'fullnames',
 		'fullnamesF',
+		'fullnames_dup',
+		'fullnames_dupF',
 		'affiliations',
 		'affiliationsF',
 		'conferences',
@@ -93,18 +99,30 @@ class PaperauthorFeaturesGenerator:
 		'journals',
 		'journalsF',
 		'years',
-		'coauthor',
-		'coauthorW',
-		'coauthorF',
+		'yearscore',
+		'coauthors',
+		'coauthorsW',
+		'coauthorsF',
+		'coauthors_ids',
+		'coauthors_idsW',
+		'coauthors_idsF',
+		'coauthors_dup',
+		'coauthors_dupW',
+		'coauthors_dupF',
+		'coauthors_ids_dup',
+		'coauthors_ids_dupW',
+		'coauthors_ids_dupF',
 		'paperIDs',
 		'paperIDsF',
+		'paperIDs_dup',
+		'paperIDs_dupF',
 # 		'paperIDs_p_title',
 # 		'paperIDs_p_titleF'
 # 		'titles_dup',
 		'titles_dupW',
-		'yearscore',
 		'pubTextSim',
-		'paperTitleSim'
+		'paperTitleSim',
+		'paperTitleSim_dup'
 	]
 	
 	fields_num_index = set([
@@ -183,27 +201,29 @@ class PaperauthorFeaturesGenerator:
 		self.pa_by_authors[aID] = curr_a
 		return
 	
-	def getCoauthorsSim(self, a1, a2):
-		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_, [a1, a2, a1, a2]).next()
+	def getCoauthorsSim(self, tablename, a1, a2):
+		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_.replace("pa_coauthors", tablename), [a1, a2, a1, a2]).next()
 		return self.sim(common, len1, len2)
 
-	def getCoauthorsSimW(self, a1, a2):
-		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_w_, [a1, a2, a1, a2, a1, a2]).next()
+	def getCoauthorsSimW(self, tablename, a1, a2):
+		common, len1, len2 = selectDB(self.conn_pa, self.coauthor_query_w_.replace("pa_coauthors", tablename), [a1, a2, a1, a2, a1, a2]).next()
 		return self.sim(common, len1, len2)
 
-	def getCoauthorsSimF(self, a1, a2):
-		return selectDB(self.conn_pa, self.coauthor_query_f_,  [a1, a2, a1, a2]).next()[0]
+	def getCoauthorsSimF(self, tablename, a1, a2):
+		return selectDB(self.conn_pa, self.coauthor_query_f_.replace("pa_coauthors", tablename),  [a1, a2, a1, a2]).next()[0]
 
 	def getTotal(self, field, aid):
 		if field not in self.pa_by_authors_totals[aid]:
 			self.pa_by_authors_totals[aid][field] = sum(self.pa_by_authors[aid][field].values())
 		return float(self.pa_by_authors_totals[aid][field])
 
-	def getFieldPA(self, field, a1, a2):
+	def getFieldPA(self, field, a1, a2, authorfield=None):
 		# missing value
 		if a1 not in self.filter:
 			return 0.
-		a2val = self.author_info[a2][field]
+		if authorfield is None:
+			authorfield = field
+		a2val = self.author_info[a2][authorfield]
 		# missing value
 		if not len(a2val) or a2val.startswith('ID:'):
 			return 0.
@@ -212,14 +232,14 @@ class PaperauthorFeaturesGenerator:
 		else:
 			return 0.
 	
-	def getPABoth(self, field, a1, a2):
-		return self.getFieldPA(field, a1, a2) + self.getFieldPA(field, a2, a1)
+	def getPABoth(self, field, a1, a2, authorfield=None):
+		return self.getFieldPA(field, a1, a2, authorfield) + self.getFieldPA(field, a2, a1, authorfield)
 
 	def getSetSim(self, field, a1, a2):
 		return self.sim(*self.dictSim(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field]))
 
 	def getSetSimW(self, field, a1, a2):
-		return self.sim(*self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field], self.getTotal(field, a1), self.getTotal(field, a2)))
+		return self.sim(*self.dictSimW(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field]))
 
 	def getSetSimF(self, field, a1, a2):
 		return self.dictSimF(self.pa_by_authors[a1][field], self.pa_by_authors[a2][field], self.getTotal(field, a1), self.getTotal(field, a2))
@@ -260,37 +280,19 @@ class PaperauthorFeaturesGenerator:
 	def getEdgeFeatures(self, author1, author2):
 # 		self.getAuthor(author1)
 # 		self.getAuthor(author2)
-		f = defaultdict(float)
+		f = dict.fromkeys(self.fields, 0)
 		f.update({
 			'pa_fullname': self.getPABoth('fullname', author1, author2),
-			'pa_affil': self.getPABoth('affiliation', author1, author2),
-			'fullnames': 0,
-			'fullnamesF': 0,
-			'affiliations': 0,
-			'affiliationsF': 0,
-			'conferences': 0,
-			'conferencesF': 0,
-			'journals': 0,
-			'journalsF': 0,
-			'years': 0,
-			'yearscore': 0,
-			'coauthor': 0,
-			'coauthorW': 0,
-			'coauthorF': 0,
-			'paperIDs': 0,
-			'paperIDsF': 0,
-# 			'paperIDs_p_title': 0,
-# 			'paperIDs_p_titleF': 0,
-# 			'titles_dup': 0,
-			'titles_dupW': 0,
-			'pubTextSim': 0,
-			'paperTitleSim': 0
+			'pa_fullname_dup': self.getPABoth('fullname_dup', author1, author2, 'fullname'),
+			'pa_affil': self.getPABoth('affiliation', author1, author2)
 		})
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
 				'has_papers': 2,
 				'fullnames': self.getSetSim('fullname', author1, author2),
 				'fullnamesF': self.getSetSimF('fullname', author1, author2),
+				'fullnames_dup': self.getSetSim('fullname_dup', author1, author2),
+				'fullnames_dupF': self.getSetSimF('fullname_dup', author1, author2),
 				'affiliations': self.getSetSim('affiliation', author1, author2),
 				'affiliationsF': self.getSetSimF('affiliation', author1, author2),
 				'conferences': self.getSetSim('conferences', author1, author2),
@@ -299,18 +301,30 @@ class PaperauthorFeaturesGenerator:
 				'journalsF': self.getSetSimF('journals', author1, author2),
 				'years': self.getSetSim('years', author1, author2),
 				'yearscore': self.getYearScore(author1, author2),
-				'coauthor': self.getCoauthorsSim(author1, author2),
-				'coauthorW': self.getCoauthorsSimW(author1, author2),
-				'coauthorF': self.getCoauthorsSimF(author1, author2),
+				'coauthors': self.getCoauthorsSim('pa_coauthors', author1, author2),
+				'coauthorsW': self.getCoauthorsSimW('pa_coauthors', author1, author2),
+				'coauthorsF': self.getCoauthorsSimF('pa_coauthors', author1, author2),
+				'coauthors_ids': self.getCoauthorsSim('pa_coauthors_ids', author1, author2),
+				'coauthors_idsW': self.getCoauthorsSimW('pa_coauthors_ids', author1, author2),
+				'coauthors_idsF': self.getCoauthorsSimF('pa_coauthors_ids', author1, author2),
+				'coauthors_dup': self.getSetSim('coauthors_dup', author1, author2),
+				'coauthors_dupW': self.getSetSimW('coauthors_dup', author1, author2),
+				'coauthors_dupF': self.getSetSimF('coauthors_dup', author1, author2),
+				'coauthors_ids_dup': self.getSetSim('coauthors_ids_dup', author1, author2),
+				'coauthors_ids_dupW': self.getSetSimW('coauthors_ids_dup', author1, author2),
+				'coauthors_ids_dupF': self.getSetSimF('coauthors_ids_dup', author1, author2),
 				'paperIDs': self.getSetSim('paperids', author1, author2),
 				'paperIDsF': self.getSetSimF('paperids', author1, author2),
+				'paperIDs_dup': self.getSetSim('paperids_dup', author1, author2),
+				'paperIDs_dupF': self.getSetSimF('paperids_dup', author1, author2),
 # 				'paperIDs_p_title': self.getSetSim('paperids_inpaper_titlenoblank', author1, author2),
 # 				'paperIDs_p_titleF': self.getSetSimF('paperids_inpaper_titlenoblank', author1, author2),
 				'titles_dupW': self.getTitlesOverlap(author1, author2),
 # 				'titles_dup': self.getSetSim('titles_dup_idified', author1, author2),
 # 				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2),
 				'pubTextSim': self.getTextSimPub('PubTextSimVecs', author1, author2),
-				'paperTitleSim': self.getTextSimPub('PaperTitleSimVecs', author1, author2)
+				'paperTitleSim': self.getTextSimPub('PaperTitleSimVecs', author1, author2),
+				'paperTitleSim_dup': self.getTextSimPub('PaperTitleSimVecs_dup', author1, author2)
 			})
 		elif author1 in self.filter or author2 in self.filter:
  			f['has_papers'] = 1
