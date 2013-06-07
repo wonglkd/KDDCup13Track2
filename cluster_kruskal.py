@@ -23,13 +23,13 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
-	parser.add_argument('-t', '--interconnectivity', default=0.87)
+	parser.add_argument('-t', '--interconnectivity', default=0.87, type=float)
 	parser.add_argument('-A', '--with-analysis', action='store_true')
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
-	threshold_interconnectivity = float(args.interconnectivity)
+	threshold_interconnectivity = args.interconnectivity
 
 	print_err("Loading graph")
 	reader = csv.reader(enforce_min(skip_comments(open(args.edgelist, 'rb')), threshold_interconnectivity))

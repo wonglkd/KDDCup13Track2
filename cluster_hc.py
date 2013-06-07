@@ -93,17 +93,17 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
-	parser.add_argument('-t', '--interconnectivity', default=0.80)
-	parser.add_argument('-d', '--density', default=0.80)
-	parser.add_argument('-m', '--min-edge', default=0.05)
+	parser.add_argument('-t', '--interconnectivity', default=0.80, type=float)
+	parser.add_argument('-d', '--density', default=0.80, type=float)
+	parser.add_argument('-m', '--min-edge', default=0.05, type=float)
 	parser.add_argument('-l', '--linkage', default='average')
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
-	threshold_min_weight = float(args.min_edge)
-	threshold_interconnectivity = float(args.interconnectivity)
-	threshold_density = float(args.density)
+	threshold_min_weight = args.min_edge
+	threshold_interconnectivity = args.interconnectivity
+	threshold_density = args.density
 
 	print_err("Loading graph")
 	G_sim = nx.read_weighted_edgelist(enforce_min(skip_comments(open(args.edgelist, 'rb')), threshold_min_weight), nodetype=int, delimiter=',')
