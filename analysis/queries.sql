@@ -7,6 +7,12 @@ SELECT AuthorId, LOWER(TRIM(REPLACE(name, ';', ''))), COUNT(*) FROM paperauthor 
 WHERE name <> ''
 GROUP BY AuthorId, LOWER(TRIM(REPLACE(name, ';', '')));
 
+.output pa_names_dup.csv
+SELECT dup.AuthorId, LOWER(TRIM(REPLACE(name, ';', ''))), COUNT(*) FROM pa_duppairs dup, awithpapers awp, paperauthor pa
+WHERE awp.Id=dup.AuthorId and dup.AuthorId = pa.AuthorId and dup.PaperId = pa.PaperId
+and name <> ''
+GROUP BY dup.AuthorId, LOWER(TRIM(REPLACE(name, ';', '')));
+
 .output pa_affiliation.csv
 SELECT AuthorId, LOWER(affiliation), COUNT(*) FROM paperauthor JOIN awithpapers ON Id=AuthorId
 WHERE affiliation <> ''
@@ -34,10 +40,22 @@ GROUP BY AuthorId, p.JournalId;
 SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId
 GROUP BY AuthorId, pa.PaperId;
 
+.output pa_paperids_dup.csv
+SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=pa.AuthorId
+JOIN pa_duppairs dup ON dup.paperId = pa.paperId and dup.AuthorId = pa.AuthorId
+GROUP BY pa.AuthorId, pa.PaperId;
+
 .output pa_paperids_inpaper_titlenoblank.csv
 SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=AuthorId JOIN paper p ON PaperId = p.Id
-WHERE title <> ""
+WHERE title <> ''
 GROUP BY AuthorId, pa.PaperId;
+
+.output pa_paperids_inpaper_titlenoblank_dup.csv
+SELECT pa.AuthorId, pa.PaperId, COUNT(*) FROM paperauthor pa JOIN awithpapers awp ON awp.Id=pa.AuthorId JOIN paper p ON pa.PaperId = p.Id
+JOIN pa_duppairs dup ON dup.paperId = pa.paperId and dup.AuthorId = pa.AuthorId
+WHERE title <> ''
+GROUP BY pa.AuthorId, pa.PaperId;
+
 
 
 CREATE TABLE pa_duppairs (PaperId INTEGER, AuthorId INTEGER, Count INTEGER, PRIMARY KEY (PaperId, AuthorId));
@@ -48,6 +66,13 @@ SELECT COUNT(cnt) FROM
 (SELECT LOWER(a.name), COUNT(*) as cnt FROM Author a JOIN 
 (SELECT DISTINCT Id as AId FROM pa_duppairs JOIN Author ON AuthorId = Id)
 ON AId = Id GROUP BY LOWER(name) HAVING COUNT(*) > 1 ORDER BY COUNT(*) DESC);
+
+SELECT * FROM paperauthor WHERE AuthorId = 2292964
+EXCEPT
+SELECT pa.* FROM paperauthor pa JOIN pa_duppairs dup ON pa.PaperId = dup.PaperId AND pa.AuthorId = dup.AuthorId 
+WHERE pa.AuthorId = 2292964;
+
+
 
 SELECT * FROM paperauthor pa JOIN (
 SELECT * FROM pa_duppairs WHERE AuthorID IN (SELECT Id FROM Author WHERE Name = 'Chung-Kang Peng') ORDER BY AuthorId
@@ -62,28 +87,40 @@ SELECT COUNT(*) FROM
 FROM authorprocessed JOIN namelist ON name_last = surname
 GROUP BY name_last);
 
+-- no. of names not in whitelist
 SELECT COUNT(*) FROM
 (SELECT name_last, COUNT(*) as cnta
 FROM authorprocessed
 WHERE NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
 GROUP BY name_last HAVING COUNT(*) > 1 ORDER BY cnta);
 
+-- no. of names in blacklist and not in whitelist
 SELECT COUNT(*) FROM (SELECT name_last, COUNT(*) as cnta
 FROM authorprocessed
 WHERE EXISTS (SELECT NULL FROM engdict WHERE word = name_last)
 AND NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
 GROUP BY name_last ORDER BY cnta);
 
+-- no. of names that are not in whitelist and not in blacklist, and occurring more than once
 SELECT COUNT(*) FROM
 (SELECT name_last, COUNT(*) as cnta
 FROM authorprocessed
 WHERE NOT EXISTS (SELECT NULL FROM engdict WHERE word = name_last)
-AND NOT EXISTS (SELECT NULL FROM namelist WHERE name_last = surname)
-GROUP BY name_last HAVING COUNT(*) > 1 LIMIT 1000);
+AND NOT EXISTS (SELECT NULL FROM lastname WHERE name_last = lastname.name)
+GROUP BY name_last HAVING COUNT(*) > 1);
+
+-- no
 
 CREATE TABLE engdict (word TEXT PRIMARY KEY);
 
 CREATE TABLE namelist (surname TEXT PRIMARY KEY, cnt INTEGER);
+
+CREATE TABLE lastname_2000 (surname TEXT PRIMARY KEY, cnt INTEGER);
+CREATE TABLE lastname_1990 (surname TEXT PRIMARY KEY, per FLOAT);
+CREATE TABLE engdict (word TEXT PRIMARY KEY);
+CREATE TABLE lastname (name TEXT PRIMARY KEY);
+INSERT INTO lastname
+SELECT surname FROM (SELECT surname FROM lastname_1990 UNION SELECT surname FROM lastname_2000);
 
 SELECT DISTINCT AuthorId FROM pa_duppairs WHERE AuthorID IN (SELECT Id FROM Author WHERE Name = 'Chung-Kang Peng') ORDER BY AuthorId
 
@@ -131,11 +168,44 @@ ORDER BY p1.Title;
 SELECT pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', ''))) as Coauthor, COUNT(*) as cnt
 FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
 JOIN awithpapers a ON a.Id = pa1.AuthorId
+WHERE LOWER(TRIM(REPLACE(pa2.name, ';', ''))) <> ''
+AND pa1.AuthorId <> pa2.AuthorId
 GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')));
 
+-- SELECT pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', ''))) as Coauthor, COUNT(*) as cnt
+-- FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
+-- JOIN awithpapers a ON a.Id = pa1.AuthorId
+-- JOIN pa_duppairs dup1 ON dup1.paperId = pa1.paperId and dup1.AuthorId = pa1.AuthorId
+-- JOIN pa_duppairs dup2 ON dup2.paperId = pa2.paperId and dup2.AuthorId = pa2.AuthorId
+-- WHERE LOWER(TRIM(REPLACE(pa2.name, ';', ''))) <> ''
+-- GROUP BY pa1.AuthorId, LOWER(TRIM(REPLACE(pa2.name, ';', '')));
+
+.output pa_coauthors_dup.csv
+SELECT dup1.AuthorId, LOWER(TRIM(REPLACE(pa.name, ';', ''))) as Coauthor, COUNT(*) as cnt
+FROM pa_duppairs dup1 JOIN pa_duppairs dup2 ON dup1.PaperId = dup2.PaperId
+JOIN awithpapers a ON a.Id = dup1.AuthorId
+JOIN paperauthor pa ON dup2.paperId = pa.paperId and dup2.AuthorId = pa.AuthorId
+WHERE LOWER(TRIM(REPLACE(pa.name, ';', ''))) <> ''
+AND dup1.AuthorId <> dup2.AuthorId
+GROUP BY dup1.AuthorId, LOWER(TRIM(REPLACE(pa.name, ';', '')));
+
+.output pa_coauthors_ids.csv
+SELECT pa1.AuthorId, pa2.AuthorId as Coauthor, COUNT(*) as cnt
+FROM paperauthor pa1 JOIN paperauthor pa2 ON pa1.PaperId = pa2.PaperId
+JOIN awithpapers a ON a.Id = pa1.AuthorId
+WHERE pa1.AuthorId <> pa2.AuthorId
+GROUP BY pa1.AuthorId, pa2.AuthorId;
+
+.output pa_coauthors_ids_dup.csv
+SELECT pa1.AuthorId, pa2.AuthorId as Coauthor, COUNT(*) as cnt
+FROM pa_duppairs pa1 JOIN pa_duppairs pa2 ON pa1.PaperId = pa2.PaperId
+JOIN awithpapers a ON a.Id = pa1.AuthorId
+WHERE pa1.AuthorId <> pa2.AuthorId
+GROUP BY pa1.AuthorId, pa2.AuthorId;
 ----
 CREATE TABLE pa_coauthors_ (AuthorId INT, Coauthor TEXT, cnt INT);
-.import pa_coauthors_u_noheader.csv pa_coauthors_
+.mode csv
+.import pa_coauthors_u_strippunc_noheader.csv pa_coauthors_
 
 CREATE TABLE pa_coauthors (AuthorId INT, Coauthor TEXT, cnt INT, PRIMARY KEY (AuthorId, Coauthor));
 
@@ -149,6 +219,9 @@ DROP TABLE pa_coauthors_;
 CREATE TABLE pa_coauthors_total (AuthorId INT PRIMARY KEY, cnt INT, total INT);
 INSERT INTO pa_coauthors_total (AuthorId, cnt, total)
 SELECT AuthorId, COUNT(*), SUM(cnt) FROM pa_coauthors GROUP BY AuthorId;
+
+ANALYZE;
+VACUUM;
 
 SELECT
 			(SELECT COUNT(*) FROM

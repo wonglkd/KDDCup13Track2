@@ -1,3 +1,4 @@
+import csv
 import sys
 import exceptions
 import numpy as np
@@ -47,6 +48,23 @@ def skip_comments(iterable):
         if not line.startswith('#') and line.strip():
             yield line
 
+def verbose_iter(iter):
+	for i, line in enumerate(iter):
+		yield i, line
+		if (i+1) % 10000 == 0:
+			print_err(i+1, 'lines done')
+
+def readcsv_iter(filename, discard_header=True, verbose=True):
+	print_err("Reading file", filename)
+	with open(filename, 'rb') as f:
+		reader = csv.reader(f)
+		if discard_header:
+			header = reader.next()
+		for i, line in enumerate(reader):
+			yield i, line
+			if (i+1) % 10000 == 0 and verbose:
+				print_err(i+1, 'lines read')	
+
 def num(s):
     try:
         return int(s)
@@ -72,4 +90,16 @@ def shared_terms_sum(aa, bb):
 		fsum = 0
 	suma = aa[[0] * len(diffa), diffa].sum() if diffa.any() else 0
 	sumb = bb[[0] * len(diffb), diffb].sum() if diffb.any() else 0
-	return fsum - math.log(1.0 + min(suma, sumb))
+	return fsum - math.log10(1.0 + min(suma, sumb))
+
+punc_nospacedash = ".;,'~:_@?\|\\/\"+)}{(&$*%=>^"
+punc_nospace = punc_nospacedash + '-'
+punc = punc_nospace + ' '
+
+def strip_punc(str, strip_spaces = True, space_dashes=True):
+	if space_dashes:
+		return ' '.join(str.translate(None, punc_nospacedash).replace('-', ' ').split())
+	elif strip_spaces:
+		return str.translate(None, punc)
+	else:
+		return str.translate(None, punc_nospace)

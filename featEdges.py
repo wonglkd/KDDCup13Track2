@@ -64,7 +64,7 @@ class PaperauthorFeaturesGenerator:
 
 	pa_files_ = {
 # 		'name': 'authordata/pa_names_u.csv',
-		'name': 'authordata/pa_names_u_strippunc.csv',
+		'fullname': 'authordata/pa_names_u_strippunc.csv',
  		'affiliation': 'authordata/pa_affiliation_u.csv',
 		'conferences': 'authordata/pa_conferences.csv',
 		'paperids': 'authordata/pa_paperids.csv',
@@ -75,12 +75,17 @@ class PaperauthorFeaturesGenerator:
 # 		'titles_dup_idified': 'authordata/pa_titles_dup_idified.csv'
 	}
 	
+	pickles_ = {
+		'PubTextSimVecs': 'textdata/publication_tfidf.pickle',
+		'PaperTitleSimVecs': 'textdata/papertitles_tfidf.pickle'
+	}
+	
 	fields = [
 		'has_papers',
-		'pa_name',
+		'pa_fullname',
 		'pa_affil',
-		'names',
-		'namesF',
+		'fullnames',
+		'fullnamesF',
 		'affiliations',
 		'affiliationsF',
 		'conferences',
@@ -98,7 +103,8 @@ class PaperauthorFeaturesGenerator:
 # 		'titles_dup',
 		'titles_dupW',
 		'yearscore',
-		'pubTextSim'
+		'pubTextSim',
+		'paperTitleSim'
 	]
 	
 	fields_num_index = set([
@@ -110,9 +116,9 @@ class PaperauthorFeaturesGenerator:
 		'titles_dup_idified'
 	])
 	
-	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt', publicationtfidffile='textdata/publication_tfidf.pickle'):
+	def __init__(self, authorprefeat, authorfilterfile='data/authors_with_papers.txt'):
 		self.filter = set(imap(int, open(authorfilterfile, 'rb')))
-		self.TextSimVecs = pickle.load(open(publicationtfidffile, 'rb'))
+		self.unpickled = {k: pickle.load(open(v, 'rb')) for k, v in self.pickles_.iteritems()}
 		self.conn = getDB()
  		self.conn_pa = getDB('pa')
 
@@ -238,28 +244,15 @@ class PaperauthorFeaturesGenerator:
 		y1, y2 = self.pcutl(kk2), self.pcuth(kk2)
 		return min(x2, y2) - max(x1, y1) + 1
 
-	def getTextSimPub(self, a1, a2):
-		if a1 not in self.TextSimVecs or a2 not in self.TextSimVecs:
+	def getTextSimPub(self, field, a1, a2):
+		if a1 not in self.unpickled[field] or a2 not in self.unpickled[field]:
 			return 0
 		
-		terms1 = self.TextSimVecs[a1]
-		terms2 = self.TextSimVecs[a2]
+		terms1 = self.unpickled[field][a1]
+		terms2 = self.unpickled[field][a2]
 		return shared_terms_sum(terms1, terms2)
 
 	def getTitlesOverlap(self, a1, a2):
-# 		titles1, titles2 = self.pa_by_authors[a1]['titles_dup_idified'], self.pa_by_authors[a2]['titles_dup_idified']
-# 		if not titles1 or not titles2:
-# 			return 0
-# 		common_titles = set(title1.keys()) & set(title2.keys())
-# 		if not common_titles:
-# 			return 0
-# 		paperids1, paperids2 = self.pa_by_authors[a1]['paperids'], self.pa_by_authors[a2]['paperids']
-# 		common_paperids = set(paperids1.keys()) & set(paperids2.keys())
-# 		common_titles -= common_paperids
-# 
-# 		common = set(a.keys()) & set(b.keys())
-# 		total_common = sum([min(a[v], b[v]) for v in common])
-
 		common_titles, _, _ = self.dictSimW(self.pa_by_authors[a1]['titles_idified'], self.pa_by_authors[a2]['titles_idified'])
 		common_paperids, _, _ = self.dictSimW(self.pa_by_authors[a1]['paperids_inpaper_titlenoblank'], self.pa_by_authors[a2]['paperids_inpaper_titlenoblank'])
 		return common_titles - common_paperids
@@ -269,10 +262,10 @@ class PaperauthorFeaturesGenerator:
 # 		self.getAuthor(author2)
 		f = defaultdict(float)
 		f.update({
-			'pa_name': self.getPABoth('name', author1, author2),
+			'pa_fullname': self.getPABoth('fullname', author1, author2),
 			'pa_affil': self.getPABoth('affiliation', author1, author2),
-			'names': 0,
-			'namesF': 0,
+			'fullnames': 0,
+			'fullnamesF': 0,
 			'affiliations': 0,
 			'affiliationsF': 0,
 			'conferences': 0,
@@ -290,13 +283,14 @@ class PaperauthorFeaturesGenerator:
 # 			'paperIDs_p_titleF': 0,
 # 			'titles_dup': 0,
 			'titles_dupW': 0,
-			'pubTextSim': 0
+			'pubTextSim': 0,
+			'paperTitleSim': 0
 		})
 		if author1 in self.filter and author2 in self.filter:
 			f.update({
 				'has_papers': 2,
-				'names': self.getSetSim('name', author1, author2),
-				'namesF': self.getSetSimF('name', author1, author2),
+				'fullnames': self.getSetSim('fullname', author1, author2),
+				'fullnamesF': self.getSetSimF('fullname', author1, author2),
 				'affiliations': self.getSetSim('affiliation', author1, author2),
 				'affiliationsF': self.getSetSimF('affiliation', author1, author2),
 				'conferences': self.getSetSim('conferences', author1, author2),
@@ -315,7 +309,8 @@ class PaperauthorFeaturesGenerator:
 				'titles_dupW': self.getTitlesOverlap(author1, author2),
 # 				'titles_dup': self.getSetSim('titles_dup_idified', author1, author2),
 # 				'titles_dupW': self.getSetSimW('titles_dup_idified', author1, author2),
-				'pubTextSim': self.getTextSimPub(author1, author2)
+				'pubTextSim': self.getTextSimPub('PubTextSimVecs', author1, author2),
+				'paperTitleSim': self.getTextSimPub('PaperTitleSimVecs', author1, author2)
 			})
 		elif author1 in self.filter or author2 in self.filter:
  			f['has_papers'] = 1

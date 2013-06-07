@@ -42,7 +42,7 @@ def main():
 	
 	queries = {
 		'author': '''SELECT * FROM author a''',
-		'all': '''SELECT a.*, pa.name, pa.affiliation, p.Id, p.title, p.year, p.journalId, p.conferenceId FROM
+		'all': '''SELECT a.*, pa.name, pa.affiliation, pa.PaperId, p.title, p.year, p.journalId, p.conferenceId FROM
 	(author a LEFT JOIN paperauthor pa ON AuthorID = a.Id)
 	LEFT JOIN paper p ON p.Id = PaperId'''
 	}

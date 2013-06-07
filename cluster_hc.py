@@ -12,17 +12,30 @@ import heapq as hq
 from cluster_common import *
 # from collections import defaultdict
 
-def getSimilarity(G_sim, cl1, cl2):
+def getSimilarity_Average(G_sim, cl1, cl2):
 	edge_sum = sum([G_sim[v1][v2]['weight'] for v1, v2 in product(cl1, cl2) if G_sim.has_edge(v1, v2)])
 	return edge_sum / float(len(cl1) * len(cl2))
 
-def hcluster(G_sim, threshold_sim):
+def getSimilarity_AvgPresent(G_sim, cl1, cl2):
+	edgeweights = [G_sim[v1][v2]['weight'] for v1, v2 in product(cl1, cl2) if G_sim.has_edge(v1, v2)]
+	return sum(edgeweights) / float(len(edgeweights))
+
+def getSimilarity_Min(G_sim, cl1, cl2):
+	return min([G_sim[v1][v2]['weight'] for v1, v2 in product(cl1, cl2) if G_sim.has_edge(v1, v2)])
+
+def hcluster(G_sim, threshold_sim, sim_func):
+	sim_funcs = {
+		'average': getSimilarity_Average,
+		'avgpresent': getSimilarity_AvgPresent,
+		'min': getSimilarity_Min
+	}
+	chosen_simfunc = sim_funcs[sim_func]
 	print_err("Finding connected components")
 	connected_components = nx.connected_component_subgraphs(G_sim)
 	all_clusters = []
 	print_err('Clustering', len(connected_components), 'components')
 	for component_i, cc in enumerate(connected_components):
- 		print_err('Starting component', component_i+1, 'of', len(connected_components), '({:} nodes)'.format(len(cc)))
+ 		print_err('Starting component', component_i+1, 'of', len(connected_components), '(V={:}, E={:})'.format(len(cc), cc.size()))
  		if len(cc) == 2:
  			cl = list(cc.nodes())
  			if cc.size(weight='weight') >= threshold_sim:
@@ -64,7 +77,7 @@ def hcluster(G_sim, threshold_sim):
  					continue
  				adjclusters[nc] -= toremove
  				adjclusters[nc].add(len(clusters)-1)
- 				nsim = getSimilarity(G_sim, clusters[-1], clusters[nc])
+ 				nsim = chosen_simfunc(G_sim, clusters[-1], clusters[nc])
  				if nsim >= threshold_sim:
  					hq.heappush(pq, (-nsim, len(clusters)-1, nc))
 #  				else:
@@ -80,27 +93,28 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
-	parser.add_argument('--interconnectivity', default=0.80)
-	parser.add_argument('--density', default=0.80)
-	parser.add_argument('--min-edge', default=0.20) #0.15
+	parser.add_argument('-t', '--interconnectivity', default=0.80)
+	parser.add_argument('-d', '--density', default=0.80)
+	parser.add_argument('-m', '--min-edge', default=0.05)
+	parser.add_argument('-l', '--linkage', default='average')
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
-	threshold_min_weight = args.min_edge
-	threshold_interconnectivity = args.interconnectivity
-	threshold_density = args.density
+	threshold_min_weight = float(args.min_edge)
+	threshold_interconnectivity = float(args.interconnectivity)
+	threshold_density = float(args.density)
 
 	print_err("Loading graph")
 	G_sim = nx.read_weighted_edgelist(enforce_min(skip_comments(open(args.edgelist, 'rb')), threshold_min_weight), nodetype=int, delimiter=',')
 	print_err('Loaded (V={:}, E={:})'.format(len(G_sim), G_sim.size()))
 
 	print_err("Clustering")
-	clusters = hcluster(G_sim, threshold_interconnectivity)
+	clusters = hcluster(G_sim, threshold_interconnectivity, args.linkage)
 
  	print_err("Writing clusters")
  	
-	G_nsim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb'), nodetype=int, delimiter=','))
+	G_nsim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
  	outputClusters(clusters, open(args.outfile, 'wb'), G_nsim, threshold_density)
 
 if __name__ == "__main__":

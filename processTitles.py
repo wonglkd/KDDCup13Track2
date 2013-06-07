@@ -6,11 +6,11 @@ import csv
 import cPickle as pickle
 import argparse
 from pprint import pprint
-from collections import defaultdict
+from collections import defaultdict, Counter
 import numpy as np
 import scipy as sp
 
-def getTitles(filenames):
+def getTitles(filenames, title_column=2, id_column=0):
 	titles = []
 	ids = []
 	boundaries = [0]
@@ -20,25 +20,34 @@ def getTitles(filenames):
 			reader = csv.reader(f)
 			header = reader.next()
 			for line in reader:
-				titles.append(unidecode(unicode(line[2], 'utf-8')))
-				ids.append(int(line[0]))
+				titles.append(unidecode(unicode(line[title_column], 'utf-8')))
+				ids.append(int(line[id_column]))
 		boundaries.append(len(titles))
-	return titles, boundaries, ids
+	return titles, ids, boundaries
 
-def computeTFIDFs(titles, series, boundaries, ids):
-	stop_words = ENGLISH_STOP_WORDS | set(['conference', 'journal', 'international', 'national', 'on', 'workshop', 'symposium', 'int', 'conf', 'research'])
-	vec = TfidfVectorizer(analyzer='word', lowercase=True, stop_words=stop_words, min_df=1, max_df=1.0, binary=True, norm=None, use_idf=True, smooth_idf=True)
+def computeTFIDFs(titles, additional_stop_words=[], words_freq=False, min_df=1, max_df=1.0):
+	stop_words = ENGLISH_STOP_WORDS | set(additional_stop_words)
+	token_pattern = u'(?u)\\b[0-9]*[a-zA-Z]+[a-zA-Z0-9]+\\b'
+	vec = TfidfVectorizer(analyzer='word', lowercase=True, token_pattern=token_pattern, stop_words=stop_words, min_df=min_df, max_df=max_df, norm=None, use_idf=True, smooth_idf=True, binary=True)
 	tfidfs = vec.fit_transform(titles)
+
+	# print words sorted by frequency
+	if words_freq:
+		print_err("Preparing Word Frequency")
+		wfreq = Counter(tfidfs.nonzero()[1])
+		kk = [(wfreq[i], word.encode('ascii')) for i, word in enumerate(vec.get_feature_names())]
+		# kk = zip(tfidfs.sum(axis=0).tolist()[0], vec.get_feature_names())
+		kk = sorted(kk)
+		return tfidfs, kk
+	return tfidfs
+
+def split_ids(series, boundaries, ids):
 	# split by boundaries
 	ids = [ids[boundaries[i]:boundaries[i+1]] for i in range(series)]
 	for i in range(series):
 		ids[i] = {idx: boundaries[i] + j for j, idx in enumerate(ids[i])}
-
-	# print words sorted by frequency
-	# kk = zip(tfidf.sum(axis=0).tolist()[0], vec.get_feature_names())
-	# pprint(sorted(kk))
-	return tfidfs, ids
-
+	return ids
+	
 def loadPubsByAuthor(filenames):
 	pubs_by_author = {}
 	author_ids = set()
@@ -64,10 +73,14 @@ def main():
 	args = parser.parse_args()
 
 	print_err("Reading Titles")	
-	titles, boundaries, ids = getTitles(args.titlefiles)
+	titles, ids, boundaries = getTitles(args.titlefiles)
 	
 	print_err("Computing TF-IDF")
-	tfidfs, id2ind = computeTFIDFs(titles, len(args.titlefiles), boundaries, ids)
+	more_stop_words = ['conference', 'journal', 'international', 'national', 'on', 'workshop', 'symposium', 'int', 'conf', 'research']
+	tfidfs = computeTFIDFs(titles, more_stop_words)
+	
+	print_err("Producing id-to-index map")
+	id2ind = split_ids(len(args.titlefiles), boundaries, ids)
 	
 	print_err("Loading pubs by author")
 	pubs_by_author, author_ids = loadPubsByAuthor(args.pafiles)
@@ -80,7 +93,7 @@ def main():
  		if tsv is not None:
 	 		TextSimVecs[aid] = tsv
 		if (i+1) % 1000 == 0:
-			print_err(i+1, ' rows done')
+			print_err(i+1, 'rows done')
 
  	pickle.dump(TextSimVecs, open(args.output, 'wb'), pickle.HIGHEST_PROTOCOL)
 

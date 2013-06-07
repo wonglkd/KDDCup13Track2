@@ -3,7 +3,7 @@ from unidecode import unidecode
 import fileinput
 import csv
 import argparse
-from process_authors import punc
+from common import strip_punc
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -30,7 +30,7 @@ def main():
 			line[c] = unidecode(unicode(line[c], 'utf-8')).strip().lower()
 		if args.strip_punc:
 			for c in args.cols:
-				line[c] = line[c].translate(None, punc.replace(' ',''))
+				line[c] = strip_punc(line[c])
 		writer.writerow(line)
 		if (i+1) % 10000 == 0:
 			print i+1, "lines done"

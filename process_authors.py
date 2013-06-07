@@ -14,8 +14,6 @@ from unidecode import unidecode
 from pprint import pprint
 import jellyfish
 
-punc = ".;,-'~:_@?\|\\/\"+-)}{(&$*%=>^ "
-
 def loadAuthors(authorfile, printaffilwordfreq=False):
 	reader = csv.reader(open(authorfile, 'rb'))
 	reader.next()
@@ -29,7 +27,7 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	id2affiliation = {}
 	for i, line in enumerate(reader):
 		line[1:] = [unidecode(unicode(cell, 'utf-8')) for cell in line[1:]]
-		hn = HumanName(line[1], titles_c=titles_c)
+		hn = HumanName(line[1].replace('-', ' '), titles_c=titles_c)
 		ai = {
  			'fullname_joined': hn.full_name,
  			'name_title': hn.title,
@@ -38,9 +36,9 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
  			'name_last': hn.last,
  			'name_suffix': hn.suffix
 		}
-		ai = {k: v.lower().encode('ascii').translate(None, punc) for k, v in ai.iteritems()}
+		ai = {k: strip_punc(v.lower().encode('ascii'), space_dashes=False) for k, v in ai.iteritems()}
 		ai['name'] = hn.full_name.lower().strip().encode('ascii').translate(None, ';')
-		ai['fullname'] = hn.full_name.lower().encode('ascii').translate(None, punc.replace(' ',''))
+		ai['fullname'] = strip_punc(hn.full_name.lower().encode('ascii'))
 		ai['fullname_parsed'] = ai['name_first'] + ai['name_middle'] + ai['name_last'] + ai['name_suffix']
 		ai['affiliation'] = line[2].lower()
 		ai['metaphone_fullname'] = jellyfish.metaphone(ai['fullname']).encode('ascii').translate(None, ' ')
@@ -80,7 +78,7 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
  	stopwordlist = ['a', 'an', 'and', 'at', 'by', 'of', 'supported', 'the', 'this']
  	# stopwordlist += ['department', 'university''school', 'institute', 'college', 'institution']
  	stopwordlist = list(ENGLISH_STOP_WORDS | set(stopwordlist))
- 	# min_df = 2 because we will be looking for common words
+ 	# min_df = 2 because though we deduct non common words, they should be significant first
  	count_vec = CountVectorizer(min_df=2, binary=True, stop_words=stopwordlist)
  	affil_count = count_vec.fit_transform(affiliations)
 
