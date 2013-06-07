@@ -44,11 +44,12 @@ def main():
 		   color="r", yerr=std[indices], align="center")
 	pl.xticks(range(len(indices)), [feat_indices[v] for v in indices], rotation=45, horizontalalignment='right')
 	pl.xlim([-1, len(indices)])
-# 	pl.show()
 	fig = pl.gcf()
 	fig.subplots_adjust(bottom=0.2)
-	pl.savefig(args.output)
-
+	if args.output == '-':
+		pl.show()
+	else:
+		pl.savefig(args.output)
 
 if __name__ == "__main__":
 	main()
