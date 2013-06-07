@@ -16,6 +16,7 @@ textdata/*_u.txt
 
 # Unignore all makefiles
 !**/Makefile
+!*.sql
 
 *.pickle
 *.tmp
