@@ -97,7 +97,7 @@ $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.fe
 	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
 grid_%: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC_PREFIX)$^ $@ --gridsearch --clf $* $(TRAIN_PARA) # > $(GEN_DIR)/$@.log
+	$(EXEC_PREFIX)$^ $@ --gridsearch --clf $* $(TRAIN_PARA) > $(GEN_DIR)/$@.log
 
 $(GEN_DIR)/model_%.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ $@ --clf $* $(TRAIN_PARA)
