@@ -91,25 +91,25 @@ $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
 	$(EXEC_PREFIX)$^ $@; $(SORT_BIN) $@ -grk 3 -t"," -o $@
 
 $(GEN_DIR)/%.prob: edge-predict.py $(GEN_DIR)/%.feat $(GEN_DIR)/model.pickle
-	$(EXEC32_PREFIX)$^ $@; $(SORT_BIN) $@ -grk 3 -t"," -o $@
+	$(EXEC_PREFIX)$^ $@; $(SORT_BIN) $@ -grk 3 -t"," -o $@
 	
 $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC32_PREFIX)$^ $@ $(TRAIN_PARA)
+	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
 grid_%: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ $@ --gridsearch --clf $* $(TRAIN_PARA) # > $(GEN_DIR)/$@.log
 
 $(GEN_DIR)/model_%.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC32_PREFIX)$^ $@ --clf $* $(TRAIN_PARA)
+	$(EXEC_PREFIX)$^ $@ --clf $* $(TRAIN_PARA)
 
 $(GEN_DIR)/%_model.pickle: edge-train.py $(DATA_DIR)/train_%.csv $(GEN_DIR)/train_%.feat
-	$(EXEC32_PREFIX)$^ $@ $(TRAIN_PARA)
+	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
 cv: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC32_PREFIX)$^ --cv $(TRAIN_PARA)
+	$(EXEC_PREFIX)$^ --cv $(TRAIN_PARA)
 
 cv-gbm: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC32_PREFIX)$^ --cv --clf gbm $(TRAIN_PARA)
+	$(EXEC_PREFIX)$^ --cv --clf gbm $(TRAIN_PARA)
 	
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
 	$(EXEC_PREFIX)$^ $@
