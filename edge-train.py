@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn import cross_validation
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, zero_one_loss
+from sklearn.grid_search import GridSearchCV
 from common import *
+from pprint import pprint
 import multiprocessing
 import argparse
 import features as feat
@@ -67,6 +69,13 @@ def loadTrainingLabels(trainfilename, idset):
  			print_err(i+1, 'rows done')
  	return np.asarray(Y), ids
 
+def grid(clf, params_grid, X, Y, folds, **kwargs):
+	clf_grid = GridSearchCV(clf, params_grid, cv=folds, pre_dispatch='2*n_jobs', verbose=1, refit=False, **kwargs)
+	clf_grid.fit(X, Y)
+	pprint(clf_grid.grid_scores_)
+	print(clf_grid.best_score_)
+	print(clf_grid.best_params_)
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('trainfile', nargs='?', default='data/train.csv')
@@ -75,7 +84,8 @@ def main():
 	parser.add_argument('--clf', default='rf')
 	parser.add_argument('--removefeat', nargs='+', default=[])
 	parser.add_argument('--cv', action='store_true')
-	parser.add_argument('--folds', default=5)
+	parser.add_argument('--folds', default=3)
+	parser.add_argument('--gridsearch', action='store_true')
 	args = parser.parse_args()
 
 	if args.removefeat:
@@ -87,20 +97,14 @@ def main():
 # 			'affiliations',
 # 			'jaro_distance'
 		]
+		
+	n_jobs = min(multiprocessing.cpu_count(), 8)
 	
 	params = {}
 	# Random Forest
 	params['rf'] = {
- 		'max_features': 'auto', #4, # 9 6
- 		'n_estimators': 400, #130
-# 		'n_estimators': 1000, #130
-		'min_samples_split': 1, #3 #10
-		'min_samples_leaf': 2,
-		'random_state': 100,
-		'n_jobs': min(multiprocessing.cpu_count(), 8), # -1 = no. of cores on machine
-		'oob_score': True,
-		'verbose': 0,
-		'compute_importances': True
+ 		'max_features': 'auto',
+ 		'n_estimators': 400
 	}
 
 	# GBM
@@ -110,14 +114,48 @@ def main():
 		'learning_rate': 1e-04,
 		'max_depth': 7,
 #		'max_depth': 16,
+	}
+
+	params_grid = {}
+
+	params_grid['rf'] = {
+		'n_estimators': [130, 300, 400, 600, 1000], # [130, 400, 1000]
+		'max_features': [3, 4, 5, 6, 7, 8, 9, 10] # [4, 6, 9]
+	}
+
+	params_grid['gbm'] = {
+# 		'n_estimators': [500, 200],
+# 		'learning_rate': [1e-04],
+# 		'max_depth': [7]
+		'n_estimators': [15000, 20000] + [17500],
+		'learning_rate': [1e-04, 1e-03, 1e-02] + [5e-03],
+		'max_depth': [7, 16] + [3, 5, 6, 8, 12, 14, 18]
+	}
+
+	params_fixed = {}
+	
+	params_fixed['rf'] = {
+		'min_samples_split': 1, #3 #10
+		'min_samples_leaf': 2,
+		'random_state': 100,
+		'n_jobs': n_jobs, # -1 = no. of cores on machine
+		'oob_score': True,
+		'verbose': 0,
+		'compute_importances': True
+	}
+	
+	params_fixed['gbm'] = {
 		'min_samples_split': 1,
 		'min_samples_leaf': 2,
 		'subsample': 0.5,
 		'verbose': 0
 	}
 	
-	print params[args.clf]
+	for k, v in params_fixed.iteritems():
+		params[k].update(v)
 
+	print params[args.clf]
+	
 	X_ids, X = feat.load_features(args.featfile)
 	idmap = {id: i for i, id in enumerate(X_ids)}
  	feat_indices = feat.FeaturesGenerator.fields
@@ -141,11 +179,22 @@ def main():
 	X[np.isnan(X)] = 5.5
 
 	if args.clf == 'rf':
-		clf = RandomForestClassifier(**params['rf'])
+		clf = RandomForestClassifier()
 	elif args.clf == 'gbm':
-	 	clf = GradientBoostingClassifier(**params['gbm'])
-
-	if args.cv:
+		clf = GradientBoostingClassifier()
+	clf.set_params(**params[args.clf])
+	
+	if args.gridsearch:
+		print_err("Running grid search for best parameters")
+		kwargs = {
+			'n_jobs': n_jobs
+		}
+		if args.clf == 'rf':
+			clf.set_params(n_jobs=1)
+		elif args.clf == 'gbm':
+			kwargs['loss_func'] = zero_one_loss
+		grid(clf, params_grid[args.clf], X, Y, folds=args.folds, **kwargs)
+	elif args.cv:
 		print_err("Running cross-validation")
 		m_cv(clf, X, Y, args.folds)
 	else:
