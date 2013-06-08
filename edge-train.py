@@ -138,7 +138,7 @@ def main():
 	affil_median = 0
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = affil_median
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = 0.
-	X[np.isnan(X)] = 0.
+	X[np.isnan(X)] = 5.5
 
 	if args.clf == 'rf':
 		clf = RandomForestClassifier(**params['rf'])
