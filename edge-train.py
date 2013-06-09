@@ -100,57 +100,55 @@ def main():
 		
 	n_jobs = min(multiprocessing.cpu_count(), 8)
 	
-	params = {}
-	# Random Forest
-	params['rf'] = {
- 		'max_features': 'auto',
- 		'n_estimators': 400
+	params = {
+		# Random Forest
+		'rf': {
+			'max_features': 4,
+			'n_estimators': 300,
+			'min_samples_split': 1,
+			'min_samples_leaf': 1,
+		},
+		# GBM
+		'gbm': {
+			'n_estimators': 20000,
+			'learning_rate': 1e-03,
+			'max_depth': 3,
+		}
 	}
 
-	# GBM
-	params['gbm'] = {
-		'n_estimators': 20000,
-#		'n_estimators': 15000,
-		'learning_rate': 1e-04,
-		'max_depth': 7,
-#		'max_depth': 16,
+	params_grid = {
+		'rf': {
+			'min_samples_split': [1, 2, 3, 4],
+			'min_samples_leaf': [1, 2, 3, 4],
+			'n_estimators': [100, 130, 200, 250, 300, 350, 400, 500], # [130, 400, 1000]
+			'max_features': [2, 3, 4, 5, 6, 7, 8, 9, 10] # [4, 6, 9]
+		},
+		'gbm': {
+	# 		'n_estimators': [500, 200],
+	# 		'learning_rate': [1e-04],
+	# 		'max_depth': [7]
+			'n_estimators': [15000, 20000] + [17500],
+			'learning_rate': [1e-04, 1e-03, 1e-02] + [5e-03],
+			'max_depth': [7, 16] + [3, 5, 6, 8, 12, 14, 18]
+		}
 	}
 
-	params_grid = {}
-
-	params_grid['rf'] = {
-		'n_estimators': [130, 300, 400, 600, 1000], # [130, 400, 1000]
-		'max_features': [3, 4, 5, 6, 7, 8, 9, 10] # [4, 6, 9]
+	params_fixed = {
+		'rf': {
+			'random_state': 100,
+			'n_jobs': n_jobs, # -1 = no. of cores on machine
+			'oob_score': True,
+			'verbose': 0,
+			'compute_importances': True
+		},
+		'gbm': {
+			'min_samples_split': 1,
+			'min_samples_leaf': 2,
+			'subsample': 0.5,
+			'verbose': 0
+		}
 	}
 
-	params_grid['gbm'] = {
-# 		'n_estimators': [500, 200],
-# 		'learning_rate': [1e-04],
-# 		'max_depth': [7]
-		'n_estimators': [15000, 20000] + [17500],
-		'learning_rate': [1e-04, 1e-03, 1e-02] + [5e-03],
-		'max_depth': [7, 16] + [3, 5, 6, 8, 12, 14, 18]
-	}
-
-	params_fixed = {}
-	
-	params_fixed['rf'] = {
-		'min_samples_split': 1, #3 #10
-		'min_samples_leaf': 2,
-		'random_state': 100,
-		'n_jobs': n_jobs, # -1 = no. of cores on machine
-		'oob_score': True,
-		'verbose': 0,
-		'compute_importances': True
-	}
-	
-	params_fixed['gbm'] = {
-		'min_samples_split': 1,
-		'min_samples_leaf': 2,
-		'subsample': 0.5,
-		'verbose': 0
-	}
-	
 	for k, v in params_fixed.iteritems():
 		params[k].update(v)
 
