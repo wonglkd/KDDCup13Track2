@@ -4,6 +4,7 @@ from common import *
 from cluster_common import *
 import argparse
 import csv
+import cPickle as pickle
 from collections import defaultdict
 
 def get_id(mp, a):
@@ -25,7 +26,9 @@ def main():
 	parser.add_argument('outfile', nargs='?')
 	parser.add_argument('-t', '--interconnectivity', default=0.79, type=float)
 	parser.add_argument('-A', '--with-analysis', action='store_true')
+	parser.add_argument('-a', '--authorprefeat', default='generated/Author_prefeat.pickle')
 	args = parser.parse_args()
+
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
@@ -67,9 +70,11 @@ def main():
  			f_out.write(','.join(map(str, sorted(cl))) + '\n')
 
 	if args.with_analysis:
+		print_err("Loading pickled author pre-features")
+		authors = pickle.load(open(args.authorprefeat, 'rb'))
 		import networkx as nx
 		G_sim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
-		outputClusters(clusters, f_out, G_sim)
+		outputClusters(clusters, f_out, G_sim, authors)
 
 if __name__ == "__main__":
 	main()

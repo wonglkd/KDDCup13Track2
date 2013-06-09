@@ -5,6 +5,7 @@ import argparse
 import csv
 import numpy as np
 import scipy as sp
+import cPickle as pickle
 from pprint import pprint
 import networkx as nx
 from itertools import combinations, product
@@ -97,7 +98,9 @@ def main():
 	parser.add_argument('-d', '--density', default=0.83, type=float)
 	parser.add_argument('-m', '--min-edge', default=0.05, type=float)
 	parser.add_argument('-l', '--linkage', default='average')
+	parser.add_argument('-a', '--authorprefeat', default='generated/Author_prefeat.pickle')
 	args = parser.parse_args()
+
 	if args.outfile == None:
 		args.outfile = args.edgelist.replace('.prob','') + '.clusters'
 
@@ -115,7 +118,11 @@ def main():
  	print_err("Writing clusters")
  	
 	G_nsim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
- 	outputClusters(clusters, open(args.outfile, 'wb'), G_nsim, threshold_density)
+
+	print_err("Loading pickled author pre-features")
+  	authors = pickle.load(open(args.authorprefeat, 'rb'))
+
+ 	outputClusters(clusters, open(args.outfile, 'wb'), G_nsim, authors, threshold_density)
 
 if __name__ == "__main__":
 	main()
