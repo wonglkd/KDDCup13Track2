@@ -23,7 +23,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
-	parser.add_argument('-t', '--interconnectivity', default=0.87, type=float)
+	parser.add_argument('-t', '--interconnectivity', default=0.79, type=float)
 	parser.add_argument('-A', '--with-analysis', action='store_true')
 	args = parser.parse_args()
 	if args.outfile == None:
