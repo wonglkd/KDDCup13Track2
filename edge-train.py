@@ -103,7 +103,7 @@ def main():
 	params = {
 		# Random Forest
 		'rf': {
-			'max_features': 4,
+			'max_features': 3,
 			'n_estimators': 300,
 			'min_samples_split': 1,
 			'min_samples_leaf': 1,
