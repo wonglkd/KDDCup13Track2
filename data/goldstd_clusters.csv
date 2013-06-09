@@ -32,6 +32,9 @@ allen p mills jr|allen p mills;1060182,1270643
 albert einstein|a einstein;1044389,508042,750892,872272,436949,142134,1710041,488666,1143870,1784383,1942234,2278185,96610,291362
 terrence j sejnowski|t sejnowski|t j sejnowski|j sejnowski|tj sejnowski|terry sejnowski|terrence j sejnowskit|terrence j sejnowskis;927362,1760868,1312229,1430574,456725,561631,1281530,1796315,2115231,496280,981190,718542,1500167,1780112,1457071,1391853,1705351,1996849,881811,647140,1893072,852174,250650,465945
 michael e phelps|michael e phelpsis;2093559,1092417,418689,1179530,1568039,214768,544817,1239636,251733,1237655,1115492
+10,B Y INGRID DAUBECHIES|Ingrid Daubechies|Ingrid Daubechies I;1623025,345668,22412,1039213,1085077,1238530,1300827,1454822,1788917,1987004,2151875,2211314
+8,John F. Nash Jr;36243,1022256,1214412,1657144,1774472,1795690,2083410
+John C. M. Nash;89810
 #werner muller is a very messy cluster - it's pretty unclear even for humans
 #confirmed clusters are below, but there are a few which only has the name, so we won't know where it is supposed to belong
 #theme of the papers are used to classify these werner mullers too
@@ -58,6 +61,46 @@ th w de loos|theodoor w de loos|theo w de loos;1409429,1334493,533533,479998,616
 #antony j williams;1933440,1532524,2292573,1703537,2129842,435092,1036573,1160093,1582495
 #patrick suppes;2209730,1893187,105060,713512,424811,1834403,44420,1736091
 
+# new ones added 09 June 2013
+# parsing issues: "Lord"
+lord rayleigh|L. Rayleigh;1382065,10236,1206037,1231530,1329323,1709393
+gregory abowd|gregory d abowd;584492,2189526,80089,325789
+# Russ Altman Md not picked up
+rb altman|russ b altman|Russ Altman Md;532485,1229741,2057644,250222
+# Mario and mrio - not merged - accented A dropped
+mario alves|mrio alves;666409,1268676,2063314,45100,637951,2089406
+Mário Fabiano Alves;1512903
+m k amirhosseini|m khalaj amirhosseini|mohammad khalaj amirhosseini;767905,1736313,1809113,690597,1347156,1953607
+# 3,0.913951,amirhosseini,m k amirhosseini|m khalaj amirhosseini|mohammad khalaj amirhosseini,1;767905,1736313,1809113
+# 3,0.947625,amirhosseini,m khalaj amirhosseini,1;690597,1347156,1953607
+h y ammar|hany ammar|hany h ammar;1238977,2212360,2003711,2082930
+#2,0.976458,ammar,h y ammar,1;1238977,2212360
+#2,0.922536,ammar,hany ammar|hany h ammar,1;2003711,2082930
+steven m anlage|steven m anlagea;168470,1166671,1259990,1961898
+# 2,0.994256,anlage,steven m anlage,1;168470,1166671
+# 2,0.970715,anlagea,steven m anlagea,1;1259990,1961898
+evert jan baerends;523317,697723,2027308,967346,1066570,1744072
+# 3,0.960683,baerends,evert jan baerends,1;523317,697723,2027308
+# 3,0.915225,baerends,evert jan baerends,1;967346,1066570,1744072
+2,0.936358,baranov,v baranov,1;1541540,1843050
+2,0.959792,baranov,v v baranov,1;963085,2229262
+2,0.865042,bayzid,m s bayzid|md shamsuzzoha bayzid,1;238439,610474
+3,0.970833,beel,joeran beel|joran beel,1;224509,722869,1519933
+# beielstein should have got picked up under titles_dupW?
+6,0.960526,beielstein,thomas bartz beielstein|thomas beielstein,1;302464,420908,528032,1134838,1427248,1580852,408436,1252480
+c bisperink|c g j bisperink|chris bisperink|chris g j bisperink;1090754,1723219,1028026,2051346
+borka jerman blazic;576562,1121734,1554374,793233,841202,1549975,1803389
+g t h a m bots|g th a m bots|gerard th a m bots;1212948,1899130,62263,307104,449050,571657,767431,1828000
+# jr - sufix
+frederick p brooks jr|frederick brooks|frederick p brooks|frederick phillips brooks jr,1;1247228,1572466,1658890,816988,1305932,1331304
+# titles_dupW - to check
+g bugnon|gregory bugnon;644516,1972852,111035,577997,1649371
+curtis g callan|curtis g callan jr;217299,1926804,86464,225408,1648253
+jean camp|l jean camp;402618,1692329,995056,2065679
+John M campbell;816146
+John F campbell;924894
+john r campbell;2182412
+john y campbell;1237890,1338942,1209871
 
 ### Negative examples that turned out in our clusterings ###
 ### Have not checked to ensure that they are complete ###
@@ -162,3 +205,6 @@ ID:1009543;1009543
 1 optimization framework;310297
 1 central bank independence;1441974
 1 basic concepts;665404
+Suggestions Or Corrections To;423394
+Multipath Rayleigh Fading;741382
+Value Of Knowledge;2067718
