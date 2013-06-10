@@ -6,21 +6,9 @@ from cluster_common import *
 import cPickle as pickle
 import argparse
 import csv
+from itertools import chain
 from pprint import pprint
 import sys
-
-def skip_front(iterable):
-	for line in iterable:
-		if ';' in line:
-			yield line.split(';')[1]
-		else:
-			yield line
-
-def loadClusters(filename):
-	with open(filename, 'rb') as f:
-		print_err('Reading', filename)
-		for line in csv.reader(skip_front(skip_comments(f))):
-			yield map(int, line)
 
 def main():
 	parser = argparse.ArgumentParser()

@@ -3,6 +3,7 @@ import sys
 import exceptions
 import numpy as np
 import math
+from collections import Iterable
 
 try:
 	import apsw
@@ -42,6 +43,13 @@ def selectDB(conn, query, para = None):
 
 def print_err(*args):
     sys.stderr.write(' '.join(map(str,args)) + '\n')
+
+def skip_front(iterable):
+	for line in iterable:
+		if ';' in line:
+			yield line.split(';')[1]
+		else:
+			yield line
 
 def skip_comments(iterable):
     for line in iterable:
@@ -116,11 +124,12 @@ def computeTFIDFs(texts, additional_stop_words=[], words_freq=False, **kwargs):
 			print '{:} {:}'.format(line)
 	return tfidfs
 
+def is_iterable(itl):
+	return isinstance(filenames, Iterable)
+
 def loadfilelines(filenames):
 	# allow for input of a single or multiple filenames
-	try:
-		[ f for f in filenames ]
-	except TypeError:
+	if not is_iterable(filenames):
 		filenames = [filenames]
 	sw = []
 	for filename in filenames:
