@@ -25,6 +25,7 @@ def main():
 		'20130609-0220/combined_kruskal': 0.95850,
 		'20130609-0251/combined_kruskal': 0.95990,
 		'20130609-1900/combined_gbm_hc': 0.95959,
+		'20130609-1900/combined_gbm_kruskal': 0.96007,
 		'best': 0.96291,
 		'best-2nd-0.8': 0.96286
 	}
