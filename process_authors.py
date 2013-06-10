@@ -23,11 +23,14 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	affiliations = []
  	print_err("Parsing names and counts")
 	#[^~:_`@\?\\|\'/\"\.\-0-9a-z;,\n\r \+\-\)\}&%\$\*\{\>=\^]
-	titles_c = nameparser.constants.TITLES - set(['wing'])
+	titles_c = nameparser.constants.TITLES - set(['wing', 'lord'])
+	suffixes_c = nameparser.constants.SUFFIXES | set(['junior', 'senior']) 
+	prefixes_c = nameparser.constants.PREFIXES - set(['bin']) # more common as first name
+
 	id2affiliation = {}
 	for i, line in enumerate(reader):
 		line[1:] = [unidecode(unicode(cell, 'utf-8')) for cell in line[1:]]
-		hn = HumanName(line[1].replace('-', ' '), titles_c=titles_c)
+		hn = HumanName(line[1].replace('-', ' '), titles_c=titles_c, prefixes_c=prefixes_c, suffixes_c=suffixes_c)
 		ai = {
  			'fullname_joined': hn.full_name,
  			'name_title': hn.title,
@@ -74,41 +77,27 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 		if (i+1) % 10000 == 0:
 			print_err(i+1, "rows processed")
 
-	print_err("Computing Counts of affiliations")
- 	stopwordlist = ['a', 'an', 'and', 'at', 'by', 'of', 'supported', 'the', 'this']
- 	# stopwordlist += ['department', 'university''school', 'institute', 'college', 'institution']
- 	stopwordlist = list(ENGLISH_STOP_WORDS | set(stopwordlist))
- 	# min_df = 2 because though we deduct non common words, they should be significant first
- 	count_vec = CountVectorizer(min_df=2, binary=True, stop_words=stopwordlist)
- 	affil_count = count_vec.fit_transform(affiliations)
-
 	print_err("Computing TF-IDF of affiliations")
- 	tt = TfidfTransformer(norm=None, use_idf=True, smooth_idf=True, sublinear_tf=False)
- 	affil_tfidf = tt.fit_transform(affil_count)
+	
+ 	# min_df = 2 because though we deduct non common words, they should be significant first
+	#affil_tfidf = computeTFIDFs(affiliations, 'all', min_df=2, words_freq=False)
 
-	# print words sorted by frequency
-	if printaffilwordfreq:
-		kk = zip(affil_count.sum(axis=0).tolist()[0], count_vec.get_feature_names())
-		kk = sorted(kk)
-		for a, b in kk:
-			print '{:} {:}'.format(a, b)
-		return
+	affil_tfidf, kk = computeTFIDFs(affiliations, 'all', min_df=2, words_freq=True)
+	pprint(kk)
+	return
 
 	print_err("Calculating IDFs")
 	iFfL_IDF = dict(zip(iFfL_cnt.keys(), np.log(float(len(authors)) / np.array(iFfL_cnt.values()))))
 	lastname_IDF = dict(zip(lastname_cnt.keys(), np.log(float(len(authors)) / np.array(lastname_cnt.values()))))
 
 	print_err("Packing it into a list")
-	affil_count = affil_count.tocsr()
  	for i, a in enumerate(authors):
  		authors[i][1]['iFfL_idf'] = iFfL_IDF[a[1]['iFfL']]
  		authors[i][1]['lastname_idf'] = lastname_IDF[a[1]['name_last']]
  		if len(a[1]['affiliation']) == 0:
  			authors[i][1]['affil_tdidf'] = None
-#  			authors[i][1]['affil_count'] = None
  		else:
 			authors[i][1]['affil_tdidf'] = affil_tfidf[id2affiliation[a[0]]]
- # 			authors[i][1]['affil_count'] = affil_count[id2affiliation[a[0]]]
 		if (i+1) % 10000 == 0:
 			print_err(i+1)
  	authors_dict = dict(authors)
@@ -127,6 +116,8 @@ def main():
 		return
 		
 	if args.format == 'pickle':
+		if not args.outputfile:
+			args.outputfile = args.authorfile.replace(".csv","").replace("data","generated") + "_prefeat.pickle"
 		print_err("Pickling...")
 		pickle.dump(authors, open(args.outputfile, 'wb'), pickle.HIGHEST_PROTOCOL)
 	elif args.format == 'csv':

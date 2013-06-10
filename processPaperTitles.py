@@ -43,13 +43,7 @@ def main():
 	args = parser.parse_args()
 
 	print_err("Computing TF-IDF")
-	more_stop_words = ['discussion', 'paper', 'method', 'keyword', 'methods', 'case study', 'keywords', 'study', 'research', 'submission', 'evaluation', 'approach', 'framework', 'analysis']
-	more_stop_words += ['conference', 'journal', 'international', 'national', 'on', 'workshop', 'symposium', 'int', 'conf']
-	more_stop_words += ['keywords', 'based', 'using', 'analysis', 'words', 'key', 'word', 'design', 'test', 'title', 'titles', 'high', 'low', 'new', 'novel', 'effects', 'performance', 'applications', 'application']
-	more_stop_words += ['und', 'gan', 'ein'] # and
-	more_stop_words += ['baseado', 'na'] # based on
-	more_stop_words += ['mm'] 
-	tfidfs = pT.computeTFIDFs(getTitleKeywords(args.paperfile), more_stop_words, min_df=2)
+	tfidfs = computeTFIDFs(getTitleKeywords(args.paperfile), 'all', min_df=2)
 	
 	print_err("Reading id-to-index map")
 	id2ind = getIdsFromPapers(args.paperfile)

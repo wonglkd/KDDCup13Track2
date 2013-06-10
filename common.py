@@ -77,7 +77,59 @@ def num(s):
         		return 0.
         	else:
 				raise Exception("Could not convert string to number:"+ s)
-        	
+
+def computeTFIDFs(texts, additional_stop_words=[], words_freq=False, **kwargs):
+	from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
+	from collections import Counter
+	if additional_stop_words == 'all':
+		additional_stop_words = loadstopwords(['multilang_u', 'affiliations', 'titles'])
+	
+	stop_words = ENGLISH_STOP_WORDS | set(additional_stop_words)
+
+	defaults = {
+		'token_pattern': u'(?u)\\b[0-9]*[a-zA-Z]+[a-zA-Z0-9]+\\b',
+		'min_df': 1,
+		'max_df': 1.0,
+		'lowercase': True,
+		'analyzer': 'word',
+		'norm': None,
+		'use_idf': True,
+		'smooth_idf': True,
+		'binary': True,
+		'sublinear_tf': False,
+		'ngram_range': (1,3),
+#		'stop_words': frozenset(stop_words)
+	}
+	defaults.update(kwargs)
+	
+	vec = TfidfVectorizer(stop_words=stop_words, **defaults)
+	tfidfs = vec.fit_transform(texts)
+
+	# print words sorted by frequency
+	if words_freq:
+		print_err("Preparing Word Frequency")
+		wfreq = Counter(tfidfs.nonzero()[1])
+		kk = [(wfreq[i], word.encode('ascii')) for i, word in enumerate(vec.get_feature_names())]
+		# kk = zip(tfidfs.sum(axis=0).tolist()[0], vec.get_feature_names())
+		kk = sorted(kk)
+		return tfidfs, kk
+	return tfidfs
+
+def loadfilelines(filenames):
+	# allow for input of a single or multiple filenames
+	try:
+		[ f for f in filenames ]
+	except TypeError:
+		filenames = [filenames]
+	sw = []
+	for filename in filenames:
+		with open(filename, 'rb') as f:
+			sw += [line.strip() for line in skip_comments(f)]
+	return sw
+
+def loadstopwords(setids):
+	return loadfilelines(['textdata/stopwordlist_{:}.txt'.format(id) for id in setids])
+		
 def shared_terms_sum(aa, bb):
 	terms_a = aa.nonzero()[1]
 	terms_b = bb.nonzero()[1]
