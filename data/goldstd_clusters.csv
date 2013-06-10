@@ -101,6 +101,36 @@ John M campbell;816146
 John F campbell;924894
 john r campbell;2182412
 john y campbell;1237890,1338942,1209871
+# added 10 June 13
+3,0.922881,catunda,sebastian yuri cavalcanti catunda,1;137007,172081,1119745
+l caviglione|luca caviglione;666904,1307357,1326064,1105541
+a cayley|arthur cayley;254134,2153525,190710
+stanford, stem cell;1357337
+microsoft, eric i chang;178801,238212
+uni of hong kong,business,eric c chang;429757
+# 2,0.856285,chang,eric i chang,1;238212,1357337
+# 2,0.892848,chang,eric i chao chang,1;178801,429757
+chiu sing oliver choy|oliver chiu sing choy;1616688,2111890,741545,1962318
+g christou|george christou;183434,356715,534662,1066190
+wind,chia ren chu;1776057,2036466,43097
+bio,chia ren chu;1805628
+tat seng chua;1012184,1688671,395059,471690,1716630
+# this set of clusters is suspect
+medical,michael cohen;987077,
+poetry,michael d cohen;754479,2071221,807591
+microsoft,michael f cohen;1212281,1830764
+voice recognition,michael h cohen;1347108,1529874,43308
+michael a cohen;1085420
+tim f cootes|t f cootes|tf cootes|timothy f cootes;1079001,1430463,1833553,143633,1848500
+jean louis cuq|j l cuq;176642,790606,1781393,1468366,2053625
+mirjam cvetiycand|mirjam cvetiyc;557331,681774,676787,1845006
+w i f david|william i f david;1499181,1729955,150480,626087,999800,1328712,2258607
+p g de gennes|pierre gilles de gennes;405656,714327,1342753,232156,274029,547513,861762,1308026,2193597
+victor o de haan|v o de haan|victor otto de haan;559382,1665365,349047,1946192,498652,672407
+kees g de kruif|cees g de kruif,1;972784,1597457,98652,447491,480446,1645714
+jose antonio gutierrez de mesa;328324,513699,860355,1945865
+david c de roure|david de roure;285327,327897,2082475,61871,181141,350285,735191,1302421
+
 
 ### Negative examples that turned out in our clusterings ###
 ### Have not checked to ensure that they are complete ###
