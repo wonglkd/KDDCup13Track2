@@ -3,6 +3,7 @@ from unidecode import unidecode
 import fileinput
 import csv
 import argparse
+import sys
 from common import strip_punc
 
 def main():
