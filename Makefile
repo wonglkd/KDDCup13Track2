@@ -48,6 +48,9 @@ generated/affil_wordcounts.txt: process_authors.py data/Author.csv
 %_u.csv: unidecodefile.py %.csv
 	$(EXEC_PREFIX)$^ $@ --all-cols
 
+%_u.txt: unidecodefile.py %.txt
+	$(EXEC_PREFIX)$^ $@ --all-cols
+
 %_noheader.csv: %.csv
 	tail -n +2 $< > $@
 
