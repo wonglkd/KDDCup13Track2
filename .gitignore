@@ -21,6 +21,7 @@ textdata/*_u.txt
 *.pickle
 *.tmp
 *.tmp.csv
+*.tmp.txt
 *.notrack.csv
 *.log
 
