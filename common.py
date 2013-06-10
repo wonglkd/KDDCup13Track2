@@ -88,7 +88,7 @@ def computeTFIDFs(texts, additional_stop_words=[], words_freq=False, **kwargs):
 
 	defaults = {
 		'token_pattern': u'(?u)\\b[0-9]*[a-zA-Z]+[a-zA-Z0-9]+\\b',
-		'min_df': 1,
+		'min_df': 2,
 		'max_df': 1.0,
 		'lowercase': True,
 		'analyzer': 'word',

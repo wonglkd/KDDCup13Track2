@@ -61,7 +61,7 @@ def main():
 	
 	print_err("Computing TF-IDF")
 	more_stop_words = ['conference', 'journal', 'international', 'national', 'on', 'workshop', 'symposium', 'int', 'conf', 'research']
-	tfidfs = computeTFIDFs(titles, more_stop_words, words_freq=args.printaffilwordfreq)
+	tfidfs = computeTFIDFs(titles, more_stop_words, words_freq=args.printaffilwordfreq, min_df=2)
 	if args.printaffilwordfreq:
 		return
 	
