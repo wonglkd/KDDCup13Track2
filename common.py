@@ -98,11 +98,11 @@ def computeTFIDFs(texts, additional_stop_words=[], words_freq=False, **kwargs):
 		'binary': True,
 		'sublinear_tf': False,
 		'ngram_range': (1,3),
-#		'stop_words': frozenset(stop_words)
+		'stop_words': frozenset(stop_words)
 	}
 	defaults.update(kwargs)
 	
-	vec = TfidfVectorizer(stop_words=stop_words, **defaults)
+	vec = TfidfVectorizer(**defaults)
 	tfidfs = vec.fit_transform(texts)
 
 	# print words sorted by frequency
