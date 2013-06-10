@@ -45,8 +45,9 @@ def main():
 		for aid in cl:
 			if aid in hrc_of_author:
 				seen_hrcs.add(hrc_of_author[aid])
-		if len(seen_hrcs) == 1:
-			hrc_of_hpc[list(seen_hrcs)[0]].append(cl)
+		if len(seen_hrcs) > 0:
+			for id in seen_hrcs:
+				hrc_of_hpc[id].append(cl)
 #		else:
 #			print_err("Not in hierarchy:", str(len(seen_hrcs))+','+' '.join(map(str, seen_hrcs)))
 
@@ -60,8 +61,10 @@ def main():
 	for hrc, hpcs in hrc_of_hpc.iteritems():
 		if len(hpcs) == 1:
 			continue
-		outputClusters(hpcs, fout, authors=authors)
-		fout.write("-----\n")
+ 		outputClusters(hpcs, fout, authors=authors)
+		fout.write("--combined:--\n")
+		outputClusters([list(chain.from_iterable(hpcs))], fout, authors=authors)
+		fout.write("---------\n")
 
 if __name__ == "__main__":
 	main()
