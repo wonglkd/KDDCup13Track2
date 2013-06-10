@@ -20,7 +20,8 @@ gavriel salvendy;1305888,1199748,1222855,1680427,212689,322068,758517,1731862,16
 martin eichenbaum|martin s eichenbaum;630090,698261,1804084
 ulrich s schubert|ulrich s schubertt|ulrich s schubertd|ulrich s schubertb|ulrich s schubertbc;884180,968450,242699,445252,716021,2205748,27535,1453614
 # note: the last three have a different affiliation (UNSW) but the papers match andrew cc yao
-andrew chi-chih yao|a c yao|andrew chi-chin yao|andrew c. c yao|andrew c. -c yao|a c. c yao|andrew c yao|andrew yao;957419,273173,1897742,1498230,1700167,95346,1654459,1696396,143953,483001,1469883,2083606,761486
+andrew chi-chih yao|a c yao|andrew chi-chin yao|andrew c. c yao|andrew c. -c yao|a c. c yao|andrew c yao|andrew yao;957419,273173,1897742,1498230,1700167,95346,1654459,1696396,143953,483001
+NSW,andrew yao;1469883,2083606,761486
 adriana cristina oliveira|adriana cristina oliveiraa|adriana cristina de oliveira|;1981296,1341712,1418963
 adriana de oliveira;567937
 manuel menendez-gonzalez|manuel menendez;1806444,1751484,1198415,208571,951972,1958091
@@ -57,7 +58,6 @@ th w de loos|theodoor w de loos|theo w de loos;1409429,1334493,533533,479998,616
 #james e gentle;1717923,2266885,2135560,599721,1103826,733107,807817,1111288,1289177
 #gerald schubert;388070,844521,1702890,1643437,665837,50387,1387544,1038042,1993491
 #schubert gerald;398173
-#c a coulson;2092355,1274407,1728264,1802834,563026,515764,942748,645181,1887358
 #antony j williams;1933440,1532524,2292573,1703537,2129842,435092,1036573,1160093,1582495
 #patrick suppes;2209730,1893187,105060,713512,424811,1834403,44420,1736091
 
@@ -101,6 +101,7 @@ John M campbell;816146
 John F campbell;924894
 john r campbell;2182412
 john y campbell;1237890,1338942,1209871
+
 # added 10 June 13
 3,0.922881,catunda,sebastian yuri cavalcanti catunda,1;137007,172081,1119745
 l caviglione|luca caviglione;666904,1307357,1326064,1105541
@@ -130,6 +131,75 @@ victor o de haan|v o de haan|victor otto de haan;559382,1665365,349047,1946192,4
 kees g de kruif|cees g de kruif,1;972784,1597457,98652,447491,480446,1645714
 jose antonio gutierrez de mesa;328324,513699,860355,1945865
 david c de roure|david de roure;285327,327897,2082475,61871,181141,350285,735191,1302421
+P. Lions|P. L. Lions|pierre louis lions;1949500,2064626,105776,329384,334572,897055,1173668,1833901,1411312,267246
+john n tsitsiklis|john n tsitsiklisx|john n tsitsiklisy|john n tsitsiklisz|john n tsitsiklist|john n tsitsiklistt;420926,427145,541905,571270,674791,838090,985491,1059797,1354412,1548596,1785389,2048689,2263775
+willard van orman quine|w v o quine|w v quine;83558,458348,487982,1479860,2222073,12369,683012,1076400,1344333,1750555,2291671
+j c f gauss|c f gauss|k f gauss|carl friedrich gauss;880779,1965297,694696,2201283,2293128,185418,318451,739600,1858781,2040157,2278009,928321
+8,tol,richard s j tol|richard sj tol|richard tol;615371,647834,719216,779260,822791,920269,1314152,2049203
+leite,jair c leite|jair cavalcanti leite;85715,551893
+leite,J. C. S. do Prado Leite|Julio Leite|J. C. S. P. Leite|Sampaio Prado Leite|Julio Cesar Leite|Julio Cesar S. P. Leite|julio cesar sampaio do prado leite;112192,415795,514310,710124,1590176,2161418,28266,208724,1737587,267946,702688,1299011,1808606,2131913
+11,coulson,c a coulson|charles alfred coulson;515764,563026,645181,702226,942748,1274407,1421072,1728264,1802834,1887358,2092355
+11,walstra,p walstra|pieter walstra;33798,872712,956498,1245217,1431608,1759076,1998073,2072786,2073007,2103923,2169646
+
+# YF, 10 June
+#confirm same clusters
+michael devetsikiotis|mike devetsikiotis;1846429,2091989,564516,614089,1615192
+carlos hernandez espinosa;501466,1902389,950999,1475779,1455941,1939975
+martin fenner|martin h fenner;1581421,2075298,154910,598579,1697046
+2,0.995667,gai,junyi gai,1;438513,2211541
+2,0.89675,dorling,daniel dorling|danny dorling,1;1126643,1991370
+# confirm wrong - after splitting
+susan donaldson;1841629
+simon donaldson|simon kirwan donaldson|Simon Donaldsonand;388259,2244978,1773930
+nick duffield|nick g duffield;600983,1378337
+nick j duffield;716605
+jonathan c engelsma|jonathan engelsma;1205806,1580210
+jonathan r engelsma;46484
+4,0.859049,guo,guang can guo|guangcan guo,1;1003031,1141867,1414107,2063275
+
+###
+### to be sorted out
+#confirm wrong clusters
+11,0.847448,dewey,john dewey|john f dewey|john m dewey,1;47194,250113,543152,774594,912447,1258715,1409121,1480287,1619847,2080444,2097772
+
+#suspects
+#should be tgt
+david c de roure|david de roure;285327,327897,2082475,61871,181141,350285,735191,1302421
+florencio lopez de silanes|florencio lopez de silanes; 1982981,2232309,432862,2083143
+g donzellini|giuliano donzellini;432004,2119860,1623054,2164287
+faith gunning dixon|faith m gunning dixon;273400,535278,434013,1632971,2012158
+g s m j e duchateau|guus s m j e duchateau|guus duchateau;265608,522057,675937,1507676, 4649,270825
+john ellis|john r ellis|jonathan richard ellis;1053503,1347347,1609449,153552,937129,1051336
+eugenio c ferreira|eugenio campos ferreira|eugenio m f c ferreira;551787,667155,674198,2235776,141767,650601
+m fettweis|michael p fettweis;1772458,2133759,459321,2270876
+r feynman|richard feynman|richard phillips feynman;1381693,1758060,907662,2188045
+fred d finkelman|fred finkelman;573194,951443,2003819,488190,1511878
+d firesmith|donald g firesmith|donald george firesmith;125978,442574,269811,671088,836920
+j fodor|jerry a fodor;726503,848447,167202,1055406
+richard s j frackowiak|r s j frack owiak|rs frackowiak;341871,2097137,895136,1102010
+a gasteratos|antonios gasteratos;894834,1477581,1246875,1482095,1545824,1742252,2008762
+c f gauss,carl friedrich gauss;185418,318451,739600,1858781,2040157,2278009,694696,2201283,2293128
+m gelfand|mikhail gelfand|mikhail s gelfand;81332,900876,1144390,2251887
+sharon c glotzer|sharon c glotzera;282123,1411437,2217657,237774,1536582
+c gransart|christophe gransart;338262,475326,651331,1918265
+l grisoni|laurent grisoni;138225,2229802,1040098,1471894,1742408
+g gulak|glenn gulak|p g gulak|p glenn gulak;144344,218605,859650,1110637
+james d hamilton|james hamilton;454878,1099593,952941,1783480
+
+#should be separated
+5,0.930275,duits,michael duits|michel h g duits,1;185447,1225362,1731902,1740109,2169151
+5,0.814502,enderlein,joerg enderlein|jorg enderlein,1;265783,812471,1340393,1465745,1883116
+4,0.858239,furber,stephen b furber|steve furber|steven b furber,1;55322,403678,1972431,2251617
+2,0.856804,gettys,james gettys|jim gettys,1;1127710,1385383
+3,0.919347,gillison,a n gillison|andrew n gillison|andy gillison,1;821036,912124,2039993
+
+#chinese names
+2,0.911708,dunxin|xin,hu dun xin|hu dunxin,1;2127658,2172534
+#2,0.859957,dong,yue dong|yue xue dong,1;88726,1552024
+3,0.933909,gai,yi gai,1;57795,1115501,1237376
+2,0.888688,guo,guang guo,1;1048923,1811371
+###
+
 
 
 ### Negative examples that turned out in our clusterings ###
@@ -238,3 +308,6 @@ ID:1009543;1009543
 Suggestions Or Corrections To;423394
 Multipath Rayleigh Fading;741382
 Value Of Knowledge;2067718
+Of Non-gaussian Processes;47032
+For Gaussian Regression;913132
+The Fast Gauss Transform;1816740
