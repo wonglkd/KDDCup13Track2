@@ -52,6 +52,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--titlefiles', nargs='*', default=['data/Conference.csv', 'data/Journal.csv'])
 	parser.add_argument('--pafiles', nargs='*', default=['authordata/pa_conferences.csv', 'authordata/pa_journals.csv'])
+	parser.add_argument('--printaffilwordfreq', action='store_true')
 	parser.add_argument('-o', '--output', nargs='?', default='textdata/publication_tfidf.pickle')
 	args = parser.parse_args()
 
@@ -60,7 +61,9 @@ def main():
 	
 	print_err("Computing TF-IDF")
 	more_stop_words = ['conference', 'journal', 'international', 'national', 'on', 'workshop', 'symposium', 'int', 'conf', 'research']
-	tfidfs = computeTFIDFs(titles, more_stop_words)
+	tfidfs = computeTFIDFs(titles, more_stop_words, words_freq=args.printaffilwordfreq)
+	if args.printaffilwordfreq:
+		return
 	
 	print_err("Producing id-to-index map")
 	id2ind = split_ids(len(args.titlefiles), boundaries, ids)

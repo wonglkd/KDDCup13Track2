@@ -112,7 +112,8 @@ def computeTFIDFs(texts, additional_stop_words=[], words_freq=False, **kwargs):
 		kk = [(wfreq[i], word.encode('ascii')) for i, word in enumerate(vec.get_feature_names())]
 		# kk = zip(tfidfs.sum(axis=0).tolist()[0], vec.get_feature_names())
 		kk = sorted(kk)
-		return tfidfs, kk
+		for line in kk:
+			print '{:} {:}'.format(line)
 	return tfidfs
 
 def loadfilelines(filenames):

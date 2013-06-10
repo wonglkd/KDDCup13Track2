@@ -40,10 +40,13 @@ def main():
 	parser.add_argument('paperfile', nargs='?', default='data/Paper_u.csv')
 	parser.add_argument('paperids', nargs='?', default='authordata/pa_paperids.csv')
 	parser.add_argument('-o', '--output', default='textdata/papertitles_tfidf.pickle')
+	parser.add_argument('--printaffilwordfreq', action='store_true')
 	args = parser.parse_args()
 
 	print_err("Computing TF-IDF")
-	tfidfs = computeTFIDFs(getTitleKeywords(args.paperfile), 'all', min_df=2)
+	tfidfs = computeTFIDFs(getTitleKeywords(args.paperfile), 'all', min_df=2, words_freq=args.printaffilwordfreq)
+	if args.printaffilwordfreq:
+		return
 	
 	print_err("Reading id-to-index map")
 	id2ind = getIdsFromPapers(args.paperfile)

@@ -78,13 +78,11 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 			print_err(i+1, "rows processed")
 
 	print_err("Computing TF-IDF of affiliations")
-	
- 	# min_df = 2 because though we deduct non common words, they should be significant first
-	#affil_tfidf = computeTFIDFs(affiliations, 'all', min_df=2, words_freq=False)
 
-	affil_tfidf, kk = computeTFIDFs(affiliations, 'all', min_df=2, words_freq=True)
-	pprint(kk)
-	return
+	# min_df = 2 because though we deduct non common words, they should be significant first
+	affil_tfidf = computeTFIDFs(affiliations, 'all', min_df=2, words_freq=printaffilwordfreq)
+	if printaffilwordfreq:
+		return
 
 	print_err("Calculating IDFs")
 	iFfL_IDF = dict(zip(iFfL_cnt.keys(), np.log(float(len(authors)) / np.array(iFfL_cnt.values()))))
