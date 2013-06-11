@@ -21,6 +21,7 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	lastname_cnt = defaultdict(int)
 	iFfL_cnt = defaultdict(int)
 	affiliations = []
+	fullnames = []
  	print_err("Parsing names and counts")
 	#[^~:_`@\?\\|\'/\"\.\-0-9a-z;,\n\r \+\-\)\}&%\$\*\{\>=\^]
 	titles_c = nameparser.constants.TITLES - set(['wing', 'lord'])
@@ -28,6 +29,7 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	prefixes_c = nameparser.constants.PREFIXES - set(['bin']) # more common as first name
 
 	id2affiliation = {}
+	id2fullname = {}
 	for i, line in verbose_iter(reader):
 		line[1:] = [unidecode(unicode(cell, 'utf-8')) for cell in line[1:]]
 
@@ -35,6 +37,11 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 			id2affiliation[int(line[0])] = len(affiliations)
 			line[2] = strip_punc(line[2].lower())
 			affiliations.append(line[2])
+
+		fullnm = strip_punc(line[1].lower().encode('ascii'))
+		if fullnm:
+			id2fullname[int(line[0])] = len(fullnames)
+			fullnames.append(fullnm)
 		if printaffilwordfreq:
 			continue
 		
@@ -51,7 +58,7 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 		ai['name'] = hn.full_name.lower().strip().encode('ascii').translate(None, ';')
 		ai['fullname'] = strip_punc(hn.full_name.lower().encode('ascii'))
 		ai['fullname_parsed'] = ai['name_first'] + ai['name_middle'] + ai['name_last'] + ai['name_suffix']
-		ai['affiliation'] = line[2].lower()
+		ai['affiliation'] = line[2]
 		ai['metaphone_fullname'] = jellyfish.metaphone(ai['fullname']).encode('ascii').translate(None, ' ')
 		if ai['name_last']:
 			if ai['name_first']:
@@ -85,6 +92,9 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	# min_df = 2 because though we deduct non common words, they should be significant first
 	affil_tfidf = computeTFIDFs(affiliations, 'all', min_df=2, words_freq=printaffilwordfreq)
 	if printaffilwordfreq:
+		print "-----"
+	name_tfidf = computeTFIDFs(fullnames, None, min_df=2, ngram_range=(1,3), words_freq=printaffilwordfreq, token_pattern=u'(?u)\\b[a-zA-Z][a-zA-Z]+\\b')
+	if printaffilwordfreq:
 		return
 
 	print_err("Calculating IDFs")
@@ -99,6 +109,11 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
  			authors[i][1]['affil_tdidf'] = None
  		else:
 			authors[i][1]['affil_tdidf'] = affil_tfidf[id2affiliation[a[0]]]
+		if a[0] in id2fullname:
+ 			authors[i][1]['fullname_tdidf'] = name_tfidf[id2fullname[a[0]]]
+ 		else:
+			authors[i][1]['fullname_tdidf'] = None
+			
 		if (i+1) % 10000 == 0:
 			print_err(i+1)
  	authors_dict = dict(authors)

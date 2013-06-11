@@ -92,8 +92,11 @@ def computeTFIDFs(texts, additional_stop_words=[], words_freq=False, **kwargs):
 	from collections import Counter
 	if additional_stop_words == 'all':
 		additional_stop_words = loadstopwords(['multilang_u', 'affiliations', 'titles'])
-	
-	stop_words = ENGLISH_STOP_WORDS | set(additional_stop_words)
+
+	if additional_stop_words is None:
+		stop_words = []
+	else:
+		stop_words = ENGLISH_STOP_WORDS | set(additional_stop_words)
 
 	defaults = {
 		'token_pattern': u'(?u)\\b[0-9]*[a-zA-Z]+[a-zA-Z0-9]+\\b',
