@@ -43,18 +43,18 @@ def main():
 			if aid in hrc_of_author:
 				seen_hrcs.add(hrc_of_author[aid])
 			else:
-				loners.add(aid)
-
-		if loners:
-			fout.write("--in HPC but not in HRC:--\n")
-	 		outputClusters([comb], fout, authors=authors)
+				loners.append(aid)
 
 		if len(seen_hrcs) > 0:
 			for id in seen_hrcs:
 				hrc_of_hpc[id].append(cl)
+			if loners:
+				fout.write("--in HPC but not in HRC:--\n")
+				outputClusters([loners], fout, authors=authors)
 		else:
 			fout.write("Not in hierarchy:\n")
 	 		outputClusters([cl], fout, authors=authors)
+
 		undiscovered_hrcs -= seen_hrcs
 
 	fout.write("------------\n")
