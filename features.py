@@ -38,6 +38,7 @@ class FeaturesGenerator:
 		'lastidf',
 		'iFfLidf',
 		'has_affil',
+		'fullname_sharedidf',
 		'affil_sharedidf',
 		'suffix',
 		'jaro_distance',
@@ -80,6 +81,10 @@ class FeaturesGenerator:
 				f[id_f] = 4
 			else: #initials don't match
 				f[id_f] = 1
+
+
+		if aa['fullname_tdidf'] is not None and ab['fullname_tdidf'] is not None:
+			f['fullname_sharedidf'] = shared_terms_sum(aa['fullname_tdidf'], ab['fullname_tdidf'])
 
 		if aa['affil_tdidf'] is not None and ab['affil_tdidf'] is not None:
 			f['has_affil'] = 2
