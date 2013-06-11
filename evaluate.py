@@ -46,28 +46,31 @@ def main():
 		scores = []
 		no_of_clusters = 0
 		no_of_authors_in_clusters = 0
-		with open(filename) as f:
-			reader = csv.reader(f)
-			reader.next()
-			for line in reader:
-				line[0] = int(line[0])
-				line[1] = map(int, line[1].split())
-				is_first = bool(line[0] == min(line[1]))
-				if len(line[1]) > 1:
-					no_of_authors_in_clusters += 1
-					if is_first:
-						no_of_clusters += 1
-				if line[0] in goldstd:
-					tp = len(goldstd[line[0]] & set(line[1]))
-					fp = len(line[1]) - tp
-					fn = len(goldstd[line[0]]) - tp
-					recall = tp / float(tp + fn)
-					precision = tp / float(tp + fp)
-					if tp == 0:
-						f1 = 0.
-					else:
-						f1 = 2. * recall * precision / (recall + precision)
-					scores.append((f1, precision, recall, tp, fp, fn, line[0], is_first))
+		try:
+			with open(filename) as f:
+				reader = csv.reader(f)
+				reader.next()
+				for line in reader:
+					line[0] = int(line[0])
+					line[1] = map(int, line[1].split())
+					is_first = bool(line[0] == min(line[1]))
+					if len(line[1]) > 1:
+						no_of_authors_in_clusters += 1
+						if is_first:
+							no_of_clusters += 1
+					if line[0] in goldstd:
+						tp = len(goldstd[line[0]] & set(line[1]))
+						fp = len(line[1]) - tp
+						fn = len(goldstd[line[0]]) - tp
+						recall = tp / float(tp + fn)
+						precision = tp / float(tp + fp)
+						if tp == 0:
+							f1 = 0.
+						else:
+							f1 = 2. * recall * precision / (recall + precision)
+						scores.append((f1, precision, recall, tp, fp, fn, line[0], is_first))
+		except IOError:
+			continue
 		scores = sorted(scores, reverse=True)
 # 		print_err("No of clusters:", no_of_clusters)
 # 		print_err("No of authors in clusters:", no_of_authors_in_clusters)
