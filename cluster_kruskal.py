@@ -56,7 +56,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('edgelist')
 	parser.add_argument('outfile', nargs='?')
-	parser.add_argument('-t', '--interconnectivity', default=0.79, type=float)
+	parser.add_argument('-t', '--interconnectivity', default=0.82, type=float)
 	parser.add_argument('-A', '--with-analysis', action='store_true')
 	parser.add_argument('-a', '--authorprefeat', default='generated/Author_prefeat.pickle')
 	parser.add_argument('-s', '--seedset', nargs='*', default=['data/goldstd_clusters.csv', 'data/seedset_clusters.csv'])
