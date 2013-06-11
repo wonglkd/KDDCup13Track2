@@ -74,7 +74,9 @@ def main():
 		if singletons:
 			fout.write("--in HRC but not in HPC:--\n")
 			outputClusters([singletons], fout, authors=authors)
-		
+			fout.write("--full HRC with singletons:--\n")
+			outputClusters([hrc_contents[hrc]], fout, authors=authors)
+
 		fout.write("---------\n")
 
 	if undiscovered_hrcs:
