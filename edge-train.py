@@ -117,10 +117,10 @@ def main():
 
 	params_grid = {
 		'rf': {
-			'min_samples_split': [1, 2, 3, 4],
-			'min_samples_leaf': [1, 2, 3, 4],
-			'n_estimators': [100, 130, 200, 250, 300, 350, 400, 500, 750, 1000], # [130, 400, 1000]
-			'max_features': [2, 3, 4, 5, 6, 7, 8, 9, 10] # [4, 6, 9]
+			'min_samples_split': [1, 2],
+			'min_samples_leaf': [1, 2],
+			'n_estimators': [130, 200, 250, 300, 500, 750, 1000, 1250], # [130, 400, 1000]
+			'max_features': [3, 4, 5, 6, 7, 8, 9] # [4, 6, 9]
 		},
 		'gbm': {
 	# 		'n_estimators': [500, 200],
@@ -151,7 +151,10 @@ def main():
 	for k, v in params_fixed.iteritems():
 		params[k].update(v)
 
-	print params[args.clf]
+	if args.usegrid or args.gridsearch:
+		print params_grid[args.clf]
+	else:
+		print params[args.clf]
 	
 	X_ids, X = feat.load_features(args.featfile)
 	idmap = {id: i for i, id in enumerate(X_ids)}
@@ -173,7 +176,7 @@ def main():
 	affil_median = 0
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = affil_median
 # 	X[np.isnan(X[:, affil_ind]), affil_ind] = 0.
-	X[np.isnan(X)] = 5.5
+	X[np.isnan(X)] = 4.
 
 	if args.clf == 'rf':
 		clf = RandomForestClassifier()
