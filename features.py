@@ -83,12 +83,12 @@ class FeaturesGenerator:
 				f[id_f] = 1
 
 
-		if aa['fullname_tdidf'] is not None and ab['fullname_tdidf'] is not None:
-			f['fullname_sharedidf'] = shared_terms_sum(aa['fullname_tdidf'], ab['fullname_tdidf'])
+		if aa['fullname_tfidf'] is not None and ab['fullname_tfidf'] is not None:
+			f['fullname_sharedidf'] = shared_terms_sum(aa['fullname_tfidf'], ab['fullname_tfidf'])
 
-		if aa['affil_tdidf'] is not None and ab['affil_tdidf'] is not None:
+		if aa['affil_tfidf'] is not None and ab['affil_tfidf'] is not None:
 			f['has_affil'] = 2
-		elif aa['affil_tdidf'] is not None or ab['affil_tdidf'] is not None:
+		elif aa['affil_tfidf'] is not None or ab['affil_tfidf'] is not None:
 			f['has_affil'] = 1
 		else:
 			f['has_affil'] = 0
@@ -96,7 +96,7 @@ class FeaturesGenerator:
 		if f['has_affil'] != 2:
 			f['affil_sharedidf'] = np.nan
 		else:
-			f['affil_sharedidf'] = shared_terms_sum(aa['affil_tdidf'], ab['affil_tdidf'])
+			f['affil_sharedidf'] = shared_terms_sum(aa['affil_tfidf'], ab['affil_tfidf'])
 
 		if aa['name_last'] == ab['name_last'] and (
 			(aa['name_first'] == ab['name_middle'] and not aa['name_middle']) or

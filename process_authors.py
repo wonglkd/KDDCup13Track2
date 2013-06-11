@@ -106,13 +106,13 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
  		authors[i][1]['iFfL_idf'] = iFfL_IDF[a[1]['iFfL']]
  		authors[i][1]['lastname_idf'] = lastname_IDF[a[1]['name_last']]
  		if len(a[1]['affiliation']) == 0:
- 			authors[i][1]['affil_tdidf'] = None
+ 			authors[i][1]['affil_tfidf'] = None
  		else:
-			authors[i][1]['affil_tdidf'] = affil_tfidf[id2affiliation[a[0]]]
+			authors[i][1]['affil_tfidf'] = affil_tfidf[id2affiliation[a[0]]]
 		if a[0] in id2fullname:
- 			authors[i][1]['fullname_tdidf'] = name_tfidf[id2fullname[a[0]]]
+ 			authors[i][1]['fullname_tfidf'] = name_tfidf[id2fullname[a[0]]]
  		else:
-			authors[i][1]['fullname_tdidf'] = None
+			authors[i][1]['fullname_tfidf'] = None
 			
 		if (i+1) % 10000 == 0:
 			print_err(i+1)
