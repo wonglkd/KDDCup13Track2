@@ -17,11 +17,12 @@ SUBMIT_FILES := $(GEN_DIR)/combined_kruskal-submit.csv $(GEN_DIR)/combined_hc-su
 EVALUATE_SETS := 20130603-2400_best/combined_716eef6 best best-2nd-0.8 20130605-2400/combined_716eef6_kruskal 20130605-2400/combined_716eef6_hc 20130605-2400/combined_kruskal 20130605-2400/combined_hc 20130606-0200/combined_716eef6_kruskal 20130605-1300/combined_716eef6_kruskal 20130606-2253/combined_hc 20130606-2253/combined_hc_min 20130606-2253/combined_hc_avgpresent 20130606-2253/combined_kruskal
 EVALUATE_FILES := $(foreach i,$(EVALUATE_SETS),$(GEN_DIR)/$i-submit.csv)
 SUBMIT_BIN_FILES := $(GEN_DIR)/samename-bins_submit.csv $(GEN_DIR)/fullparsedname-bins_submit.csv
-TRAIN_PARA = --usegrid --removefeat conferences journals fullnames coauthor paperIDs affiliations jaro_distance
-TRAIN_PARA += suffix last jaro_winkler coauthors_idsW coauthors_dupW fullnames_dup coauthors_ids_dupW
-TRAIN_PARA += paperIDs_dup coauthors_ids_dupF coauthors coauthorsW coauthors coauthors_ids coauthors_dup
-TRAIN_PARA += jarow_mid jarow_firstmid metaphone
-# TRAIN_PARA += jarow_midlast jarow_firstmid
+FEAT_PARA = --removefeat conferences journals fullnames coauthor paperIDs affiliations jaro_distance
+FEAT_PARA += suffix last jaro_winkler coauthors_idsW coauthors_dupW fullnames_dup coauthors_ids_dupW
+FEAT_PARA += paperIDs_dup coauthors_ids_dupF coauthors coauthorsW coauthors coauthors_ids coauthors_dup
+FEAT_PARA += jarow_mid jarow_firstmid metaphone
+FEAT_PARA += jarow_midlast
+TRAIN_PARA = --usegrid $(FEAT_PARA)
 
 .PHONY:
 .SECONDARY:
@@ -61,8 +62,11 @@ generated/affil_wordcounts.txt: process_authors.py data/Author.csv
 %_idified.csv: idify.py %.csv
 	$(EXEC_PREFIX)$^ $@
 
-analyse: edge-analyseModel.py $(GEN_DIR)/model.pickle
-	$(EXEC_PREFIX)$<
+%_analyse: edge-analyseModel.py $(GEN_DIR)/%.pickle
+	$(EXEC_PREFIX)$^ -o -
+
+$(GEN_DIR)/%.pdf: edge-analyseModel.py $(GEN_DIR)/%.pickle
+	$(EXEC_PREFIX)$^ -o $@
 	
 textdata/publication_tfidf.pickle: processTitles.py data/Conference.csv data/Journal.csv
 	$(EXEC_PREFIX)$<
@@ -104,7 +108,7 @@ $(GEN_DIR)/model.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.fe
 	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
 grid_%: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC_PREFIX)$^ $@ --gridsearch --clf $* $(TRAIN_PARA) > $(GEN_DIR)/$@.log
+	$(EXEC_PREFIX)$^ $@ --gridsearch --clf $* $(FEAT_PARA) > $(GEN_DIR)/$@.log
 
 $(GEN_DIR)/model_%.pickle: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
 	$(EXEC_PREFIX)$^ $@ --clf $* $(TRAIN_PARA)
@@ -113,10 +117,10 @@ $(GEN_DIR)/%_model.pickle: edge-train.py $(DATA_DIR)/train_%.csv $(GEN_DIR)/trai
 	$(EXEC_PREFIX)$^ $@ $(TRAIN_PARA)
 
 cv: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC_PREFIX)$^ --cv $(TRAIN_PARA)
+	$(EXEC_PREFIX)$^ --cv $(FEAT_PARA)
 
 cv-gbm: edge-train.py $(DATA_DIR)/train.csv $(GEN_DIR)/train.feat
-	$(EXEC_PREFIX)$^ --cv --clf gbm $(TRAIN_PARA)
+	$(EXEC_PREFIX)$^ --cv --clf gbm $(FEAT_PARA)
 	
 $(GEN_DIR)/%-submit.csv: prep_submit.py $(GEN_DIR)/%.clusters
 	$(EXEC_PREFIX)$^ $@
