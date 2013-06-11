@@ -24,8 +24,8 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	fullnames = []
  	print_err("Parsing names and counts")
 	#[^~:_`@\?\\|\'/\"\.\-0-9a-z;,\n\r \+\-\)\}&%\$\*\{\>=\^]
-	titles_c = nameparser.constants.TITLES - set(['wing', 'lord'])
-	suffixes_c = nameparser.constants.SUFFIXES | set(['junior', 'senior']) 
+	titles_c = nameparser.constants.TITLES - set(['wing', 'lord', 'mg', 'mate', 'king', 'sharif', 'sheikh', 'rt', 'lama', 'gen', 'bg', 'baba', 'ab'])
+	suffixes_c = nameparser.constants.SUFFIXES | set(['junior', 'senior', 'vii']) 
 	prefixes_c = nameparser.constants.PREFIXES - set(['bin']) # more common as first name
 
 	id2affiliation = {}
