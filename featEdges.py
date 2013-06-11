@@ -65,7 +65,7 @@ class PaperauthorFeaturesGenerator:
 	pa_files_ = {
 		'fullname': 'authordata/pa_names_u_strippunc.csv',
 		'fullname_dup': 'authordata/pa_names_dup_u_strippunc.csv',
- 		'affiliation': 'authordata/pa_affiliation_u.csv',
+ 		'affiliation': 'authordata/pa_affiliation_u_strippunc.csv',
 		'conferences': 'authordata/pa_conferences.csv',
 		'coauthors_dup': 'authordata/pa_coauthors_dup_u_strippunc.csv',
 		'coauthors_ids_dup': 'authordata/pa_coauthors_ids_dup.csv',
