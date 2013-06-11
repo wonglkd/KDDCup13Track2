@@ -3,6 +3,7 @@ import sys
 import exceptions
 import numpy as np
 import math
+import re
 from collections import Iterable
 
 try:
@@ -56,10 +57,10 @@ def skip_comments(iterable):
         if not line.startswith('#') and line.strip():
             yield line
 
-def verbose_iter(iter):
+def verbose_iter(iter, n=10000):
 	for i, line in enumerate(iter):
 		yield i, line
-		if (i+1) % 10000 == 0:
+		if (i+1) % n == 0:
 			print_err(i+1, 'lines done')
 
 def readcsv_iter(filename, discard_header=True, verbose=True):
@@ -121,11 +122,11 @@ def computeTFIDFs(texts, additional_stop_words=[], words_freq=False, **kwargs):
 		# kk = zip(tfidfs.sum(axis=0).tolist()[0], vec.get_feature_names())
 		kk = sorted(kk)
 		for line in kk:
-			print '{:} {:}'.format(line)
+			print '{:} {:}'.format(*line)
 	return tfidfs
 
 def is_iterable(itl):
-	return isinstance(filenames, Iterable)
+	return isinstance(itl, Iterable)
 
 def loadfilelines(filenames):
 	# allow for input of a single or multiple filenames
@@ -160,7 +161,7 @@ punc = punc_nospace + ' '
 
 def strip_punc(str, strip_spaces = True, space_dashes=True):
 	if space_dashes:
-		return ' '.join(str.translate(None, punc_nospacedash).replace('-', ' ').split())
+		return ' '.join(re.sub('[{:}]'.format(punc_nospace), ' ', str).split())
 	elif strip_spaces:
 		return str.translate(None, punc)
 	else:
