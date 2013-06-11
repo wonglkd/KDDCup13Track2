@@ -44,10 +44,10 @@ train: $(GEN_DIR)/model.pickle
 authordata_u: authordata/pa_affiliation_u.csv authordata/pa_names_u.csv authordata/pa_coauthors_u.csv
 
 textdata/Author_processed.csv: process_authors.py data/Author.csv
-	$(EXEC32_PREFIX)$^ $@ --format csv
+	$(EXEC_PREFIX)$^ $@ --format csv
 
 generated/affil_wordcounts.txt: process_authors.py data/Author.csv
-	$(EXEC32_PREFIX)$^ --affilwordfreq > $@
+	$(EXEC_PREFIX)$^ --affilwordfreq > $@
 
 %_u.csv: unidecodefile.py %.csv
 	$(EXEC_PREFIX)$^ $@ --all-cols
@@ -83,16 +83,16 @@ $(GEN_DIR)/edges.txt: edges.py $(BIN_FILES)
 	$(EXEC_PREFIX)$^ > $@
 
 $(GEN_DIR)/%_prefeat.pickle: process_authors.py $(DATA_DIR)/%.csv
-	$(EXEC32_PREFIX)$^ $@
+	$(EXEC_PREFIX)$^ $@
 
 $(GEN_DIR)/train.feat: features.py $(DATA_DIR)/train.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle textdata/papertitles_tfidf.pickle
-	$(EXEC32_PREFIX)features.py $(DATA_DIR)/train.csv $(PREFEAT) $@
+	$(EXEC_PREFIX)features.py $(DATA_DIR)/train.csv $(PREFEAT) $@
 	
 $(GEN_DIR)/train_%.feat: features.py $(DATA_DIR)/train_%.csv $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle textdata/papertitles_tfidf.pickle
-	$(EXEC32_PREFIX)features.py $(DATA_DIR)/train_$*.csv $(PREFEAT) $@
+	$(EXEC_PREFIX)features.py $(DATA_DIR)/train_$*.csv $(PREFEAT) $@
 
 $(GEN_DIR)/%.feat: features.py $(GEN_DIR)/edges.txt $(PREFEAT) featEdges.py textdata/publication_tfidf.pickle textdata/papertitles_tfidf.pickle
-	$(EXEC32_PREFIX)features.py $(GEN_DIR)/edges.txt $(PREFEAT) $@
+	$(EXEC_PREFIX)features.py $(GEN_DIR)/edges.txt $(PREFEAT) $@
 
 $(GEN_DIR)/%.sim: features2similarity.py $(GEN_DIR)/%.feat
 	$(EXEC_PREFIX)$^ $@; $(SORT_BIN) $@ -grk 3 -t"," -o $@
