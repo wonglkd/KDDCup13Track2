@@ -28,8 +28,16 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 	prefixes_c = nameparser.constants.PREFIXES - set(['bin']) # more common as first name
 
 	id2affiliation = {}
-	for i, line in enumerate(reader):
+	for i, line in verbose_iter(reader):
 		line[1:] = [unidecode(unicode(cell, 'utf-8')) for cell in line[1:]]
+
+  		if line[2]:
+			id2affiliation[int(line[0])] = len(affiliations)
+			line[2] = strip_punc(line[2].lower())
+			affiliations.append(line[2])
+		if printaffilwordfreq:
+			continue
+		
 		hn = HumanName(line[1].replace('-', ' '), titles_c=titles_c, prefixes_c=prefixes_c, suffixes_c=suffixes_c)
 		ai = {
  			'fullname_joined': hn.full_name,
@@ -71,11 +79,6 @@ def loadAuthors(authorfile, printaffilwordfreq=False):
 		authors.append((int(line[0]), ai))
  		lastname_cnt[ai['name_last']] += 1
   		iFfL_cnt[ai['iFfL']] += 1
-  		if line[2]:
-			id2affiliation[int(line[0])] = len(affiliations)
-			affiliations.append(line[2])
-		if (i+1) % 10000 == 0:
-			print_err(i+1, "rows processed")
 
 	print_err("Computing TF-IDF of affiliations")
 
