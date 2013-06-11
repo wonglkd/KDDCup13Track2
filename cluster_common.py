@@ -32,10 +32,20 @@ def outputClusters(clusters, fout, G_sim=None, authors=None, threshold_density=N
 
 		if authors is not None:
 			fullnames = set([authors[v]['fullname'] for v in clist])
-			fullnames = '|'.join(sorted(fullnames))
 			lastnames = set([authors[v]['name_last'] for v in clist])
+			firstnames = set([authors[v]['name_first'] for v in clist])
+			if '' in firstnames:
+				firstnames.remove('')
+			middlenames = set([authors[v]['name_middle'] for v in clist])
+			if '' in middlenames:
+				middlenames.remove('')
+			a_l = [len(lastnames), len(firstnames), len(middlenames)]
+			fullnames = '|'.join(sorted(fullnames))
 			lastnames = '|'.join(sorted(lastnames))
-			line.append([lastnames, fullnames])
+			firstnames = '|'.join(sorted(firstnames))
+			middlenames = '|'.join(sorted(middlenames))
+			a_l += [lastnames, fullnames, firstnames, middlenames]
+			line.append(a_l)
 
 		if G_sim is None or threshold_density is None or cl_weighted_density >= threshold_density:
 			clusters_o.append(line + [','.join(map(str, sorted(clist)))])
@@ -47,6 +57,6 @@ def outputClusters(clusters, fout, G_sim=None, authors=None, threshold_density=N
 		fout.write(','.join(map('{:g}'.format, cline.pop(0))))
 		if authors is not None:
 			fout.write(',')
-			fout.write(','.join(cline.pop(0)))
+			fout.write(','.join(map(str, cline.pop(0))))
 		fout.write(';')
 		fout.write('{:}\n'.format(cline.pop(0)))
