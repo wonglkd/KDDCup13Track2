@@ -70,11 +70,9 @@ def loadTrainingLabels(trainfilename, idset):
  	return np.asarray(Y), ids
 
 def grid(clf, params_grid, X, Y, folds, **kwargs):
-	clf_grid = GridSearchCV(clf, params_grid, cv=folds, pre_dispatch='2*n_jobs', verbose=1, refit=False, **kwargs)
+	clf_grid = GridSearchCV(clf, params_grid, cv=folds, pre_dispatch='2*n_jobs', verbose=1, refit=True, **kwargs)
 	clf_grid.fit(X, Y)
-	pprint(clf_grid.grid_scores_)
-	print(clf_grid.best_score_)
-	print(clf_grid.best_params_)
+	return clf_grid
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -86,6 +84,7 @@ def main():
 	parser.add_argument('--cv', action='store_true')
 	parser.add_argument('--folds', default=3)
 	parser.add_argument('--gridsearch', action='store_true')
+	parser.add_argument('--usegrid', action='store_true')
 	args = parser.parse_args()
 
 	if args.removefeat:
@@ -120,7 +119,7 @@ def main():
 		'rf': {
 			'min_samples_split': [1, 2, 3, 4],
 			'min_samples_leaf': [1, 2, 3, 4],
-			'n_estimators': [100, 130, 200, 250, 300, 350, 400, 500], # [130, 400, 1000]
+			'n_estimators': [100, 130, 200, 250, 300, 350, 400, 500, 750, 1000], # [130, 400, 1000]
 			'max_features': [2, 3, 4, 5, 6, 7, 8, 9, 10] # [4, 6, 9]
 		},
 		'gbm': {
@@ -182,7 +181,7 @@ def main():
 		clf = GradientBoostingClassifier()
 	clf.set_params(**params[args.clf])
 	
-	if args.gridsearch:
+	if args.usegrid or args.gridsearch:
 		print_err("Running grid search for best parameters")
 		kwargs = {
 			'n_jobs': n_jobs
@@ -191,11 +190,18 @@ def main():
 			clf.set_params(n_jobs=1)
 		elif args.clf == 'gbm':
 			kwargs['loss_func'] = zero_one_loss
-		grid(clf, params_grid[args.clf], X, Y, folds=args.folds, **kwargs)
+		clf_grid = grid(clf, params_grid[args.clf], X, Y, folds=args.folds, **kwargs)
+
+		pprint(clf_grid.grid_scores_)
+		print(clf_grid.best_score_)
+		print(clf_grid.best_params_)
+		if args.usegrid:
+			clf = clf_grid.best_estimator_
 	elif args.cv:
 		print_err("Running cross-validation")
 		m_cv(clf, X, Y, args.folds)
-	else:
+
+	if not args.cv and (not args.gridsearch or args.usegrid):
 		print_err("Fitting data for training")
 		clf.fit(X, Y)
 		# for GBM
