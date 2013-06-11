@@ -144,16 +144,18 @@ def loadfilelines(filenames):
 def loadstopwords(setids):
 	return loadfilelines(['textdata/stopwordlist_{:}.txt'.format(id) for id in setids])
 		
-def shared_terms_sum(aa, bb):
+def shared_terms_sum(aa, bb, deduct_diff=True):
 	terms_a = aa.nonzero()[1]
 	terms_b = bb.nonzero()[1]
 	terms_common = np.intersect1d(terms_a, terms_b, assume_unique=True)
-	diffa = np.setdiff1d(terms_a, terms_common)
-	diffb = np.setdiff1d(terms_b, terms_common)
 	if terms_common.any():
 		fsum = aa[[0] * len(terms_common), terms_common].sum()
 	else:
 		fsum = 0
+	if not deduct_diff:
+		return fsum
+	diffa = np.setdiff1d(terms_a, terms_common)
+	diffb = np.setdiff1d(terms_b, terms_common)
 	suma = aa[[0] * len(diffa), diffa].sum() if diffa.any() else 0
 	sumb = bb[[0] * len(diffb), diffb].sum() if diffb.any() else 0
 	return fsum - math.log10(1.0 + min(suma, sumb))

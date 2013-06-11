@@ -270,7 +270,7 @@ class PaperauthorFeaturesGenerator:
 		
 		terms1 = self.unpickled[field][a1]
 		terms2 = self.unpickled[field][a2]
-		return shared_terms_sum(terms1, terms2)
+		return shared_terms_sum(terms1, terms2, False)
 
 	def getTitlesOverlap(self, a1, a2):
 		common_titles, _, _ = self.dictSimW(self.pa_by_authors[a1]['titles_idified'], self.pa_by_authors[a2]['titles_idified'])
