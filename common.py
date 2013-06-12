@@ -45,6 +45,7 @@ def selectDB(conn, query, para = None):
 def print_err(*args):
     sys.stderr.write(' '.join(map(str,args)) + '\n')
 
+
 def skip_front(iterable):
 	for line in iterable:
 		if ';' in line:
@@ -63,7 +64,20 @@ def verbose_iter(iter, n=10000):
 		if (i+1) % n == 0:
 			print_err(i+1, 'lines done')
 
-def readcsv_iter(filename, discard_header=True, verbose=True):
+def readEdges_iter(filename, verbose=True, weighted=True, n=10000):
+	print_err("Reading file", filename)
+	ind = 3 if weighted else 2
+	with open(filename, 'rb') as f:
+		reader = csv.reader(f)
+		for i, line in enumerate(reader):
+			line[0:2] = map(int, line[0:2])
+			if weighted:
+				line[2] = float(line[2])
+			yield i, line[0:ind]
+			if (i+1) % n == 0 and verbose:
+				print_err(i+1, 'edges read')
+
+def readcsv_iter(filename, discard_header=True, verbose=True, n=10000):
 	print_err("Reading file", filename)
 	with open(filename, 'rb') as f:
 		reader = csv.reader(f)
@@ -71,7 +85,7 @@ def readcsv_iter(filename, discard_header=True, verbose=True):
 			header = reader.next()
 		for i, line in enumerate(reader):
 			yield i, line
-			if (i+1) % 10000 == 0 and verbose:
+			if (i+1) % n == 0 and verbose:
 				print_err(i+1, 'lines read')	
 
 def num(s):

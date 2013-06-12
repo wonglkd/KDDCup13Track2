@@ -65,7 +65,7 @@ def main():
 	parser.add_argument('-a', '--authorprefeat', default='generated/Author_prefeat.pickle')
 	parser.add_argument('-s', '--seedset', nargs='*', default=['data/goldstd_clusters.csv', 'data/seedset_clusters.csv'])
 	parser.add_argument('-S', '--seededges', nargs='*', default=['data/train.csv'])
-	parser.add_argument('-b', '--blacklist', nargs='*', default=['data/blacklist_edges.csv', 'data/train.csv', 'data/train_extra.tmp.csv'])
+	parser.add_argument('-b', '--blacklist', nargs='*', default=['data/blacklist_edges.csv', 'data/train.csv', 'data/train_extra.csv'])
 	args = parser.parse_args()
 
 	if args.outfile == None:
