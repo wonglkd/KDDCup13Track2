@@ -10,7 +10,7 @@ from itertools import chain
 from pprint import pprint
 import sys
 
-def check_for_blacklisted(hrc_c, blacklisted_edges):
+def check_for_blacklisted(hrc_c, blacklisted_edges, fout):
 	if any(v1 in hrc_c and v2 in hrc_c for v1, v2 in blacklisted_edges):
 		fout.write("--blacklisted edges:--\n")
 		be = ((v1, v2) for v1, v2 in blacklisted_edges if v1 in hrc_c and v2 in hrc_c)
@@ -107,7 +107,7 @@ def main():
 			fout.write("--full HRC with singletons:--\n")
 			outputClusters([hrc_c], fout, authors=authors)
 
-		check_for_blacklisted(hrc_c, blacklisted_edges)
+		check_for_blacklisted(hrc_c, blacklisted_edges, fout)
 
 		fout.write("---------\n")
 
@@ -115,7 +115,7 @@ def main():
 		fout.write("--HRCs never seen:--\n")
 		outputClusters((hrc_contents[cl] for cl in undiscovered_hrcs), fout, authors=authors)
 		for cl in undiscovered_hrcs:
-			check_for_blacklisted(hrc_contents[cl], blacklisted_edges)
+			check_for_blacklisted(hrc_contents[cl], blacklisted_edges, fout)
 
 if __name__ == "__main__":
 	main()
