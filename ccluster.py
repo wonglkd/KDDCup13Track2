@@ -10,15 +10,39 @@ from itertools import chain
 from pprint import pprint
 import sys
 
+def check_for_blacklisted(hrc_c, blacklisted_edges):
+	if any(v1 in hrc_c and v2 in hrc_c for v1, v2 in blacklisted_edges):
+		fout.write("--blacklisted edges:--\n")
+		be = ((v1, v2) for v1, v2 in blacklisted_edges if v1 in hrc_c and v2 in hrc_c)
+		for v1, v2 in be:
+			fout.write("{:},{:}\n".format(v1, v2))
+
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('hpc_file')
 	parser.add_argument('hrc_file')
 	parser.add_argument('outfile', nargs='?')
 	parser.add_argument('-a', '--authorprefeat', default='generated/Author_prefeat.pickle')
+	parser.add_argument('-b', '--blacklist', nargs='*', default=['data/blacklist_edges.csv', 'data/train.csv', 'data/train_extra.tmp.csv'])
 	args = parser.parse_args()
 	if args.outfile == None:
 		args.outfile = args.hrc_file.replace('.clusters','') + '.clusgrp'
+
+	blacklisted_edges = []
+
+	if args.blacklist:
+		for filename in args.blacklist:
+			with open(filename, 'rb') as f:
+				reader = csv.reader(skip_comments(f))
+				for line in reader:
+					if len(line) > 2:
+						if line[0] != 0:
+							continue
+						line = line[1:]
+					line[0:2] = map(int, line[0:2])
+					blacklisted_edges.append((line[0], line[1]))
+
 
 	hrc_of_author = {}
 	hrc_contents = list(loadClusters(args.hrc_file))
@@ -63,25 +87,34 @@ def main():
 #		G_sim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
 	
 	for hrc, hpcs in hrc_of_hpc.iteritems():
-		if len(hpcs) == 1:
+ 		hrc_c = hrc_contents[hrc]
+		comb = list(chain.from_iterable(hpcs))
+		if len(hpcs) == 1 and set(hrc_c) == set(comb):
 			continue
   		outputClusters(hpcs, fout, authors=authors)
 		fout.write("--combined:--\n")
-		comb = list(chain.from_iterable(hpcs))
  		outputClusters([comb], fout, authors=authors)
 
-		singletons = list(set(hrc_contents[hrc]) - set(comb))
+		singletons = list(set(hrc_c) - set(comb))
+		singletons_r = list(set(comb) - set(hrc_c))
+		if singletons_r:
+			fout.write("--in HPC but not in HRC:--\n")
+			outputClusters([singletons_r], fout, authors=authors)
 		if singletons:
 			fout.write("--in HRC but not in HPC:--\n")
 			outputClusters([singletons], fout, authors=authors)
 			fout.write("--full HRC with singletons:--\n")
-			outputClusters([hrc_contents[hrc]], fout, authors=authors)
+			outputClusters([hrc_c], fout, authors=authors)
+
+		check_for_blacklisted(hrc_c, blacklisted_edges)
 
 		fout.write("---------\n")
 
 	if undiscovered_hrcs:
 		fout.write("--HRCs never seen:--\n")
-		outputClusters([hrc_contents[cl] for cl in undiscovered_hrcs], fout, authors=authors)
+		outputClusters((hrc_contents[cl] for cl in undiscovered_hrcs), fout, authors=authors)
+		for cl in undiscovered_hrcs:
+			check_for_blacklisted(hrc_contents[cl], blacklisted_edges)
 
 if __name__ == "__main__":
 	main()
