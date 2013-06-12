@@ -18,7 +18,7 @@ def main():
 	parser.add_argument('-a', '--authorprefeat', default='generated/Author_prefeat.pickle')
 	args = parser.parse_args()
 	if args.outfile == None:
-		args.outfile = args.hpc_file.replace('.clusters','') + '.clusgrp'
+		args.outfile = args.hrc_file.replace('.clusters','') + '.clusgrp'
 
 	hrc_of_author = {}
 	hrc_contents = list(loadClusters(args.hrc_file))
