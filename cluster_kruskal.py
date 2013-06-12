@@ -51,6 +51,10 @@ class unionfind:
 			if c1 == v1 and c2 == v2:
 				return True
 		return False
+	
+	def trymerge(self, v1, v2):
+		if self.get_id(v1) != self.get_id(v2) and not self.check_for_blacklist(v1, v2):
+			self.mergeset(v1, v2)
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -60,7 +64,8 @@ def main():
 	parser.add_argument('-A', '--with-analysis', action='store_true')
 	parser.add_argument('-a', '--authorprefeat', default='generated/Author_prefeat.pickle')
 	parser.add_argument('-s', '--seedset', nargs='*', default=['data/goldstd_clusters.csv', 'data/seedset_clusters.csv'])
-	parser.add_argument('-b', '--blacklist', nargs='*', default=['data/blacklist_edges.csv'])
+	parser.add_argument('-S', '--seededges', nargs='*', default=['data/train.csv'])
+	parser.add_argument('-b', '--blacklist', nargs='*', default=['data/blacklist_edges.csv', 'data/train.csv', 'data/train_extra.tmp.csv'])
 	args = parser.parse_args()
 
 	if args.outfile == None:
@@ -83,30 +88,40 @@ def main():
 	
 	uf = unionfind()
 
-	if args.seedset is not None:
+	if args.seedset:
 		print_err("Loading seedset(s)")
 		for filename in args.seedset:
 			for cl in loadClusters(filename):
 				if len(cl) < 2:
 					continue
 				uf.mergeall(cl)
-	
-	if args.blacklist is not None:
+
+	if args.blacklist:
 		for filename in args.blacklist:
 			with open(filename, 'rb') as f:
 				reader = csv.reader(skip_comments(f))
 				for line in reader:
 					if len(line) > 2:
-						if line[0] == 1:
+						if line[0] != 0:
 							continue
 						line = line[1:]
 					line[0:2] = map(int, line[0:2])
 					uf.disallow(line[0], line[1])
-	
+
+	if args.seededges:
+		for filename in args.blacklist:
+			with open(filename, 'rb') as f:
+				reader = csv.reader(skip_comments(f))
+				for line in reader:
+					if line[0] != 1:
+						continue
+					line = line[1:]
+					line[0:2] = map(int, line[0:2])
+					uf.trymerge(line[0], line[1])
+
 	print_err("Clustering")
 	for i, (w, v1, v2) in enumerate(edges):
-		if uf.get_id(v1) != uf.get_id(v2) and not uf.check_for_blacklist(v1, v2):
-			uf.mergeset(v1, v2)
+		uf.trymerge(v1, v2)
 		if (i+1) % 10000 == 0:
 			print_err(i+1, "edges done")
 
