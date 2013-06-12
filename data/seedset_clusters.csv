@@ -485,3 +485,43 @@ wang,zheng|zhenghan,,zheng wang|zhenghan wang;269369,1729161
 2,1,1,1,davidson,richard,j,richard davidson|richard j davidson;805816,1490723
 2,1,1,1,chan,raymond,h,raymond chan|raymond h chan;751910,1993970
 2,1,1,0,kumar,vipin,,vipin kumar;198099,896458
+
+# MORE CLUSTERS
+10,2,2,1,pentl|pentland,a|alex,p,a pentland|alex p pentl|alex p pentland|alex pentland;39537,57821,379518,571595,1181943,1312421,1479638,1697656,1785543,1828945
+8,1,1,2,kuo,c,cj|cjay,c c jay kuo|cc j kuo|cc jay kuo;74078,394580,739271,1449777,1717075,1858752,1916439,1968449
+8,2,1,2,sangiovannivincentelli|vincentelli,alberto,l|sangiovanni,alberto l sangiovannivincentelli|alberto sangiovanni vincentelli|alberto sangiovannivincentelli;43589,114713,386425,1211366,1278532,1314166,1852860,2141987
+6,1,2,1,colditz,ga|graham,a,ga colditz|graham a colditz;573820,868401,909429,1070772,1082480,1677926
+6,2,1,0,gerla|gerlay,mario,,mario gerla|mario gerlay;758887,910041,1025044,1344239,2052516,2260817
+5,1,1,1,ottersten,bjorn,e,bjorn e ottersten|bjorn ottersten;246614,306168,1162396,1448815,1519874
+5,2,1,1,demmel|demmely,james,w,james demmel|james w demmel|james w demmely;914811,1102836,1422824,1642717,1973992
+5,1,2,2,camp,jean|l,jean|jeanjean,jean camp|l jean camp|l jean jean camp;402618,988956,995056,1692329,2065679
+5,1,2,1,szeliski,r|richard,s,r s szeliski|richard szeliski;483497,576749,1236479,1374545,1983436
+5,2,1,1,bonnecaze|bonnecazea,roger,t,roger t bonnecaze|roger t bonnecazea;577282,707927,1974025,2110882,2218213
+5,3,2,1,garceamolina|garciamolina|molina,h|hector,garcia,h garceamolina|hector garcia molina|hector garciamolina;21211,849724,1074207,1260279,1726585
+5,1,2,2,hoare,c|charles,antonyrichard|ar,c a r hoare|charles antony richard hoare;421250,919062,1090705,1323469,1420602
+5,1,1,2,norman,donald,a|arthur,donald a norman|donald arthur norman;819155,1513684,1756776,1763059,2280511
+4,1,2,1,beeftink,h|hendrik,h,h h beeftink|hendrik h beeftink;625150,766040,1146037,1232359
+4,1,2,1,whitley,darrell|l,darrell,darrell whitley|l darrell whitley;629082,757264,2098250,2189720
+4,1,1,2,wright,randall,d|douglas,randall d wright|randall douglas wright|randall wright;764142,1210179,1348994,1650305
+3,2,1,0,atzmueller|atzmuller,martin,,martin atzmueller|martin atzmuller;558492,1303207,1384057
+3,1,2,1,sucar,enrique|luis,enrique,enrique sucar|luis enrique sucar;787862,1188160,1619819
+3,1,2,1,bame,s|samuel,j,s j bame|samuel j bame;1475364,1624223,1662438
+3,2,1,1,olivas|soria,emilio,soria,emilio soria|emilio soria olivas;465081,1365336,1463818
+3,2,2,2,chau|ngo,bao|ngo,bao|chau,bao chau ngo|ngo bao chau;7774,1419291,1868746
+3,2,2,2,k|kumar,b|shreyamsha,kshreyamsha|kumarb,b k shreyamsha kumar|shreyamsha kumar b k;979428,1990094,2097191
+3,1,2,1,stirewalt,kurt|r,ekurt,kurt stirewalt|r e kurt stirewalt;36444,718548,1249270
+3,1,1,1,robertson,david,stuart,david robertson|david stuart robertson;146035,804813,2054098
+3,2,2,1,grefen|paulwpj,grefen|paul,wpj,paul grefen|paul w p j grefen|paul wpj grefen;802588,1636014,2015955
+3,1,2,1,kaas,j|jon,h,j h kaas|jon h kaas;1228754,1408848,2249770
+3,2,1,0,sene|seneff,stephanie,,stephanie sene|stephanie seneff;796318,901989,2073472
+3,1,2,1,laffont,jean|jeanjacques,jacques,jean jacques laffont|jeanjacques laffont;1104275,1215999,1989094
+3,1,1,2,iskovskikh,vasilii,a|alekseevich,vasilii a iskovskikh|vasilii alekseevich iskovskikh;286209,1585197,1586147
+3,1,2,1,kaashoek,frans|m,frans,frans kaashoek|m frans kaashoek;484044,1490735,1589275
+3,1,2,1,ho,seng|sengtiong,tiong,seng tiong ho|sengtiong ho;485487,938912,1075780
+3,1,1,1,johnson,simon,h,simon h johnson|simon johnson;1208789,1316702,1783452
+3,1,1,1,lee,jeannie,t,jeannie t lee;1115538,1765463,2177867
+3,1,2,2,ho,y|yinglung,daniel|ld,yinglung daniel ho|yl d ho;324162,1037234,1477996
+3,2,1,1,levyyeyati|yeyati,eduardo,levy,eduardo levy yeyati|eduardo levyyeyati;863203,882661,2203048
+3,1,2,0,deser,s|stanley,,s deser|stanley deser;883582,935562,1658316
+3,2,1,2,bote|guerrerobote,vicente,p|pguerrero,vicente p guerrero bote|vicente p guerrerobote;195611,1729289,2241412
+3,1,3,1,shokrollahi,amin|m|mohammad,amin,amin shokrollahi|m amin shokrollahi|mohammad amin shokrollahi;687564,1123190,1744973
