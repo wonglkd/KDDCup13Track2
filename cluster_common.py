@@ -44,7 +44,7 @@ def outputClusters(clusters, fout, G_sim=None, authors=None, threshold_density=N
 			lastnames = '|'.join(sorted(lastnames))
 			firstnames = '|'.join(sorted(firstnames))
 			middlenames = '|'.join(sorted(middlenames))
-			a_l += [lastnames, fullnames, firstnames, middlenames]
+			a_l += [lastnames, firstnames, middlenames, fullnames]
 			line.append(a_l)
 
 		if G_sim is None or threshold_density is None or cl_weighted_density >= threshold_density:
