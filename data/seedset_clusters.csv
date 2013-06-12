@@ -176,9 +176,9 @@ p devanbu|prem devanbu|premkumar devanbu|premkumar t devanbu;1931633,2267384,494
 george constantinides;906986
 1,1,1,1,constantinides,george,a,george a constantinides;2189458
 11,1,1,1,simon,herbert,a,herbert a simon|herbert simon;238713,266535,418476,716794,776212,1067184,1295463,1296406,1450654,1649980,1698594
-geography,ian j foster;142821,1806984,2287442
-ian s foster;450448
-cs,ian t foster;1146745,1595001,1758955,670796,1778584,2036805,2248137
+# geography,ian j foster;142821,1806984,2287442
+# ian s foster;450448
+# cs,ian t foster;1146745,1595001,1758955,670796,1778584,2036805,2248137
 10,1,2,1,goody,r|richard,m,r m goody|richard m goody;20344,588857,636833,743103,767696,786467,1283275,1316709,1467774,1913603
 10,1,2,1,gogotsi,yu|yury,g,yu g gogotsi|yury g gogotsi|yury gogotsi;255644,1236860,1697117,1711666,1799520,2093608,2159473,2176778,2202957,2260945
 8,1,2,1,gosling,j|john,t,j t gosling|john t gosling;66400,380241,1068210,1223438,1521521,1925489,1992335,2041570
@@ -289,3 +289,56 @@ team,benjamin s kuipers;1594122
 5,1,2,0,talik,e|ewa,,e talik|ewa talik;4057,771534,921746,1291214,1609037
 5,1,2,0,focardi,e|ettore,,e focardi|ettore focardi;1053484,1689304,1883830,2008987,2085413
 10,1,2,0,kailath,t|thomas,,t kailath|thomas kailath;444131,477893,1395609,1603993,1797940,1908343,1912269,1964526,2212073,2241496
+
+# 12 June (Derek)
+11,2,3,3,jahedmotlagh|motlagh,m|mohammad|mohammadreza,reza|rezajahed|rjahed,m r jahed motlagh|mohammad reza jahed motlagh|mohammad reza jahedmotlagh|mohammadreza jahedmotlagh;105849,140376,148130,539045,854047,1126826,1392071,1644262,1673784,1861677,1933323
+10,1,2,1,goody,r|richard,m,r m goody|richard m goody;20344,588857,636833,743103,767696,786467,1283275,1316709,1467774,1913603
+10,1,2,0,kailath,t|thomas,,t kailath|thomas kailath;444131,477893,1395609,1603993,1797940,1908343,1912269,1964526,2212073,2241496,1271843
+joseph|joe y. halpern from cornell;702006,1557757,1792466,1816526,2142762,405462,1436656,354136,1576075
+joseph halpern from denver;2266632,2039429,681652
+9,1,3,1,voragen,a|alfons|alphons,gj,a g j voragen|alfons g j voragen|alfons gj voragen|alphons g j voragen;207086,288569,545950,668811,964632,1036761,1156304,1332562,1609996,763688,1839820,2048183,2055750
+chl voragen;704147,1009357,1194031,1638876
+geography australia,ian j foster;142821
+geography uk,ian d l foster;1806984
+ian s foster;450448
+cs,ian t foster;1146745,1595001,1758955,670796,1778584,2036805,2248137,2287442,29078,423986,1071244,1541295,2088434
+9,1,2,1,pentland,a|alex,p,a pentland|alex p pentland|alex pentland;39537,57821,379518,571595,1181943,1479638,1697656,1785543,1828945
+9*,1,2,1,vandeginste,b|bernard,gm,b g m vandeginste|bernard g m vandeginste;306441,433804,751916,1188351,1486786,1705426,1786918,2068345,798479
+
+6,1,2,0,nicolau,alex|alexandru,,alex nicolau|alexandru nicolau;193919,788974,794578,821772,985020,1482455
+4,1,1,2,phillips,peter,cb|charlesbonest,peter c b phillips|peter charles bonest phillips;141579,712908,1477678,2175301
+2,1,2,1,lu,i|itai,tai,itai lu;1050846,1178431
+2,1,2,1,kurose,james|jim,f,james f kurose|jim kurose;1509920,2213746
+2,1,2,0,silberschatz,abraham|avi,,abraham silberschatz|avi silberschatz;652545,2100431
+2,1,1,2,novikov,sergei,p|petrovich,sergei p novikov|sergei petrovich novikov;983274,1251694
+2,1,1,2,arnold,vladimir,i|igorevich,vladimir i arnold|vladimir igorevich arnold;2036712,2166684
+2,1,1,1,pople,john,a,john a pople;1522591,2028883
+2,1,1,1,poor,harold,vincent,harold vincent poor;402072,814664
+2,1,1,1,lin,ming,c,ming c lin|ming lin;242197,1311589
+2,1,1,1,jones,philip,d,philip d jones;167916,2131176
+2,1,1,1,hill,mark,d,mark d hill;1276812,1726706
+2,1,1,1,fisher,john,w,john w fisher iii;1101005,1836413
+5,1,2,0,jamshidi,mo|mohammad,,mo jamshidi|mohammad jamshidi;166107,339712,1341044,1638253,2000962
+5,2,1,1,rosavelardo|velardo,fernando,rosa,fernando rosa velardo|fernando rosavelardo;577417,1030440,1398821,1526151,2145939
+4,1,1,2,oliveira,marcio,ferreiradasilva|fs,marcio f s oliveira|marcio ferreira da silva oliveira;461970,1243682,1734276,2143752
+3,1,1,1,davis,l,aj,l davis|laj davis;1075887,1850814
+2,2,2,1,tsang|tsangy,d|danny,hk,d h k tsang|danny h k tsangy;1728774,2139027
+2,2,1,1,aytur|ur,orhan,ayt,orhan ayt ur|orhan aytur;829490,1267199
+2,2,1,1,amico|dellamico,matteo,dell,matteo dell amico|matteo dellamico;929389,1253468
+2,2,1,0,villegas|villegascortez,juan,,juan villegas|juan villegascortez;24019,361375
+2,2,1,0,lib|lic,shujun,,shujun lib|shujun lic;322507,470351
+2,1,2,1,warburton,t|timothy,c,tc warburton|timothy c warburton;115264,1421514
+2,1,2,1,thiele,h|hansjorg,j,hansjorg thiele|hj thiele;150707,854659
+2,1,2,1,shen,g|guangdi,d,gd shen|guangdi shen;97816,313381
+2,1,2,1,sharyn,s|sergii,v,s v sharyn|sergii sharyn;1812063,2086279
+2,1,2,1,pitertsev,a|alexander,a,a a pitertsev|alexander pitertsev;952276,1765692
+2,1,2,1,ostrovsky,y|yaroslav,p,y p ostrovsky|yaroslav ostrovsky;216458,941970
+2,1,2,1,franklin,william|wm,randolph,william randolph franklin|wm randolph franklin;261374,1111220
+2,1,1,1,richter,francisca,gc,francisca gc richter|francisca richter;1420361,1626736
+2,1,1,1,miller,duane,alexander,duane alexander miller;702627,2173137
+2,1,1,1,arredondo,tomas,v,tomas arredondo|tomas v arredondo;1177059,2144558
+4,1,2,2,abdu,m|mangalathayil,a|ali,m a abdu|mangalathayil ali abdu;386069,431942,2015793,2274247
+4,1,2,1,towsley,don|donald,f,don f towsley|don towsley|donald f towsley;256423,1113428,1976055,2171967
+3,1,2,2,kroes,g|geert,j|jan,geert jan kroes|gj kroes;34055,1127229,1809432
+3,1,2,1,friston,k|karl,j,k j friston|karl friston|karl j friston;264909,671390,1550682
+3,1,1,1,armstrong,j,scott,j scott armstrong;7642,540041,2234059
