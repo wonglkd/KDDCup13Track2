@@ -485,3 +485,21 @@ wang,zheng|zhenghan,,zheng wang|zhenghan wang;269369,1729161
 2,1,1,1,davidson,richard,j,richard davidson|richard j davidson;805816,1490723
 2,1,1,1,chan,raymond,h,raymond chan|raymond h chan;751910,1993970
 2,1,1,0,kumar,vipin,,vipin kumar;198099,896458
+
+# MORE CLUSTERS
+10,2,2,1,pentl|pentland,a|alex,p,a pentland|alex p pentl|alex p pentland|alex pentland;39537,57821,379518,571595,1181943,1312421,1479638,1697656,1785543,1828945
+8,1,1,2,kuo,c,cj|cjay,c c jay kuo|cc j kuo|cc jay kuo;74078,394580,739271,1449777,1717075,1858752,1916439,1968449
+8,2,1,2,sangiovannivincentelli|vincentelli,alberto,l|sangiovanni,alberto l sangiovannivincentelli|alberto sangiovanni vincentelli|alberto sangiovannivincentelli;43589,114713,386425,1211366,1278532,1314166,1852860,2141987
+6,1,2,1,colditz,ga|graham,a,ga colditz|graham a colditz;573820,868401,909429,1070772,1082480,1677926
+6,2,1,0,gerla|gerlay,mario,,mario gerla|mario gerlay;758887,910041,1025044,1344239,2052516,2260817
+5,1,1,1,ottersten,bjorn,e,bjorn e ottersten|bjorn ottersten;246614,306168,1162396,1448815,1519874
+5,2,1,1,demmel|demmely,james,w,james demmel|james w demmel|james w demmely;914811,1102836,1422824,1642717,1973992
+5,1,2,2,camp,jean|l,jean|jeanjean,jean camp|l jean camp|l jean jean camp;402618,988956,995056,1692329,2065679
+5,1,2,1,szeliski,r|richard,s,r s szeliski|richard szeliski;483497,576749,1236479,1374545,1983436
+5,2,1,1,bonnecaze|bonnecazea,roger,t,roger t bonnecaze|roger t bonnecazea;577282,707927,1974025,2110882,2218213
+5,3,2,1,garceamolina|garciamolina|molina,h|hector,garcia,h garceamolina|hector garcia molina|hector garciamolina;21211,849724,1074207,1260279,1726585
+5,1,2,2,hoare,c|charles,antonyrichard|ar,c a r hoare|charles antony richard hoare;421250,919062,1090705,1323469,1420602
+5,1,1,2,norman,donald,a|arthur,donald a norman|donald arthur norman;819155,1513684,1756776,1763059,2280511
+4,1,2,1,beeftink,h|hendrik,h,h h beeftink|hendrik h beeftink;625150,766040,1146037,1232359
+4,1,2,1,whitley,darrell|l,darrell,darrell whitley|l darrell whitley;629082,757264,2098250,2189720
+4,1,1,2,wright,randall,d|douglas,randall d wright|randall douglas wright|randall wright;764142,1210179,1348994,1650305
