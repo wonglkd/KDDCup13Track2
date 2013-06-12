@@ -101,11 +101,11 @@ def main():
 			with open(filename, 'rb') as f:
 				reader = csv.reader(skip_comments(f))
 				for line in reader:
+					line[0:3] = map(int, line[0:3])
 					if len(line) > 2:
 						if line[0] != 0:
 							continue
 						line = line[1:]
-					line[0:2] = map(int, line[0:2])
 					uf.disallow(line[0], line[1])
 
 	if args.seededges:
@@ -113,10 +113,10 @@ def main():
 			with open(filename, 'rb') as f:
 				reader = csv.reader(skip_comments(f))
 				for line in reader:
+					line[0:3] = map(int, line[0:3])
 					if line[0] != 1:
 						continue
 					line = line[1:]
-					line[0:2] = map(int, line[0:2])
 					uf.trymerge(line[0], line[1])
 
 	print_err("Clustering")

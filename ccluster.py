@@ -36,11 +36,11 @@ def main():
 			with open(filename, 'rb') as f:
 				reader = csv.reader(skip_comments(f))
 				for line in reader:
+					line[0:3] = map(int, line[0:3])
 					if len(line) > 2:
 						if line[0] != 0:
 							continue
 						line = line[1:]
-					line[0:2] = map(int, line[0:2])
 					blacklisted_edges.append((line[0], line[1]))
 
 
@@ -87,16 +87,17 @@ def main():
 #		G_sim = nx.read_weighted_edgelist(skip_comments(open(args.edgelist, 'rb')), nodetype=int, delimiter=',')
 	
 	for hrc, hpcs in hrc_of_hpc.iteritems():
- 		hrc_c = hrc_contents[hrc]
-		comb = list(chain.from_iterable(hpcs))
-		if len(hpcs) == 1 and set(hrc_c) == set(comb):
+ 		hrc_c = set(hrc_contents[hrc])
+		comb = set(list(chain.from_iterable(hpcs)))
+		if len(hpcs) == 1 and hrc_c == comb:
 			continue
   		outputClusters(hpcs, fout, authors=authors)
-		fout.write("--combined:--\n")
- 		outputClusters([comb], fout, authors=authors)
+  		if len(hpcs) > 1:
+			fout.write("--combined:--\n")
+			outputClusters([comb], fout, authors=authors)
 
-		singletons = list(set(hrc_c) - set(comb))
-		singletons_r = list(set(comb) - set(hrc_c))
+		singletons = list(hrc_c - comb)
+		singletons_r = list(comb - hrc_c)
 		if singletons_r:
 			fout.write("--in HPC but not in HRC:--\n")
 			outputClusters([singletons_r], fout, authors=authors)
