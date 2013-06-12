@@ -88,14 +88,6 @@ def main():
 	
 	uf = unionfind()
 
-	if args.seedset:
-		print_err("Loading seedset(s)")
-		for filename in args.seedset:
-			for cl in loadClusters(filename):
-				if len(cl) < 2:
-					continue
-				uf.mergeall(cl)
-
 	if args.blacklist:
 		for filename in args.blacklist:
 			with open(filename, 'rb') as f:
@@ -107,6 +99,14 @@ def main():
 							continue
 						line = line[1:]
 					uf.disallow(line[0], line[1])
+
+	if args.seedset:
+		print_err("Loading seedset(s)")
+		for filename in args.seedset:
+			for cl in loadClusters(filename):
+				if len(cl) < 2:
+					continue
+				uf.mergeall(cl)
 
 	if args.seededges:
 		for filename in args.blacklist:
