@@ -29,7 +29,8 @@ class unionfind:
 	def mergeall(self, a):
 		d = self.get_id(a[0])
 		for b in a[1:]:
-			self.mp[self.get_id(b)] = d
+			if not self.check_for_blacklist(b, d):
+				self.mp[self.get_id(b)] = d
 
 	def disallow(self, v1, v2):
 		if v2 > v1:
